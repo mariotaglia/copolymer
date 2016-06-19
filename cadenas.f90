@@ -119,30 +119,23 @@ end
 !* on a three state RIS-model see Flory book                 *
 !* GENERA CADENAS DE PAH-Os                                  *
 !*************************************************************
-subroutine cadenas1(chains,chainsw,ncha,LT)
+subroutine cadenas(chains,ncha)
 use longs
 use seed1
 use pis
 use matrices
 use senos
-use multicapa
+use globals
 implicit none
 
-real*8, external :: interaction11
-integer longo
 integer i,state,ii,j,k1,k2,ncha
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3)
-real*8 x(3),xend(3,maxlong+5),xendr(3,maxlong+5)
-real*8 tmp
-REAL*8 chains(3,maxlong,ncha_max), chainsw(ncha_max)
-integer LT
+real*8 x(3),xend(3,long+5),xendr(3,long+5)
+REAL*8 chains(3,long,ncha_max), chainsw(ncha_max)
 character*1 test
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
-
-if(LT.eq.1)longo=long1
-if(LT.eq.2)longo=long2
 
 tolerancia = 1.0e-5
 
@@ -171,7 +164,7 @@ xend(1,2)=xend(1,1)+x(1)  ! second postion
 xend(2,2)=xend(2,1)+x(2)
 xend(3,2)=xend(3,1)+x(3)
 
-do i=3,longo          ! loop over remaining positions!
+do i=3,long          ! loop over remaining positions!
 
 123     rn=rands(seed)
 state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
@@ -217,8 +210,8 @@ xend(3,i)=xend(3,i-1)+x(3)
 enddo
 
 dista=0.0                       ! check self avoiding constraint (segmentos)
-do k1=1,longo
-do k2=k1+1,longo
+do k1=1,long
+do k2=k1+1,long
 dista=(xend(1,k2)-xend(1,k1))**(2.0)
 dista=dista+(xend(2,k2)-xend(2,k1))**(2.0)
 dista=dista+(xend(3,k2)-xend(3,k1))**(2.0)
@@ -229,30 +222,16 @@ endif
 enddo
 enddo
 
-! determine statistical weight
-tmp = 1.0
-
-do k1=1, longo
-do k2=k1+1,longo
-dista=(xend(1,k2)-xend(1,k1))**(2.0)
-dista=dista+(xend(2,k2)-xend(2,k1))**(2.0)
-dista=dista+(xend(3,k2)-xend(3,k1))**(2.0)
-dista=sqrt(dista)
-tmp=tmp*exp(interaction11(dista))
-enddo
-enddo
-
 ncha=0
 do i=1,12
-call rota(xend,xendr,longo,test)   ! rotate chain conformation ncha time
+call rota(xend,xendr,long,test)   ! rotate chain conformation ncha time
 ncha=ncha+1
 
-do j=1,longo
+do j=1,long
  chains(1,j,ncha)=xendr(1,j)       ! output 
  chains(2,j,ncha)=xendr(2,j)
  chains(3,j,ncha)=xendr(3,j)
 enddo
- chainsw(ncha)=tmp
 enddo
 
 if (ncha.eq.0) goto 223

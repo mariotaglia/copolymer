@@ -3,7 +3,7 @@
 !     to it.  The argument list must also be as illustrated below:
 
 subroutine fkpsol(udata, uscale, fdata, fscale, vv, ftem, ier)
-use multicapa
+use globals
 use mkinsol
 implicit none
 
@@ -14,7 +14,7 @@ integer *4 ier ! Kinsol error flag
 
 common /psize/ neq
 
-neq = ntot
+neq = 2*ntot
 
 do  i = 1, neq
    vv(i) = vv(i) * pp(i)
@@ -31,7 +31,7 @@ end
 !c     to it.  The argument list must also be as illustrated below:
 
 subroutine fkpset(udata, uscale, fdata, fscale,vtemp1,vtemp2, ier)
-use multicapa
+use globals
 use mkinsol
 implicit none
 integer *4 ier ! Kinsol error flag
@@ -41,33 +41,34 @@ double precision vtemp1(*), vtemp2(*)
 
 common /psize/ neq
 
-do i = 1, neq
-   pp(i) = 1.0 !0.1 / (1.0+exp(-udata(i)))
+do i = 1, ntot
+   pp(i) = 1.0 
+   pp(i+ntot) = 0.1 / (1.0+exp(-udata(i)))
 enddo
    ier = 0
 return
 end
 
 subroutine call_kinsol(x1_old, xg1_old, ier)
-use multicapa
+use globals
 implicit none
 integer *4 ier ! Kinsol error flag
 integer i
-real*8 x1(ntot), xg1(ntot)
-real*8 x1_old(ntot), xg1_old(ntot)
+real*8 x1(2*ntot), xg1(2*ntot)
+real*8 x1_old(2*ntot), xg1_old(2*ntot)
 integer*8 iout(15) ! Kinsol additional output information
 real*8 rout(2) ! Kinsol additional out information
 integer*8 msbpre
 real*8 fnormtol, scsteptol
-real*8 scale(ntot)
-real*8 constr(ntot)
+real*8 scale(2*ntot)
+real*8 constr(2*ntot)
 integer*4  globalstrat, maxl, maxlrst
 integer neq ! Kinsol number of equations
 integer*4 max_niter
 common /psize/ neq ! Kinsol
 integer ierr
 
-neq=ntot
+neq=2*ntot
 
 ! INICIA KINSOL
 
@@ -152,14 +153,14 @@ end
 
 
 subroutine call_fkfun(x1_old)
-use multicapa
+use globals
 use MPI
 
 integer i
 
-real*8 x1_old(ntot)
-real*8 x1(ntot)
-real*8 f(ntot)
+real*8 x1_old(2*ntot)
+real*8 x1(2*ntot)
+real*8 f(2*ntot)
 
 ! MPI
 
@@ -168,7 +169,7 @@ parameter(tag = 0)
 integer err
 
 x1 = 0.0
-do i = 1,ntot
+do i = 1,2*ntot
   x1(i) = x1_old(i)
 enddo
 

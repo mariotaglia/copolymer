@@ -1,22 +1,15 @@
 subroutine allocation
-use multicapa
+use globals
 use mkinsol
-use posmk
 use longs
 
-allocate (Tcapas(adsmax))
-allocate (avpol(adsmax,ntot))
-allocate (avpol2(ntot))
-allocate (avpolall(ntot))
-allocate (in1n(2,maxcuantas,ntot,ntot))
-!allocate (maxlayer(adsmax,maxcuantas))
+allocate (avpol(ntot,2))
+allocate (in1n(maxcuantas,ntot,base))
+allocate (in2n(maxcuantas,ntot,base))
+allocate (maxpos(maxcuantas,2*ntot))
+allocate (minpos(maxcuantas,2*ntot))
 allocate (eps(ntot))
 allocate (xtotal(2*ntot))
-allocate (fbound(2,ntot))
-allocate (pp(ntot))
-allocate (Xu(2,2,-Xulimit:Xulimit))
-allocate (weight(2,maxcuantas,ntot))
-allocate (current(maxlong,3))
-allocate (nextbead(maxlong))
-ALLOCATE (firstcell(-mcube:mcube,-mcube:mcube,-mcube:mcube))
+allocate (Xu(ntot,ntot))
+allocate (pp(2*ntot))
 end

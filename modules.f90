@@ -3,28 +3,33 @@ module mkinsol
 double precision, allocatable :: pp(:)
 endmodule
 
-module global
+module globals
+
+integer, parameter :: base = 25
+
 real*8 lseg
 real*8, allocatable :: Xu(:,:)
-real*8 sumXu11, sumXu12
 integer Xulimit
 REAL*8 sts(100), npols(100)
-real*8 npol
-INTEGER nst, nnpol
+INTEGER nst, nnpol, npol
 real*8 error              ! error imposed accuaracy
 real*8 infile             ! inputfile control variable for reading input files  value 0,1
 CHARACTER nada
 
 real*8 norma
-integer cuantas          ! number of polymer configuration or  bound sequences
+INTEGER adsmax
 
 integer ntot ! lattice sites
 real*8, allocatable :: avpol(:,:) ! volume fraction polymers already adsorbed
 
-integer*4, allocatable :: in1n(:,:,:)
-integer*4, allocatable :: in2n(:,:,:)
+INTEGER cuantas
+integer curvature
 
-real*8 sigma
+integer*1, allocatable :: in1n(:,:,:)
+integer*1, allocatable :: in2n(:,:,:)
+integer, allocatable ::  maxpos(:,:)
+integer, allocatable ::  minpos(:,:)
+
 
 real*8, allocatable :: eps(:)
 real*8 eps1
@@ -33,6 +38,7 @@ integer iter              ! counts number of iterations
 
 REAL*8, allocatable ::  xtotal(:)
 real*8 st
+integer, parameter :: ncha_max = 700
 endmodule
 
 module partfunc
@@ -59,9 +65,7 @@ endmodule
 
 
 module longs
-integer long(2)            ! length of polymer
-
-INTEGER long1,long2,maxlong
+integer long            ! length of polymer
 endmodule
 
 module pis
@@ -81,14 +85,4 @@ include 'mpif.h' ! librerias MPI
 integer rank, size, ierr
 integer flagsolver
 endmodule
-
-module posmk
-real*8, allocatable :: current(:,:)
-integer*2, allocatable :: nextbead(:)
-integer*2, allocatable :: firstcell(:,:,:)
-integer, parameter :: mcube = 100
-integer, parameter :: calq = 0
-real*8, parameter :: qprob0 = 0.6933
-integer, parameter :: nearbonds = 5
-endmodule posmk
 

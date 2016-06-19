@@ -8,14 +8,14 @@
 
 subroutine kai
 
-implicit none
-include global
-include layer
-include volume 
+use globals
+use layer
+use volume 
 
+implicit none
 real*8 suma(ntot, ntot)
 integer seed
-
+real*8 xmin,xmax,ymin,ymax,zmin,zmax
 integer MCsteps ! numero de steps de MC
 
 real*8 R,theta,z
@@ -24,7 +24,7 @@ integer i, ii
 real*8 rands
 real*8 pi
 real*8 x1,x2,y1, y2, z1, z2, vect
-integer iR, iz, itheta
+integer iR, ix,iy,iz, itheta
 integer j
 real*8 radio
 
@@ -35,52 +35,65 @@ pi=dacos(-1.0d0)          ! pi = arccos(-1)
 radio = float(ntot)*delta
 
 suma = 0.0
-
 Xu = 0.0 ! vector Xu
 
 seed = 1010
-MCsteps = 20
-!      MCsteps = 1
+MCsteps = 100
 
 do ii = 1, ntot ! loop sobre cada posicion del segmento
 
-do itheta = 1, MCsteps
-do iz = 1, MCsteps
-do iR = 1, MCsteps
+      ymax = 3.0*delta/2.0
+      ymin = -3.0*delta/2.0
 
-theta = 2*pi*dfloat(itheta - 1)/dfloat(MCsteps)    ! numero 0 y 2pi
-z = 3.0*(dfloat(iz - 1)/dfloat(MCsteps)-0.5)*delta ! numero entre -1.5*delta y 1.5*delta
-R = radio*(dfloat(iR-1)/dfloat(MCsteps))         ! numero 0 y radio
+      zmax = 3.0*delta/2.0
+      zmin = -3.0*delta/2.0
+
+      xmax = 3.0*delta/2.0 + (dfloat(ii) - 0.5)*delta
+      xmin = -3.0*delta/2.0 + (dfloat(ii) - 0.5)*delta
+    
+      do ix = 1, MCsteps
+      do iy = 1, MCsteps
+      do iz = 1, MCsteps
 
 ! coordenadas del segmento (x1,y1,z1) y del punto a integrar (x2,y2,z2)
 
-x1 = (dfloat(ii) - 0.5)*delta ! asume theta segmento = 0, z segmento = 0 y segmento en el centro de la layer
-y1 = 0.0
-z1 = 0.0
-x2 = R*cos(theta)      y2 = R*sin(theta)
-z2 = z
+         x1 = (dfloat(ii) - 0.5)*delta ! asume theta segmento = 0, z segmento = 0 y segmento en el centro de la layer
+         y1 = 0.0
+         z1 = 0.0
 
-vect = sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2) ! vector diferencia
-j = int(R/delta)+1 ! j tiene la celda donde cae el punto a integrar
+         x2 = xmin + (xmax-xmin)*dfloat(ix-1)/dfloat(MCsteps-1)
+         y2 = ymin + (ymax-ymin)*dfloat(iy-1)/dfloat(MCsteps-1)
+         z2 = zmin + (zmax-zmin)*dfloat(iz-1)/dfloat(MCsteps-1)
 
-suma(ii, j) = suma(ii, j) + R
+         select case (abs(curvature))
+         case (0)
+         R = x2
+         case (1)
+         R = sqrt(x2**2 + y2**2)
+         case (2)
+         R = sqrt(x2**2 + y2**2 + z2**2)
+         end select
 
-if(vect.le.(1.5*delta)) then ! esta dentro de la esfera del cut-off   
-if(vect.ge.lseg) then ! esta dentro de la esfera del segmento
-Xu(ii, j) = Xu(ii, j) + ((lseg/vect)**6)*R ! incluye el jacobiano R(segmento)
-endif
-endif
+         vect = sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2) ! vector diferencia
+         j = int(R/delta)+1 ! j tiene la celda donde cae el punto a integrar
 
-enddo
-enddo
-enddo
+         suma(ii, j) = suma(ii, j) + R
 
+         if(vect.le.(1.5*delta)) then ! esta dentro de la esfera del cut-off   
+         if(vect.ge.lseg) then ! esta dentro de la esfera del segmento
+             Xu(ii, j) = Xu(ii, j) + ((lseg/vect)**6)*R ! incluye el jacobiano R(segmento)
+        endif
+        endif
 
-do j = 1, ntot
-Xu(ii, j) = Xu(ii, j)/MCsteps**3*(3.0*delta)*2*pi*radio
-suma(ii, j) = suma(ii, j)/MCsteps**3*(3.0*delta)*2*pi*(radio)
-write(111,*)ii,j,Xu(ii,j) ! residual size of iteration vector
-enddo
+      enddo
+      enddo
+      enddo
+
+      do j = 1, ntot
+      Xu(ii, j) = Xu(ii, j)/(MCsteps**3)*(3.0*delta)**3
+      suma(ii, j) = suma(ii, j)/(MCsteps**3)*(3.0*delta)**3
+     write(111,*)ii,j,Xu(ii,j) ! residual size of iteration vector
+     enddo
 
 end do ! ii
 
