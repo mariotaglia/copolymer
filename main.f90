@@ -22,12 +22,9 @@ real*8 pi
 real*8 Na               
 parameter (Na=6.02d23)
 
-real*8 avpol_red(ntot)
-
-REAL*8 avtotal(ntot)       ! sum over all avpol
 real*8 xsol(ntot)         ! volume fraction solvent
-
-real*8 x1(ntot),xg1(ntot)   ! density solvent iteration vector
+real*8 avtmp
+real*8 x1(2*ntot),xg1(2*ntot)   ! density solvent iteration vector
 real*8 zc(ntot)           ! z-coordinate layer 
 
 REAL*8 sumrhoz, meanz     ! Espesor medio pesado
@@ -92,7 +89,7 @@ double  precision norma_tosend
 
 integer in1tmp(long)
 
-!
+error = 1.0d-6
 seed=435+ 3232*rank               ! seed for random number generator
 print*, 'I am', rank, ' and my seed is', seed
 
@@ -110,10 +107,11 @@ vpol= ((4.0/3.0)*pi*(0.3)**3)/vsol  ! volume polymer segment in units of vsol
 
 ! eps
 
-eps(ntot)=eps1
-do i=1,ntot-1
+eps(1)=eps1
+do i=2,ntot
 eps(i)=0
 enddo
+
 
 !!!!
 ! solver
@@ -125,8 +123,8 @@ enddo
 do i=1,n
 xg1(i)=1.0
 x1(i)=1.0
-xg1(i+n)=0.0
-x1(i+n)=0.0
+xg1(i+n)=0.0001
+x1(i+n)=0.0001
 zc(i)= (i-0.5) * delta
 enddo
 
@@ -158,7 +156,7 @@ in2n = 0
    if(conf.lt.cuantas) then
    conf=conf+1
 
-   do ii = 1, ntot ! position of first segment
+   do ii = 1, maxntot ! position of first segment
 
       minpos(conf,ii) = ntot
       maxpos(conf,ii) = 0 
@@ -178,7 +176,8 @@ in2n = 0
         tempr=(chains(1,k,j)+(float(ii)-0.5)*delta)
         temp=int(tempr/delta)+1  ! put them into the correct layer
         
-        if(temp.le.0)temp=-temp+1      ! RBC for planar calculation
+        if(temp.le.0)temp=-temp+2      ! RBC for planar calculation
+        if(temp.gt.ntot)temp=ntot-(temp-ntot)+1      ! RBC for planar calculation
 
       endselect
 
@@ -196,8 +195,9 @@ in2n = 0
 
        do k = 1, long
        temp = in1tmp(k)-minpos(conf,ii)+1 
-       if(k.le.(long/2))in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
-       if(k.gt.(long/2))in2n(conf,ii,temp) =  in2n(conf,ii,temp) + 1
+!       if(k.le.(long/2))in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
+!       if(k.gt.(long/2))in2n(conf,ii,temp) =  in2n(conf,ii,temp) + 1
+        in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
        enddo
    enddo ! ii
    endif
@@ -240,12 +240,7 @@ st = sts(cc)
 do ccc = 1, nnpol !loop kbind
 npol = npols(ccc)
 
-
-! inits output files 
-!write(meanzfilename,'(A6,BZ,I5.5,A4)')'meanz.',countfile,'.dat'
-!write(sigmafilename,'(A6,BZ,I5.5,A4)')'sigma.',countfile,'.dat'
-!write(sigmaadfilename,'(A8,BZ,I5.5,A4)')'sigmaad.',countfile,'.dat'
-
+if(rank.eq.0)print*, 'st:',st,' npol:', npol
 
 ! xh bulk
  123 xsolbulk=1.0  - phibulkpol
@@ -303,8 +298,8 @@ endif
 if(rank.eq.0) then
 
 write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', countfileuno,'.',countfile,'.dat'
-write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymerA.',countfileuno,'.',countfile,'.dat'
-write(denspol2filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymerA.',countfileuno,'.',countfile,'.dat'
+write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',countfileuno,'.',countfile,'.dat'
+write(denspol2filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer2.',countfileuno,'.',countfile,'.dat'
 write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', countfileuno,'.',countfile,'.dat'
 write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',countfileuno,'.',countfile,'.dat'
 
@@ -317,7 +312,8 @@ open(unit=330,file=denssolfilename)
 do i=1,n
 write(321,*)zc(i),avpol(i,1)
 write(322,*)zc(i),avpol(i,2)
-write(322,*)zc(i),avpol(i,2)+avpol(i,1)
+avtmp = avpol(i,2)+avpol(i,1)
+write(323,*)zc(i),avtmp
 write(330,*)zc(i),xsol(i)
 enddo
 

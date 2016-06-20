@@ -4,10 +4,10 @@ use mkinsol
 use longs
 
 allocate (avpol(ntot,2))
-allocate (in1n(maxcuantas,ntot,base))
-allocate (in2n(maxcuantas,ntot,base))
-allocate (maxpos(maxcuantas,2*ntot))
-allocate (minpos(maxcuantas,2*ntot))
+allocate (in1n(cuantas,ntot,base))
+allocate (in2n(cuantas,ntot,base))
+allocate (maxpos(cuantas,2*ntot))
+allocate (minpos(cuantas,2*ntot))
 allocate (eps(ntot))
 allocate (xtotal(2*ntot))
 allocate (Xu(ntot,ntot))

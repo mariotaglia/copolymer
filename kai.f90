@@ -11,7 +11,7 @@ subroutine kai
 use globals
 use layer
 use volume 
-
+use MPI
 implicit none
 real*8 suma(ntot, ntot)
 integer seed
@@ -28,7 +28,7 @@ integer iR, ix,iy,iz, itheta
 integer j
 real*8 radio
 
-print*,'Kai calculation'
+if(rank.eq.0)print*,'Kai calculation'
 open(unit=111, file='kais.dat')
 
 pi=dacos(-1.0d0)          ! pi = arccos(-1) 
@@ -38,7 +38,7 @@ suma = 0.0
 Xu = 0.0 ! vector Xu
 
 seed = 1010
-MCsteps = 100
+MCsteps = 200
 
 do ii = 1, ntot ! loop sobre cada posicion del segmento
 
@@ -67,7 +67,7 @@ do ii = 1, ntot ! loop sobre cada posicion del segmento
 
          select case (abs(curvature))
          case (0)
-         R = x2
+         R = abs(x2)
          case (1)
          R = sqrt(x2**2 + y2**2)
          case (2)
@@ -77,14 +77,18 @@ do ii = 1, ntot ! loop sobre cada posicion del segmento
          vect = sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2) ! vector diferencia
          j = int(R/delta)+1 ! j tiene la celda donde cae el punto a integrar
 
+         if(j.le.ntot) then
+
          suma(ii, j) = suma(ii, j) + R
 
          if(vect.le.(1.5*delta)) then ! esta dentro de la esfera del cut-off   
          if(vect.ge.lseg) then ! esta dentro de la esfera del segmento
-             Xu(ii, j) = Xu(ii, j) + ((lseg/vect)**6)*R ! incluye el jacobiano R(segmento)
-        endif
-        endif
+             Xu(ii, j) = Xu(ii, j) + ((lseg/vect)**6) ! incluye el jacobiano R(segmento)
+         endif
+         endif
 
+         endif
+         
       enddo
       enddo
       enddo

@@ -10,7 +10,8 @@ $(info HOST is ${HOST})
 
 # some definitions
 SHELL = /bin/bash
-FFLAGS= -fbacktrace -fbounds-check # -O3
+FFLAGS= -O3#-fbacktrace -fbounds-check # -O3
+ 
 
 ifeq ($(HOST),master) 
 

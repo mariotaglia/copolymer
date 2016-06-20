@@ -11,7 +11,8 @@ real*8 lseg
 real*8, allocatable :: Xu(:,:)
 integer Xulimit
 REAL*8 sts(100), npols(100)
-INTEGER nst, nnpol, npol
+INTEGER nst, nnpol
+real*8 npol
 real*8 error              ! error imposed accuaracy
 real*8 infile             ! inputfile control variable for reading input files  value 0,1
 CHARACTER nada
@@ -19,7 +20,7 @@ CHARACTER nada
 real*8 norma
 INTEGER adsmax
 
-integer ntot ! lattice sites
+integer ntot, maxntot ! lattice sites
 real*8, allocatable :: avpol(:,:) ! volume fraction polymers already adsorbed
 
 INTEGER cuantas

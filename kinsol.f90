@@ -42,8 +42,8 @@ double precision vtemp1(*), vtemp2(*)
 common /psize/ neq
 
 do i = 1, ntot
-   pp(i) = 1.0 
-   pp(i+ntot) = 0.1 / (1.0+exp(-udata(i)))
+   pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+   pp(i+ntot) =  0.1 / (1.0+exp(1.0-udata(i)))
 enddo
    ier = 0
 return
@@ -60,7 +60,7 @@ integer*8 iout(15) ! Kinsol additional output information
 real*8 rout(2) ! Kinsol additional out information
 integer*8 msbpre
 real*8 fnormtol, scsteptol
-real*8 scale(2*ntot)
+real*8 uscale(2*ntot), fscale(2*ntot)
 real*8 constr(2*ntot)
 integer*4  globalstrat, maxl, maxlrst
 integer neq ! Kinsol number of equations
@@ -118,8 +118,13 @@ endif
 call fkinspilssetprec(1, ier) ! preconditiones
 
 do i = 1, neq ! scaling vector
-  scale(i) = 1.0
+  uscale(i) = 1.0
 enddo
+
+do i = 1, neq ! scaling vector
+  fscale(i) = 0.01 
+enddo
+
 
 do i = 1, neq ! Initial guess
       x1(i) = x1_old(i)
@@ -127,7 +132,7 @@ do i = 1, neq ! Initial guess
 enddo
 
 
-call fkinsol(x1, globalstrat, scale, scale, ier)         ! Llama a kinsol
+call fkinsol(x1, globalstrat, uscale, fscale, ier)         ! Llama a kinsol
 
 print*, 'IER:', ier
 
@@ -173,7 +178,7 @@ do i = 1,2*ntot
   x1(i) = x1_old(i)
 enddo
 
-CALL MPI_BCAST(x1, ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
+CALL MPI_BCAST(x1, 2*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
 
 call fkfun(x1,f, ier) ! todavia no hay solucion => fkfun 
 end
