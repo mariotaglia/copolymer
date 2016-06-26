@@ -47,7 +47,7 @@ real*8 min1               ! variable to determine minimal position of chain
 
 integer il,inda,ncha
 
-REAL*8 xfile(ntot)                        
+REAL*8 xfile(2*ntot)                        
 real*8 algo, algo2                  
 
 
@@ -134,7 +134,13 @@ if (infile.ge.1) then
 do i=1,n
 read(100,*)j,xfile(i)   ! solvent
 read(200,*)j,xfile(i+n)   ! solvent
+x1(i)=xfile(i)
+xg1(i)=xfile(i)
+x1(i+n)=xfile(i+n)
+xg1(i+n)=xfile(i+n)
 enddo  
+
+
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
