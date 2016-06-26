@@ -249,7 +249,7 @@ npol = npols(ccc)
 if(rank.eq.0)print*, 'st:',st,' npol:', npol
 
 ! xh bulk
- 123 xsolbulk=1.0  - phibulkpol
+ 123 xsolbulk=1.0
 
 do i=1,2*n             ! initial gues for x1
 xg1(i)=x1(i)

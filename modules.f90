@@ -26,8 +26,8 @@ real*8, allocatable :: avpol(:,:) ! volume fraction polymers already adsorbed
 INTEGER cuantas
 integer curvature
 
-integer*1, allocatable :: in1n(:,:,:)
-integer*1, allocatable :: in2n(:,:,:)
+integer*2, allocatable :: in1n(:,:,:)
+integer*2, allocatable :: in2n(:,:,:)
 integer, allocatable ::  maxpos(:,:)
 integer, allocatable ::  minpos(:,:)
 
