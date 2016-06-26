@@ -62,10 +62,10 @@ xpot(n+1:2*n,2)=xpot(n,2)
 !    probability distribution
 q=0.0d0                   ! init q to zero
 
-do ii=1,ntot ! position of segment #0 
+do ii=1,maxntot ! position of segment #0 
  do i=1,cuantas
 
- pro(i) = 1.0
+    pro(i) = 1.0
 
     do j=minpos(i,ii), maxpos(i,ii) ! posicion dentro del poro
      k = j-minpos(i,ii)+1 ! k may be lager than ntot
@@ -111,6 +111,7 @@ endif
 sumpol = 0.0
 
 do i = 1, ntot
+
 select case (curvature)
 case (0)
 sumpol = sumpol + (avpol(i,1) + avpol(i,2))*delta ! final result in units of chains/nm^2
@@ -120,7 +121,6 @@ case(2)
 sumpol = sumpol + (avpol(i,1) + avpol(i,2))*(((float(i)-0.5)*delta)**2)*delta*4.0*pi ! final result in units of chains/micelle
 end select
 enddo
-
 sumpol = sumpol/(vpol*vsol)/long
 avpol = avpol/sumpol*npol ! integral of avpol is fixed
 
@@ -146,6 +146,10 @@ do i = 1, n*2
 ! algo2 = algo2 + f(i+n)**2
 algo = algo + f(i)**2
 end do
+
+
+print*, avpol(1,1), x(1), f(1)
+
 
 if(rank.eq.0)PRINT*, iter, algo, sumpol
 !if(rank.eq.0)PRINT*, iter, algo1,algo2,algo1+algo2
