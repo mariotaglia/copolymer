@@ -184,9 +184,14 @@ in2n = 0
         temp=int(tempr/delta)+1  ! put them into the correct layer
         
         if(temp.le.0)temp=-temp+2      ! RBC for planar calculation
-        if(temp.gt.ntot)temp=ntot-(temp-ntot)+1      ! RBC for planar calculation
 
       endselect
+        
+       if(temp.gt.ntot) then
+        if(rank.eq.0)print*, 'Increase ntot'
+        stop
+       endif
+
 
        in1tmp(k) = temp
 
@@ -202,6 +207,9 @@ in2n = 0
 
        do k = 1, long
        temp = in1tmp(k)-minpos(conf,ii)+1 
+
+
+
        if(k.le.(long/2))in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
        if(k.gt.(long/2))in2n(conf,ii,temp) =  in2n(conf,ii,temp) + 1
 !        in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
