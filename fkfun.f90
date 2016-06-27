@@ -10,7 +10,7 @@ use pis
 implicit none
 
 integer*4 ier2
-real*8 protemp
+real*8 protemp, sttemp
 real*8 x(2*ntot),f(2*ntot)
 real*8 xh(2*ntot)
 real*8 xpot(2*ntot,2)
@@ -23,6 +23,7 @@ real*8 avpol_tosend(ntot,2)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
 real*8 sumpol
+real*8 q_tosend(ntot)
 
 ! Jefe
 if(rank.eq.0) then ! llama a subordinados y pasa vector x
@@ -45,12 +46,13 @@ xtotal(i) = 0.0 ! bulk
 xh(i) = 1.0
 enddo
 
+sttemp = st/(vpol*vsol)
 
 do i = 1, ntot
 protemp = dlog(xh(i)**(vpol))
 xpot(i,1) = dexp(protemp)
   do j = 1, ntot
-      protemp = protemp+st*vsol*vpol*Xu(i,j)*xtotal(j)
+      protemp = protemp+sttemp*vsol*vpol*Xu(i,j)*xtotal(j)
   end do
       protemp = protemp+eps(i)
 xpot(i,2) = dexp(protemp)
@@ -64,9 +66,10 @@ xpot(n+1:2*n,2)=xpot(n,2)
 avpol_tosend = 0.0
 avpol_tmp = 0.0
 avpol = 0.0
+q = 0.0
+q_tosend=0.0d0                   ! init q to zero
 
 do ii=1,maxntot ! position of segment #0 
-q=0.0d0                   ! init q to zero
  do i=1,cuantas
 
     pro(i) = 1.0
@@ -77,7 +80,7 @@ q=0.0d0                   ! init q to zero
      pro(i)= pro(i) * xpot(j,2)**in2n(i,ii,k)
     enddo
 
-    q=q+pro(i)
+    q_tosend(ii)=q_tosend(ii)+pro(i)
 
     do j=minpos(i,ii), maxpos(i,ii)
      k = j-minpos(i,ii)+1 ! k may be larger than ntot
@@ -100,11 +103,13 @@ call MPI_Barrier(MPI_COMM_WORLD, err)
 if (rank.eq.0) then
 ! Junta avpol       
   call MPI_REDUCE(avpol_tosend, avpol, 2*ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 endif
 ! Subordinados
 if(rank.ne.0) then
 ! Junta avpol       
   call MPI_REDUCE(avpol_tosend, avpol, 2*ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 !!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
   goto 3333
 endif

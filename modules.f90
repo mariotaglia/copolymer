@@ -43,7 +43,7 @@ integer, parameter :: ncha_max = 700
 endmodule
 
 module partfunc
-real*8 q
+real*8, allocatable :: q(:)
 endmodule
 
 module layer

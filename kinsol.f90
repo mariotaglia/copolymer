@@ -138,7 +138,7 @@ do i = 1, ntot  !constraint vector
 enddo
 
 do i = ntot+1, 2*ntot
-   constr(i) = 1.0 ! xtotal >= 0
+   constr(i) = 2.0 ! xtotal >= 0
 enddo
 
 call fkinsetvin('CONSTR_VEC', constr, ier) ! constraint vector
@@ -169,7 +169,7 @@ call fkinsol(x1, globalstrat, scale, scale, ier)         ! Llama a kinsol
 if (ier .lt. 0) then
       print*, 'call_kinsol: SUNDIALS_ERROR: FKINSOL returned IER = ', ier
       print*, 'call_kinsol: Linear Solver returned IER = ', iout(9)
-      call fkinfree
+!      call fkinfree
 endif
 
 do i = 1, neq ! output

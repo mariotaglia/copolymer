@@ -2,7 +2,9 @@ subroutine allocation
 use globals
 use mkinsol
 use longs
+use partfunc
 
+allocate (q(ntot))
 allocate (avpol(ntot,2))
 allocate (in1n(cuantas,ntot,base))
 allocate (in2n(cuantas,ntot,base))
