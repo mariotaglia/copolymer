@@ -60,9 +60,13 @@ xpot(n+1:2*n,1)=xpot(n,1)
 xpot(n+1:2*n,2)=xpot(n,2)
 
 !    probability distribution
-q=0.0d0                   ! init q to zero
+
+avpol_tosend = 0.0
+avpol_tmp = 0.0
+avpol = 0.0
 
 do ii=1,maxntot ! position of segment #0 
+q=0.0d0                   ! init q to zero
  do i=1,cuantas
 
     pro(i) = 1.0
