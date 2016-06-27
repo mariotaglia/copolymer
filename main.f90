@@ -29,7 +29,7 @@ real*8 zc(ntot)           ! z-coordinate layer
 
 REAL*8 sumrhoz, meanz     ! Espesor medio pesado
 real*8 pro                ! probability distribution function 
-
+real*8 trash
 
 integer n                 ! number of lattice sites
 integer itmax             ! maximum number of iteration allowed for 
@@ -132,8 +132,8 @@ enddo
 
 if (infile.ge.1) then
 do i=1,n
-read(100,*)j,xfile(i)   ! solvent
-read(200,*)j,xfile(i+n)   ! solvent
+read(100,*)trash,xfile(i)   ! solvent
+read(200,*)trash,xfile(i+n)   ! solvent
 x1(i)=xfile(i)
 xg1(i)=xfile(i)
 x1(i+n)=xfile(i+n)
