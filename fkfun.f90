@@ -151,10 +151,6 @@ do i = 1, n*2
 algo = algo + f(i)**2
 end do
 
-
-print*, avpol(1,1), x(1), f(1)
-
-
 if(rank.eq.0)PRINT*, iter, algo, sumpol
 !if(rank.eq.0)PRINT*, iter, algo1,algo2,algo1+algo2
 norma=algo
