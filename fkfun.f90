@@ -52,7 +52,7 @@ do i = 1, ntot
 protemp = dlog(xh(i)**(vpol))
 xpot(i,1) = dexp(protemp)
   do j = 1, ntot
-      protemp = protemp+sttemp*vsol*vpol*Xu(i,j)*xtotal(j)
+      protemp = protemp+sttemp*Xu(i,j)*xtotal(j)
   end do
       protemp = protemp+eps(i)
 xpot(i,2) = dexp(protemp)
