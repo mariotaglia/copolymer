@@ -25,6 +25,7 @@ real*8 algo, algo1,algo2
 double precision, external :: factorcurv
 real*8 sumpol
 real*8 q_tosend(ntot)
+real*8 qall_tosend
 
 ! Jefe
 if(rank.eq.0) then ! llama a subordinados y pasa vector x
@@ -71,6 +72,8 @@ avpol = 0.0
 xpol = 0.0
 q = 0.0
 q_tosend=0.0d0                   ! init q to zero
+qall_tosend = 0.0
+qall = 0.0
 
 do ii=1,maxntot ! position of segment #0 
  do i=1,cuantas
@@ -84,6 +87,7 @@ do ii=1,maxntot ! position of segment #0
     enddo
 
     q_tosend(ii)=q_tosend(ii)+pro(i)
+    qall_tosend = qall_tosend + pro(i)
 
      xpol_tosend(ii)=xpol_tosend(ii)+pro(i)
 
@@ -110,6 +114,7 @@ if (rank.eq.0) then
   call MPI_REDUCE(avpol_tosend, avpol, 2*ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(qall_tosend, qall, 1, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 endif
 ! Subordinados
 if(rank.ne.0) then
@@ -117,6 +122,7 @@ if(rank.ne.0) then
   call MPI_REDUCE(avpol_tosend, avpol, 2*ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(qall_tosend, qall, 1, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 !!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
   goto 3333
 endif

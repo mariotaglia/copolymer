@@ -45,6 +45,7 @@ endmodule
 
 module partfunc
 real*8, allocatable :: q(:)
+real*8 qall
 endmodule
 
 module layer

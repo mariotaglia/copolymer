@@ -234,7 +234,7 @@ if(rank.eq.0)print*," chains ready"
 iter=0                    ! iteration counter
 
 !if(rank.eq.0) then
-!open(unit=533,file='ADS-mol.cm-2.dat')
+open(unit=533,file='lnq.dat')
 !open(unit=534,file='ADS-cad.nm-2.dat')
 !open(unit=535,file='meanz.dat')
 !endif
@@ -313,6 +313,9 @@ endif
 
 if(rank.eq.0) then
 
+
+write(533,*)st, npol, -dlog(qall)
+
 write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', countfileuno,'.',countfile,'.dat'
 write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',countfileuno,'.',countfile,'.dat'
 write(denspol2filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer2.',countfileuno,'.',countfile,'.dat'
@@ -377,6 +380,8 @@ endif ! rank
 
 END do ! loop de npol
 end do ! loop de st
+
+close(533)
 
 countfileuno = countfileuno + 1
 
