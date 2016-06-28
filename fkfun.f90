@@ -20,6 +20,7 @@ integer err
 integer n
 real*8 avpol_tmp(2*ntot,2)
 real*8 avpol_tosend(ntot,2)
+real*8 xpol_tosend(ntot)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
 real*8 sumpol
@@ -64,8 +65,10 @@ xpot(n+1:2*n,2)=xpot(n,2)
 !    probability distribution
 
 avpol_tosend = 0.0
+xpol_tosend = 0.0
 avpol_tmp = 0.0
 avpol = 0.0
+xpol = 0.0
 q = 0.0
 q_tosend=0.0d0                   ! init q to zero
 
@@ -81,6 +84,8 @@ do ii=1,maxntot ! position of segment #0
     enddo
 
     q_tosend(ii)=q_tosend(ii)+pro(i)
+
+     xpol_tosend(ii)=xpol_tosend(ii)+pro(i)
 
     do j=minpos(i,ii), maxpos(i,ii)
      k = j-minpos(i,ii)+1 ! k may be larger than ntot
@@ -103,12 +108,14 @@ call MPI_Barrier(MPI_COMM_WORLD, err)
 if (rank.eq.0) then
 ! Junta avpol       
   call MPI_REDUCE(avpol_tosend, avpol, 2*ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 endif
 ! Subordinados
 if(rank.ne.0) then
 ! Junta avpol       
   call MPI_REDUCE(avpol_tosend, avpol, 2*ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 !!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
   goto 3333
@@ -120,7 +127,6 @@ endif
 sumpol = 0.0
 
 do i = 1, ntot
-
 select case (curvature)
 case (0)
 sumpol = sumpol + (avpol(i,1) + avpol(i,2))*delta ! final result in units of chains/nm^2
@@ -130,8 +136,22 @@ case(2)
 sumpol = sumpol + (avpol(i,1) + avpol(i,2))*(((float(i)-0.5)*delta)**2)*delta*4.0*pi ! final result in units of chains/micelle
 end select
 enddo
+
 sumpol = sumpol/(vpol*vsol)/long
 avpol = avpol/sumpol*npol ! integral of avpol is fixed
+
+sumpol = 0.0
+do i = 1, ntot
+select case (curvature)
+case (0)
+sumpol = sumpol + xpol(i)*delta ! final result in units of chains/nm^2
+case(1)
+sumpol = sumpol + xpol(i)*(float(i)-0.5)*delta*delta*2.0*pi ! final result in units of chains/nm
+case(2)
+sumpol = sumpol + xpol(i)*(((float(i)-0.5)*delta)**2)*delta*4.0*pi ! final result in units of chains/micelle
+end select
+enddo
+xpol = xpol/sumpol*npol ! integral of avpol is fixed
 
 ! contruction of f and the volume fractions
 

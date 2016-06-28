@@ -69,6 +69,7 @@ character*26 denssolfilename  ! contains the denisty of the solvent
 character*27 lnqfilename  ! contains the denisty of the solvent
 character*28 densendfilename
 CHARACTER*24 totalfilename
+CHARACTER*24 xtotalfilename
 character*27 denspol2filename
 character*27 denspol1filename
 
@@ -317,14 +318,16 @@ write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',countfileun
 write(denspol2filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer2.',countfileuno,'.',countfile,'.dat'
 write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', countfileuno,'.',countfile,'.dat'
 write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',countfileuno,'.',countfile,'.dat'
+write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'xdensitytota.',countfileuno,'.',countfile,'.dat'
 
 write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',countfileuno,'.',countfile,'.dat'
-write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'log_part_functn.',countfileuno,'.',countfile,'.dat'
+write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',countfileuno,'.',countfile,'.dat'
 
 open(unit=310,file=sysfilename)
 open(unit=321,file=denspol1filename)
 open(unit=322,file=denspol2filename)
 open(unit=323,file=totalfilename)
+open(unit=325,file=xtotalfilename)
 open(unit=330,file=denssolfilename)
 open(unit=324,file=lnqfilename)
 
@@ -333,7 +336,8 @@ write(321,*)zc(i),avpol(i,1)
 write(322,*)zc(i),avpol(i,2)
 avtmp = avpol(i,2)+avpol(i,1)
 write(323,*)zc(i),avtmp
-write(324,*)zc(i),dlog(q(i))
+write(325,*)zc(i),xpol(i)
+write(324,*)zc(i),dlog(xpol(i))-dlog(q(i))
 write(330,*)zc(i),xsol(i)
 enddo
 
@@ -363,6 +367,7 @@ close(320)
 CLOSE(321)
 CLOSE(322)
 CLOSE(323)
+CLOSE(325)
 CLOSE(324)
 close(330)
 

@@ -6,6 +6,7 @@ use partfunc
 
 allocate (q(ntot))
 allocate (avpol(ntot,2))
+allocate (xpol(ntot))
 allocate (in1n(cuantas,ntot,base))
 allocate (in2n(cuantas,ntot,base))
 allocate (maxpos(cuantas,2*ntot))

@@ -22,6 +22,7 @@ INTEGER adsmax
 
 integer ntot, maxntot ! lattice sites
 real*8, allocatable :: avpol(:,:) ! volume fraction polymers already adsorbed
+real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
 
 INTEGER cuantas
 integer curvature
