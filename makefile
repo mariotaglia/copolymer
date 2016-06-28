@@ -51,7 +51,7 @@ GIT_VERSION := $(shell git describe --abbrev=6 --dirty --always --tags)
 GFLAGS=-cpp -D_VERSION=\"$(GIT_VERSION)\"
 
 FF = mpif77 #${F90}
-VER = ~/bin/multicapa_convex
+VER = ~/bin/assembly
 
 all:	$(TARGET)
 
@@ -63,7 +63,7 @@ $(SRC:.f90=.o): $(SRC)
 	${FF} -c ${FFLAGS}  $(SRC) $(LFLAGS) $(GFLAGS)
 
 install: all
-#	cp $(TARGET) $(VER)
+	cp $(TARGET) $(VER)
 
 clean:	
 	@rm -f $(SRC:.f90=.o) $(SRC:.f90=.d) $(TARGET) *~
