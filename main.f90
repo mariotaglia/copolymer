@@ -257,10 +257,10 @@ st = sts(cc)
 do ccc = 1, nnpol !loop kbind
 npol = npols(ccc)
 
-if(rank.eq.0)print*, 'st:',st,' npol:', npol
+ 123 if(rank.eq.0)print*, 'st:',st,' npol:', npol
 
 ! xh bulk
- 123 xsolbulk=1.0
+ xsolbulk=1.0
 
 do i=1,2*n             ! initial gues for x1
 xg1(i)=x1(i)
@@ -291,19 +291,20 @@ do i=1,n
 xsol(i)=x1(i)
 enddo
 
-if(norma.gt.error) then
+if((norma.gt.error).or.(ier.lt.0)) then
+if(rank.eq.0)print*, 'Fail', npol
 if(ccc.eq.1) then
 npol = npol/2.0
+if(rank.eq.0)print*, 'Try', npol
 goto 123
 endif
-if(rank.eq.0)print*, 'Fail', npol
 npol=(npols(ccc-1)+npol)/2.0
 if(rank.eq.0)print*, 'Try', npol
-npols(ccc-1) = npol
 goto 123
 endif
 
 if(npols(ccc).ne.npol) then
+npols(ccc-1) = npol
 npol = npols(ccc)
 goto 123
 endif
@@ -316,6 +317,7 @@ if(rank.eq.0) then
 
 
 write(533,*)st, npol, -dlog(qall)
+flush(533)
 
 write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', countfileuno,'.',countfile,'.dat'
 write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',countfileuno,'.',countfile,'.dat'
@@ -360,6 +362,7 @@ write(310,*)'vsol        = ',vsol
 write(310,*)'vpol        = ',vpol*vsol
 
 write(310,*)'npol       = ', npol
+write(310,*)'st         = ', st
 
 
 write(310,*)'cuantas     = ',cuantas

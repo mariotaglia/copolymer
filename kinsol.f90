@@ -169,7 +169,6 @@ call fkinsol(x1, globalstrat, scale, scale, ier)         ! Llama a kinsol
 if (ier .lt. 0) then
       print*, 'call_kinsol: SUNDIALS_ERROR: FKINSOL returned IER = ', ier
       print*, 'call_kinsol: Linear Solver returned IER = ', iout(9)
-!      call fkinfree
 endif
 
 do i = 1, neq ! output
