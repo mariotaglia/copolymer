@@ -138,6 +138,7 @@ read(100,*)trash,xfile(i)   ! solvent
 read(200,*)trash,xfile(i+n)   ! solvent
 x1(i)=xfile(i)
 xg1(i)=xfile(i)
+if(xfile(i+n).eq.0.0)xfile(i+n)=1.0d-30
 x1(i+n)=xfile(i+n)
 xg1(i+n)=xfile(i+n)
 enddo  
