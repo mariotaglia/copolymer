@@ -10,7 +10,7 @@ integer, parameter :: base = 25
 real*8 lseg
 real*8, allocatable :: Xu(:,:)
 integer Xulimit
-REAL*8 sts(100), npols(100)
+REAL*8 sts(1000), npols(1000)
 INTEGER nst, nnpol
 real*8 npol
 real*8 error              ! error imposed accuaracy
