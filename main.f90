@@ -138,12 +138,10 @@ read(100,*)trash,xfile(i)   ! solvent
 read(200,*)trash,xfile(i+n)   ! solvent
 x1(i)=xfile(i)
 xg1(i)=xfile(i)
-if(xfile(i+n).eq.0.0)xfile(i+n)=1.0d-30
+if(xfile(i+n).lt.1.0d-30)xfile(i+n)=1.0d-30
 x1(i+n)=xfile(i+n)
 xg1(i+n)=xfile(i+n)
 enddo  
-
-
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -214,7 +212,7 @@ in2n = 0
 
        if(k.le.(long/2))in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
        if(k.gt.(long/2))in2n(conf,ii,temp) =  in2n(conf,ii,temp) + 1
-!        in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
+!        in2n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
        enddo
    enddo ! ii
    endif
@@ -266,6 +264,11 @@ do i=1,2*n             ! initial gues for x1
 xg1(i)=x1(i)
 enddo
 
+do i=1,n
+if(xg1(i+n).lt.1.0d-30)xg1(i+n)=1.0d-30 ! OJO
+enddo
+
+
 ! JEFE
 if(rank.eq.0) then ! solo el jefe llama al solver
    iter = 0
@@ -291,15 +294,23 @@ do i=1,n
 xsol(i)=x1(i)
 enddo
 
-if((norma.gt.error).or.(ier.lt.0)) then
+if((norma.gt.error).or.(ier.lt.0).or.(isnan(norma))) then
 if(rank.eq.0)print*, 'Fail', npol
 if(ccc.eq.1) then
 npol = npol/2.0
 if(rank.eq.0)print*, 'Try', npol
+x1 = xg1
 goto 123
 endif
+
 npol=(npols(ccc-1)+npol)/2.0
 if(rank.eq.0)print*, 'Try', npol
+
+x1 = xg1
+!do i = 1, n
+!print*, i, x1(i), x1(i+n)
+!enddo
+
 goto 123
 endif
 

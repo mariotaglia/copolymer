@@ -159,7 +159,7 @@ do i = 1, neq ! scaling vector
 enddo
 
 do i = 1, neq ! Initial guess
-      x1(i) = x1_old(i)
+      x1(i) = xg1_old(i)
       xg1(i) = x1(i)  
 enddo
 
@@ -173,7 +173,6 @@ endif
 
 do i = 1, neq ! output
   x1_old(i) = x1(i)
-  xg1_old(i) = x1(i)
 enddo
 
 call fkinfree
