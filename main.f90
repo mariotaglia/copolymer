@@ -21,7 +21,7 @@ integer *4 ier ! Kinsol error flag
 real*8 pi
 real*8 Na               
 parameter (Na=6.02d23)
-
+integer av1(ntot), av2(ntot)
 real*8 xsol(ntot)         ! volume fraction solvent
 real*8 avtmp
 real*8 x1(2*ntot),xg1(2*ntot)   ! density solvent iteration vector
@@ -172,11 +172,13 @@ in2n = 0
 
       in1tmp = 0
 
-!      algo = 1d100
-!      do k=1,long
-!      if(algo.gt.chains(1,k,j))algo=chains(1,k,j)
-!      enddo
-!      chains(1,:,j)=chains(1,:,j)-algo
+      do i = 1,3
+      algo = 1d100
+      do k=1,long
+      if(algo.gt.chains(i,k,j))algo=chains(i,k,j)
+      enddo
+      chains(i,:,j)=chains(i,:,j)-algo
+      enddo
 
       do k=1,long
       select case (abs(curvature))
@@ -231,7 +233,25 @@ in2n = 0
 
 if(rank.eq.0)print*," chains ready"
 
+! CHECK that chains are unbiased
 
+!   av1 = 0
+!   av2 = 0
+
+!   do ii = 1, maxntot
+!   do i = 1, cuantas
+!   do k = 1, ntot
+!   av1(k) = av1(k) + in1n(i,ii,k)
+!   av2(k) = av2(k) + in2n(i,ii,k)
+!   enddo
+!   enddo
+
+!   do k = 1, ntot
+!   print*, ii, k, av1(k), av2(k)
+!   enddo
+!   enddo
+!   stop
+  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !     computation starts
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
