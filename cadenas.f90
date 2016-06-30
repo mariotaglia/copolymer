@@ -132,7 +132,7 @@ integer i,state,ii,j,k1,k2,ncha
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3)
-real*8 x(3),xend(3,long+5),xendr(3,long+5)
+real*8 x(3),xend(3,long+5),xendr(3,long+5), xendcom(3,long+5)
 REAL*8 chains(3,long,ncha_max), chainsw(ncha_max)
 character*1 test
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
@@ -224,7 +224,9 @@ enddo
 
 ncha=0
 do i=1,12
-call rota(xend,xendr,long,test)   ! rotate chain conformation ncha time
+
+call com(xend,xendcom,long)       ! substracts center of mass
+call rota(xendcom,xendr,long,test)   ! rotate chain conformation ncha time
 ncha=ncha+1
 
 do j=1,long
@@ -240,4 +242,24 @@ return
 end
 
 
+subroutine com(xend,xendcom,long)
+use seed1
+use layer
+implicit none
 
+integer n, i, k, long
+real*8 xend(3,long+5),xendcom(3,long+5)
+real*8 cm(3)
+cm = 0.0
+do k = 1, long
+do i = 1,3
+cm(i) = cm(i) + xend(i,k)
+enddo
+enddo
+cm = cm/float(k)
+do k = 1, long
+do i = 1,3
+xendcom(i,k) = xend(i,k) - cm(i)
+enddo
+enddo
+end subroutine

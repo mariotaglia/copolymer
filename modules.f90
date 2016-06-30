@@ -5,7 +5,7 @@ endmodule
 
 module globals
 
-integer, parameter :: base = 25
+integer, parameter :: base = 80
 
 real*8 lseg
 real*8, allocatable :: Xu(:,:)
@@ -49,7 +49,7 @@ real*8 qall
 endmodule
 
 module layer
-real*8, parameter :: delta = 0.5
+real*8, parameter :: delta = 0.2
 endmodule
 
 module volume

@@ -43,7 +43,7 @@ real*8 tempr
 real*8 tmp
 
 real*8 min1               ! variable to determine minimal position of chain
-
+integer qqq,www,eee
 
 integer il,inda,ncha
 
@@ -93,6 +93,7 @@ integer in1tmp(long)
 
 error = 1.0d-6
 seed=435+ 3232*rank               ! seed for random number generator
+
 print*, 'I am', rank, ' and my seed is', seed
 
 if(rank.eq.0)print*, 'Program Multicapa'
@@ -165,13 +166,19 @@ in2n = 0
 
    do ii = 1, maxntot ! position of first segment
 
+
       minpos(conf,ii) = ntot
       maxpos(conf,ii) = 0 
 
       in1tmp = 0
 
-      do k=1,long
+!      algo = 1d100
+!      do k=1,long
+!      if(algo.gt.chains(1,k,j))algo=chains(1,k,j)
+!      enddo
+!      chains(1,:,j)=chains(1,:,j)-algo
 
+      do k=1,long
       select case (abs(curvature))
       case (2)
         tempr=((chains(1,k,j)+(float(ii)-0.5)*delta)**2 + chains(2,k,j)**2 +chains(3,k,j)**2 )**(0.5)
@@ -212,8 +219,10 @@ in2n = 0
 
        if(k.le.(long/2))in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
        if(k.gt.(long/2))in2n(conf,ii,temp) =  in2n(conf,ii,temp) + 1
+
 !        in2n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
        enddo
+
    enddo ! ii
    endif
 

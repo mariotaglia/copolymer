@@ -27,6 +27,11 @@ real*8 x1,x2,y1, y2, z1, z2, vect
 integer iR, ix,iy,iz, itheta
 integer j
 real*8 radio
+real*8 cutoff
+
+
+cutoff = (float(Xulimit)+0.5)*delta
+
 
 if(rank.eq.0)print*,'Kai calculation'
 open(unit=111, file='kais.dat')
@@ -42,14 +47,14 @@ MCsteps = 200
 
 do ii = 1, ntot ! loop sobre cada posicion del segmento
 
-      ymax = 3.0*delta/2.0
-      ymin = -3.0*delta/2.0
+      ymax =cutoff
+      ymin = -cutoff
 
-      zmax = 3.0*delta/2.0
-      zmin = -3.0*delta/2.0
+      zmax = cutoff
+      zmin = -cutoff
 
-      xmax = 3.0*delta/2.0 + (dfloat(ii) - 0.5)*delta
-      xmin = -3.0*delta/2.0 + (dfloat(ii) - 0.5)*delta
+      xmax = cutoff + (dfloat(ii) - 0.5)*delta
+      xmin = -cutoff + (dfloat(ii) - 0.5)*delta
     
       do ix = 1, MCsteps
       do iy = 1, MCsteps
@@ -81,7 +86,7 @@ do ii = 1, ntot ! loop sobre cada posicion del segmento
 
          suma(ii, j) = suma(ii, j) + R
 
-         if(vect.le.(1.5*delta)) then ! esta dentro de la esfera del cut-off   
+         if(vect.le.(cutoff)) then ! esta dentro de la esfera del cut-off   
          if(vect.ge.lseg) then ! esta dentro de la esfera del segmento
              Xu(ii, j) = Xu(ii, j) + ((lseg/vect)**6) ! incluye el jacobiano R(segmento)
          endif
@@ -94,8 +99,8 @@ do ii = 1, ntot ! loop sobre cada posicion del segmento
       enddo
 
       do j = 1, ntot
-      Xu(ii, j) = Xu(ii, j)/(MCsteps**3)*(3.0*delta)**3
-      suma(ii, j) = suma(ii, j)/(MCsteps**3)*(3.0*delta)**3
+      Xu(ii, j) = Xu(ii, j)/(MCsteps**3)*(2.0*cutoff)**3
+      suma(ii, j) = suma(ii, j)/(MCsteps**3)*(2.0*cutoff)**3
      write(111,*)ii,j,Xu(ii,j) ! residual size of iteration vector
      enddo
 
