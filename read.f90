@@ -18,7 +18,7 @@ read(8,*),nada
 read(8,*)cuantas
 
 read(8,*),nada
-read(8,*)long
+read(8,*)long, long1
 
 READ(8,*),nada
 read(8,*),nst

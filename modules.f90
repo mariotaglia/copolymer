@@ -68,7 +68,7 @@ endmodule
 
 
 module longs
-integer long            ! length of polymer
+integer long, long1            ! length of polymer
 endmodule
 
 module pis

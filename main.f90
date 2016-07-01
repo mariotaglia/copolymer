@@ -219,8 +219,8 @@ in2n = 0
 
 
 
-       if(k.le.(long/2))in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
-       if(k.gt.(long/2))in2n(conf,ii,temp) =  in2n(conf,ii,temp) + 1
+       if(k.le.long1)in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
+       if(k.gt.long1)in2n(conf,ii,temp) =  in2n(conf,ii,temp) + 1
 
 !        in2n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
        enddo

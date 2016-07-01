@@ -42,7 +42,7 @@ integer ncells
 common /psize/ neq
 
 do i = 1, ntot
-   pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+   pp(i) = 1.0 !0.1 / (1.0+exp(1.0-udata(i)))
 enddo
 
 do i = ntot+1, 2*ntot
@@ -110,7 +110,7 @@ fnormtol = 1.0d-6 ! Function-norm stopping tolerance
 scsteptol = 1.0d-6 ! Function-norm stopping tolerance
 
 maxl = 2000 ! maximum Krylov subspace dimesion (?!?!?!) ! Esto se usa para el preconditioner
-maxlrst = 5 ! maximum number of restarts
+maxlrst = 50 ! maximum number of restarts
 max_niter = 2000
 globalstrat = 0
 
