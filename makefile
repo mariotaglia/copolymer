@@ -11,7 +11,15 @@ $(info HOST is ${HOST})
 # some definitions
 SHELL = /bin/bash
 FFLAGS= -fbacktrace -fbounds-check # -O3
- 
+
+
+
+
+ifeq ($(HOST),spinetta) 
+LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
+endif
+
+
 
 ifeq ($(HOST),master) 
 
@@ -51,7 +59,7 @@ GIT_VERSION := $(shell git describe --abbrev=6 --dirty --always --tags)
 GFLAGS=-cpp -D_VERSION=\"$(GIT_VERSION)\"
 
 FF = mpif77 #${F90}
-VER = ~/bin/assembly
+VER = ~/bin/copolymer
 
 all:	$(TARGET)
 
