@@ -194,5 +194,8 @@ norma=algo
 
 3333 continue
 
+
+ier2 = 0
+
 return
 end

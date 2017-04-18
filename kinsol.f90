@@ -7,7 +7,7 @@ use globals
 use mkinsol
 implicit none
 
-integer ier
+integer*4 ier
 integer*8 neq, i
 double precision udata(*), uscale(*), fdata(*), fscale(*)
 double precision vv(*), ftem(*)
@@ -18,7 +18,6 @@ do  i = 1, neq
    vv(i) = vv(i) * pp(i)
 enddo
 ier = 0
-
 return
 end
 
@@ -33,7 +32,7 @@ use globals
 use mkinsol
 implicit none
 
-integer ier
+integer*4 ier
 integer*8 neq, i
 double precision udata(*), uscale(*), fdata(*), fscale(*)
 double precision vtemp1(*), vtemp2(*)
@@ -49,6 +48,7 @@ do i = ntot+1, 2*ntot
 pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
 enddo
 
+ier = 0
 return
 end
 
@@ -59,8 +59,10 @@ end
 subroutine call_fkfun(x1_old)
 use globals
 use MPI
+implicit none
 
 integer i
+integer*4 ier
 
 real*8 x1_old(2*ntot)
 real*8 x1(2*ntot)
@@ -80,6 +82,9 @@ enddo
 CALL MPI_BCAST(x1, 2*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
 
 call fkfun(x1,f, ier) ! todavia no hay solucion => fkfun 
+
+ier = 0
+
 end
 
 subroutine call_kinsol(x1_old, xg1_old, ier)
@@ -131,7 +136,7 @@ if (ier .ne. 0) then
 call fkinsetiin('MAX_SETUPS', msbpre, ier)  ! Additional input information
 call fkinsetrin('FNORM_TOL', fnormtol, ier)
 call fkinsetrin('SSTEP_TOL', scsteptol, ier)
-call fkinsetiin('MAX_NITER', max_niter, ier)
+!call fkinsetiin('MAX_NITER', max_niter, ier)
 
 do i = 1, ntot  !constraint vector
    constr(i) = 2.0 ! xh > 0

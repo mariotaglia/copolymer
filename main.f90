@@ -319,6 +319,7 @@ if(rank.ne.0) then
    enddo
 endif
 
+
 do i=1,n
 xsol(i)=x1(i)
 enddo
@@ -428,7 +429,6 @@ end do ! loop de st
 close(533)
 
 countfileuno = countfileuno + 1
-
 call MPI_FINALIZE(ierr) ! finaliza MPI
 stop
 
