@@ -320,6 +320,27 @@ if(rank.ne.0) then
 endif
 
 
+! Recupero el valor de ier y de la norma
+! Asi los subordinados se enteran si el solver convergio o si hay que
+! cambiar la   estrategia...
+! Jefe
+
+if (rank.eq.0) then
+   norma_tosend = norma
+   ier_tosend = ier ! distinto tipo de integer
+   CALL MPI_BCAST(norma_tosend, 1, MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,err)
+   CALL MPI_BCAST(ier_tosend,1, MPI_INTEGER,0,MPI_COMM_WORLD,err)
+endif
+
+! Subordinados
+
+if (rank.ne.0) then
+   CALL MPI_BCAST(norma_tosend, 1, MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,err)
+   CALL MPI_BCAST(ier_tosend, 1, MPI_INTEGER,0,MPI_COMM_WORLD,err)
+   norma = norma_tosend
+   ier = ier_tosend
+endif
+
 do i=1,n
 xsol(i)=x1(i)
 enddo
