@@ -30,11 +30,7 @@ READ(8,*),nada
 read(8,*),infile
 
 READ(8,*),nada
-READ(8,*), nnpol
-
-do i =1, nnpol
-read(8,*),npols(i)
-end do
+READ(8,*), npolini, npolfirst, npollast, npolstep
 
 read(8,*)nada
 read(8,*)eps1

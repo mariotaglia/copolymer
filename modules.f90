@@ -10,8 +10,11 @@ integer, parameter :: base = 80
 real*8 lseg
 real*8, allocatable :: Xu(:,:)
 integer Xulimit
-REAL*8 sts(1000), npols(1000)
-INTEGER nst, nnpol
+REAL*8 sts(1000)
+INTEGER nst
+
+real*8 npolini, npolfirst, npollast, npolstep 
+
 real*8 npol
 real*8 error              ! error imposed accuaracy
 real*8 infile             ! inputfile control variable for reading input files  value 0,1

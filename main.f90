@@ -24,7 +24,7 @@ parameter (Na=6.02d23)
 integer av1(ntot), av2(ntot)
 real*8 xsol(ntot)         ! volume fraction solvent
 real*8 avtmp
-real*8 x1(2*ntot),xg1(2*ntot)   ! density solvent iteration vector
+real*8 x1(2*ntot),xg1(2*ntot),x1ini(2*ntot)   ! density solvent iteration vector
 real*8 zc(ntot)           ! z-coordinate layer 
 
 REAL*8 sumrhoz, meanz     ! Espesor medio pesado
@@ -74,13 +74,12 @@ character*27 denspol2filename
 character*27 denspol1filename
 
 integer countfile         ! enumerates the outputfiles 
-integer countfileuno     ! enumerates the outputfiles para una corrida
 integer conf              ! counts number of conformations
 
 integer readsalt          !integer to read salt concentrations
 
 
-INTEGER cc, ccc
+INTEGER cc, actionflag
 
 ! MPI
 integer tag, source
@@ -172,15 +171,6 @@ in2n = 0
 
       in1tmp = 0
 
-!      do i = 1,3
-!      algo = 1d100
-!      do k=1,long
-!      if(algo.gt.chains(i,k,j))algo=chains(i,k,j)
-!      print*, j, k, chains(1,k,j), chains(2,k,j), chains(3,k,j)
-!      enddo
-!      stop
-!      chains(i,:,j)=chains(i,:,j)-algo
-!      enddo
 
       do k=1,long
       select case (abs(curvature))
@@ -274,22 +264,31 @@ open(unit=533,file='lnq.dat')
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-countfileuno=1           
 
 countfile=1
+
+
+actionflag = 1 ! Actionflag controls the current action of loop
+               ! = 1 increases npol from npolini to npollast
+               ! = 2 decreases npol from npolini to npolfirst
+               ! = 3 finalize
+
+npol = npolini
 
 do cc = 1, nst !loop st
 st = sts(cc)
 
-do ccc = 1, nnpol !loop kbind
-npol = npols(ccc)
+
+
+
+do while (actionflag.lt.3)
 
  123 if(rank.eq.0)print*, 'st:',st,' npol:', npol
 
 ! xh bulk
  xsolbulk=1.0
 
-do i=1,2*n             ! initial gues for x1
+do i=1,2*n             ! initial guess for x1
 xg1(i)=x1(i)
 enddo
 
@@ -346,34 +345,29 @@ xsol(i)=x1(i)
 enddo
 
 if((norma.gt.error).or.(ier.lt.0).or.(isnan(norma))) then
-if(rank.eq.0)print*, 'Fail', npol
-if(ccc.eq.1) then
-npol = npol/2.0
-if(rank.eq.0)print*, 'Try', npol
-x1 = xg1
-goto 123
+stop
+!if(rank.eq.0)print*, 'Fail', npol
+!if(ccc.eq.1) then
+!npol = npol/2.0
+!if(rank.eq.0)print*, 'Try', npol
+!x1 = xg1
+!goto 123
+!endif
+!npol=(npols(ccc-1)+npol)/2.0
+!if(rank.eq.0)print*, 'Try', npol
+!x1 = xg1
+!goto 123
 endif
 
-npol=(npols(ccc-1)+npol)/2.0
-if(rank.eq.0)print*, 'Try', npol
+!if(npols(ccc).ne.npol) then
+!npols(ccc-1) = npol
+!npol = npols(ccc)
+!goto 123
+!endif
 
-x1 = xg1
-!do i = 1, n
-!print*, i, x1(i), x1(i+n)
-!enddo
-
-goto 123
-endif
-
-if(npols(ccc).ne.npol) then
-npols(ccc-1) = npol
-npol = npols(ccc)
-goto 123
-endif
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Determination of adsorbed polymer
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! Determination of adsorbed polymer
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 if(rank.eq.0) then
 
@@ -381,15 +375,15 @@ if(rank.eq.0) then
 write(533,*)st, npol, -dlog(qall)
 flush(533)
 
-write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', countfileuno,'.',countfile,'.dat'
-write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',countfileuno,'.',countfile,'.dat'
-write(denspol2filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer2.',countfileuno,'.',countfile,'.dat'
-write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', countfileuno,'.',countfile,'.dat'
-write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',countfileuno,'.',countfile,'.dat'
-write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'xdensitytota.',countfileuno,'.',countfile,'.dat'
+write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', actionflag,'.',countfile,'.dat'
+write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',actionflag,'.',countfile,'.dat'
+write(denspol2filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer2.',actionflag,'.',countfile,'.dat'
+write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', actionflag,'.',countfile,'.dat'
+write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',actionflag,'.',countfile,'.dat'
+write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'xdensitytota.',actionflag,'.',countfile,'.dat'
 
-write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',countfileuno,'.',countfile,'.dat'
-!write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',countfileuno,'.',countfile,'.dat'
+write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',actionflag,'.',countfile,'.dat'
+!write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',actionflag,'.',countfile,'.dat'
 
 open(unit=310,file=sysfilename)
 open(unit=321,file=denspol1filename)
@@ -425,7 +419,7 @@ write(310,*)'vpol        = ',vpol*vsol
 
 write(310,*)'npol       = ', npol
 write(310,*)'st         = ', st
-
+write(310,*)'Actionflag = ', actionflag
 
 write(310,*)'cuantas     = ',cuantas
 write(310,*)'iterations  = ',iter
@@ -440,16 +434,31 @@ CLOSE(325)
 !CLOSE(324)
 close(330)
 
-countfile = countfile+1 ! next
 
 endif ! rank
+countfile = countfile+1 ! next
+
+
+!npolini, npolfirst, npollast, npolstep
+select case (actionflag)
+ case(1)  ! increases from npolini to npollast
+    if(npol.eq.npolini)x1ini = x1
+    npol = npol + npolstep      
+    if(npol.gt.npollast) then
+       npol = npolini - npolstep
+       actionflag = 2
+       x1 = x1ini
+    endif       
+ case(2)
+    npol = npol - npolstep
+    if(npol.lt.npolfirst)actionflag = 3
+endselect
 
 END do ! loop de npol
 end do ! loop de st
 
 close(533)
 
-countfileuno = countfileuno + 1
 call MPI_FINALIZE(ierr) ! finaliza MPI
 stop
 
