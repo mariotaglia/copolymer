@@ -124,6 +124,7 @@ if(rank.ne.0) then
   call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(qall_tosend, qall, 1, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 !!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+  ier2 = 0
   goto 3333
 endif
 
@@ -193,6 +194,9 @@ if(rank.eq.0)PRINT*, iter, algo, sumpol
 norma=algo
 
 3333 continue
+
+
+ier2 = 0
 
 return
 end

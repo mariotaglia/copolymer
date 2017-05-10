@@ -45,6 +45,7 @@ Xu = 0.0 ! vector Xu
 seed = 1010
 MCsteps = 200
 
+
 do ii = 1, ntot ! loop sobre cada posicion del segmento
 
       ymax =cutoff
