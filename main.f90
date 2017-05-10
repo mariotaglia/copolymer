@@ -172,13 +172,15 @@ in2n = 0
 
       in1tmp = 0
 
-      do i = 1,3
-      algo = 1d100
-      do k=1,long
-      if(algo.gt.chains(i,k,j))algo=chains(i,k,j)
-      enddo
-      chains(i,:,j)=chains(i,:,j)-algo
-      enddo
+!      do i = 1,3
+!      algo = 1d100
+!      do k=1,long
+!      if(algo.gt.chains(i,k,j))algo=chains(i,k,j)
+!      print*, j, k, chains(1,k,j), chains(2,k,j), chains(3,k,j)
+!      enddo
+!      stop
+!      chains(i,:,j)=chains(i,:,j)-algo
+!      enddo
 
       do k=1,long
       select case (abs(curvature))
@@ -189,11 +191,9 @@ in2n = 0
         tempr=((chains(1,k,j)+(float(ii)-0.5)*delta)**2+chains(2,k,j)**2)**(0.5)
         temp=int(tempr/delta)+1  ! put them into the correct layer
       case (0) 
-        tempr=(chains(1,k,j)+(float(ii)-0.5)*delta)
+        tempr=abs(chains(1,k,j)+(float(ii)-0.5)*delta)
         temp=int(tempr/delta)+1  ! put them into the correct layer
         
-        if(temp.le.0)temp=-temp+2      ! RBC for planar calculation
-
       endselect
         
        if(temp.gt.ntot) then
