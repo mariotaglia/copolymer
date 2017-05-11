@@ -75,8 +75,42 @@ q_tosend=0.0d0                   ! init q to zero
 qall_tosend = 0.0
 qall = 0.0
 
-do ii=1,maxntot ! position of segment #0 
- do i=1,cuantas
+
+select case (actionflag)
+
+case (0)
+
+ if (maxntotcounter.lt.maxntot) then ! loop de maxntot
+  do ii=1,maxntotcounter ! position of segment #0 
+   do i=1,cuantas
+
+     pro(i) = 1.0
+
+     do j=minpos(i,ii), maxpos(i,ii) ! posicion dentro del poro
+      k = j-minpos(i,ii)+1 ! k may be lager than ntot
+      pro(i)= pro(i) * xpot(j,1)**in1n(i,ii,k) ! hidrofilico
+      pro(i)= pro(i) * xpot(j,2)**in2n(i,ii,k)
+     enddo
+
+      q_tosend(ii)=q_tosend(ii)+pro(i)
+      qall_tosend = qall_tosend + pro(i)
+
+      xpol_tosend(ii)=xpol_tosend(ii)+pro(i)
+
+     do j=minpos(i,ii), maxpos(i,ii)
+      k = j-minpos(i,ii)+1 ! k may be larger than ntot
+      avpol_tmp(j,1)=avpol_tmp(j,1)+pro(i)*vpol*in1n(i,ii,k)*factorcurv(ii,j)
+      avpol_tmp(j,2)=avpol_tmp(j,2)+pro(i)*vpol*in2n(i,ii,k)*factorcurv(ii,j)
+     enddo
+
+   enddo ! i
+  enddo   ! ii
+ endif 
+
+case (1:3)
+
+ do ii=1,maxntot ! position of segment #0 
+   do i=1,cuantas
 
     pro(i) = 1.0
 
@@ -97,8 +131,10 @@ do ii=1,maxntot ! position of segment #0
      avpol_tmp(j,2)=avpol_tmp(j,2)+pro(i)*vpol*in2n(i,ii,k)*factorcurv(ii,j)
     enddo
 
- enddo ! i
-enddo   ! ii
+  enddo ! i
+ enddo   ! ii
+
+end select
 
 avpol_tosend(1:ntot,:)=avpol_tmp(1:ntot,:) 
 

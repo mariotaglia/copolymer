@@ -79,7 +79,7 @@ integer conf              ! counts number of conformations
 integer readsalt          !integer to read salt concentrations
 
 
-INTEGER cc, actionflag
+INTEGER cc
 
 ! MPI
 integer tag, source
@@ -268,10 +268,12 @@ open(unit=533,file='lnq.dat')
 countfile=1
 
 
-actionflag = 1 ! Actionflag controls the current action of loop
+actionflag = 0 ! Actionflag controls the current action of loop
+               ! = 0 loop maxntotcounter from 2 to maxntot
                ! = 1 increases npol from npolini to npollast
                ! = 2 decreases npol from npolini to npolfirst
                ! = 3 finalize
+maxntotcounter = maxntot !maxntot inicial
 
 npol = npolini
 
@@ -437,10 +439,14 @@ close(330)
 
 endif ! rank
 countfile = countfile+1 ! next
-
-
 !npolini, npolfirst, npollast, npolstep
 select case (actionflag)
+ case(0) ! maxntot loop
+    if (maxntotcounter.lt.maxntot) then
+!    write(1000+maxntotcounter,*), maxntotcounter
+    maxntotcounter=maxntotcounter+1
+    endif
+    if(maxntotcounter.eq.maxntot)actionflag=1 
  case(1)  ! increases from npolini to npollast
     if(npol.eq.npolini)x1ini = x1
     npol = npol + npolstep      

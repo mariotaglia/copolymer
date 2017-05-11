@@ -11,7 +11,7 @@ real*8 lseg
 real*8, allocatable :: Xu(:,:)
 integer Xulimit
 REAL*8 sts(1000)
-INTEGER nst
+INTEGER nst, actionflag
 
 real*8 npolini, npolfirst, npollast, npolstep 
 
@@ -23,7 +23,7 @@ CHARACTER nada
 real*8 norma
 INTEGER adsmax
 
-integer ntot, maxntot ! lattice sites
+integer ntot, maxntot, maxntotcounter ! lattice sites
 real*8, allocatable :: avpol(:,:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
 
