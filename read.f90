@@ -12,7 +12,7 @@ read(8,*),nada
 read(8,*),curvature
 
 read(8,*),nada
-read(8,*),ntot, maxntot
+read(8,*),ntot, maxntotcounter_ini, maxntot
 
 read(8,*),nada
 read(8,*)cuantas

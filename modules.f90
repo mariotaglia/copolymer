@@ -23,7 +23,7 @@ CHARACTER nada
 real*8 norma
 INTEGER adsmax
 
-integer ntot, maxntot, maxntotcounter ! lattice sites
+integer ntot, maxntot, maxntotcounter_ini, maxntotcounter ! lattice sites
 real*8, allocatable :: avpol(:,:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
 

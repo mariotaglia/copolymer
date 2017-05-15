@@ -273,7 +273,7 @@ actionflag = 0 ! Actionflag controls the current action of loop
                ! = 1 increases npol from npolini to npollast
                ! = 2 decreases npol from npolini to npolfirst
                ! = 3 finalize
-maxntotcounter = maxntot !maxntot inicial
+maxntotcounter = maxntotcounter_ini !maxntot inicial
 
 npol = npolini
 
@@ -285,7 +285,8 @@ st = sts(cc)
 
 do while (actionflag.lt.3)
 
- 123 if(rank.eq.0)print*, 'st:',st,' npol:', npol
+ 123 if(rank.eq.0)print*, 'st:',st,' npol:', npol, 'maxntot:', maxntotcounter
+
 
 ! xh bulk
  xsolbulk=1.0
@@ -293,6 +294,7 @@ do while (actionflag.lt.3)
 do i=1,2*n             ! initial guess for x1
 xg1(i)=x1(i)
 enddo
+
 
 do i=1,n
 if(xg1(i+n).lt.1.0d-30)xg1(i+n)=1.0d-30 ! OJO
@@ -308,6 +310,8 @@ if(rank.eq.0) then ! solo el jefe llama al solver
    CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,err)
 endif
 ! Subordinados
+
+
 if(rank.ne.0) then
   do
      flagsolver = 0
@@ -342,12 +346,14 @@ if (rank.ne.0) then
    ier = ier_tosend
 endif
 
+
 do i=1,n
 xsol(i)=x1(i)
 enddo
 
+
 if((norma.gt.error).or.(ier.lt.0).or.(isnan(norma))) then
-stop
+!stop
 !if(rank.eq.0)print*, 'Fail', npol
 !if(ccc.eq.1) then
 !npol = npol/2.0
@@ -360,6 +366,8 @@ stop
 !x1 = xg1
 !goto 123
 endif
+
+print*, "norma", rank
 
 !if(npols(ccc).ne.npol) then
 !npols(ccc-1) = npol
@@ -436,23 +444,32 @@ CLOSE(325)
 !CLOSE(324)
 close(330)
 
+print*, rank, " escribe"
 
 endif ! rank
+
+
 countfile = countfile+1 ! next
 !npolini, npolfirst, npollast, npolstep
 select case (actionflag)
  case(0) ! maxntot loop
+!    countfile = 1
     if (maxntotcounter.lt.maxntot) then
 !    write(1000+maxntotcounter,*), maxntotcounter
     maxntotcounter=maxntotcounter+1
+!    xg1 = x1
     endif
-    if(maxntotcounter.eq.maxntot)actionflag=1 
+    if(maxntotcounter.eq.maxntot) then
+    actionflag=1 
+    countfile = 1
+    endif
  case(1)  ! increases from npolini to npollast
     if(npol.eq.npolini)x1ini = x1
     npol = npol + npolstep      
     if(npol.gt.npollast) then
        npol = npolini - npolstep
        actionflag = 2
+       countfile = 1
        x1 = x1ini
     endif       
  case(2)
