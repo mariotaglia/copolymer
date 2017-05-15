@@ -353,6 +353,7 @@ enddo
 
 
 if((norma.gt.error).or.(ier.lt.0).or.(isnan(norma))) then
+  if(actionflag.gt.0)stop
 !stop
 !if(rank.eq.0)print*, 'Fail', npol
 !if(ccc.eq.1) then
