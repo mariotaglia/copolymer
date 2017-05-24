@@ -465,10 +465,10 @@ select case (actionflag)
     countfile = 1
     endif
  case(1)  ! increases from npolini to npollast
-    if(npol.eq.npolini)x1ini = x1
+    if(npol.eq.npolini)x1ini=x1
     npol = npol + npolstep      
     if(npol.gt.npollast) then
-       npol = npolini - npolstep
+       npol = npolini
        actionflag = 2
        countfile = 1
        x1 = x1ini
