@@ -56,7 +56,7 @@ xpot(i,1) = dexp(protemp)
   do j = 1, ntot
       protemp = protemp+sttemp*Xu(i,j)*xtotal(j)
   end do
-      protemp = protemp+eps(i)
+!      protemp = protemp+eps(i)
 xpot(i,2) = dexp(protemp)
 enddo
 

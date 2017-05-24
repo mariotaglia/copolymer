@@ -3,26 +3,27 @@ module mkinsol
 double precision, allocatable :: pp(:)
 endmodule
 
+
+module kai
+integer Npoorsv ! number of different types of poor solvent
+REAL*8, allocatable ::  xtotal(:,:)
+real*8, allocatable :: st(:,:)
+real*8, allocatable :: Xu(:,:)
+integer Xulimit
+endmodule
+
 module globals
 
 integer, parameter :: base = 80
-
 real*8 lseg
-real*8, allocatable :: Xu(:,:)
-integer Xulimit
-REAL*8 sts(1000)
-INTEGER nst, actionflag
-
+INTEGER actionflag
 real*8 npolini, npolfirst, npollast, npolstep 
-
 real*8 npol
 real*8 error              ! error imposed accuaracy
 real*8 infile             ! inputfile control variable for reading input files  value 0,1
 CHARACTER nada
-
 real*8 norma
 INTEGER adsmax
-
 integer ntot, maxntot, maxntotcounter_ini, maxntotcounter ! lattice sites
 real*8, allocatable :: avpol(:,:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
@@ -41,8 +42,6 @@ real*8 eps1
 
 integer iter              ! counts number of iterations
 
-REAL*8, allocatable ::  xtotal(:)
-real*8 st
 integer, parameter :: ncha_max = 700
 endmodule
 

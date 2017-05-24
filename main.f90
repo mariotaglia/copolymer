@@ -15,6 +15,7 @@ use bulk
 use seed1
 use longs
 use MPI
+use kai
 
 implicit none
 integer *4 ier ! Kinsol error flag
@@ -148,8 +149,7 @@ endif
 ! CHAIN GENERATION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-in1n = 0
-in2n = 0
+inn = 0
 
    call initcha              ! init matrices for chain generation
    conf=0                    ! counter of number of conformations
@@ -206,13 +206,7 @@ in2n = 0
 
        do k = 1, long
        temp = in1tmp(k)-minpos(conf,ii)+1 
-
-
-
-       if(k.le.long1)in1n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
-       if(k.gt.long1)in2n(conf,ii,temp) =  in2n(conf,ii,temp) + 1
-
-!        in2n(conf,ii,temp) =  in1n(conf,ii,temp) + 1
+       inn(segpoorsv(k),conf,ii,temp) = inn(segpoorsv(k),conf,ii,temp) + 1      
        enddo
 
    enddo ! ii
