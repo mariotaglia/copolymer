@@ -22,7 +22,6 @@ real*8 pi
 real*8 Na               
 parameter (Na=6.02d23)
 integer av1(ntot), av2(ntot)
-real*8 xsol(ntot)         ! volume fraction solvent
 real*8 avtmp
 real*8 x1(2*ntot),xg1(2*ntot),x1ini(2*ntot)   ! density solvent iteration vector
 real*8 zc(ntot)           ! z-coordinate layer 
@@ -375,6 +374,15 @@ print*, "norma", rank
 !npol = npols(ccc)
 !goto 123
 !endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! calc free energy
+!
+!
+
+call calc_free_energy(actionflag, countfile)
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! Determination of adsorbed polymer

@@ -15,4 +15,5 @@ allocate (eps(ntot))
 allocate (xtotal(2*ntot))
 allocate (Xu(ntot,ntot))
 allocate (pp(2*ntot))
+allocate (xsol(ntot))
 end

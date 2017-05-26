@@ -26,7 +26,7 @@ INTEGER adsmax
 integer ntot, maxntot, maxntotcounter_ini, maxntotcounter ! lattice sites
 real*8, allocatable :: avpol(:,:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
-
+real*8, allocatable :: xsol(:)
 INTEGER cuantas
 integer curvature
 
@@ -49,6 +49,7 @@ endmodule
 module partfunc
 real*8, allocatable :: q(:)
 real*8 qall
+real*8 sumprolnproall
 endmodule
 
 module layer
