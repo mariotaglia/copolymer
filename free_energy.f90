@@ -28,16 +28,16 @@ print*, 'Starting free energy calculation...'
 ! open files
 open(unit=301, file='F_tot.dat')                           
 open(unit=302, file='F_mixs.dat')                          
-open(unit=303, file='F_mixpos.dat')                        
-open(unit=304, file='F_mixneg.dat')                        
-open(unit=305, file='F_mixH.dat')                          
-open(unit=306, file='F_mixOH.dat')                         
+!open(unit=303, file='F_mixpos.dat')                        
+!open(unit=304, file='F_mixneg.dat')                        
+!open(unit=305, file='F_mixH.dat')                          
+!open(unit=306, file='F_mixOH.dat')                         
 open(unit=307, file='F_conf.dat')                          
-open(unit=308, file='F_eq.dat')                            
-open(unit=313 ,file='F_eq_P.dat')                            
+!open(unit=308, file='F_eq.dat')                            
+!open(unit=313 ,file='F_eq_P.dat')                            
 open(unit=309, file='F_vdW.dat')                           
-open(unit=310, file='F_eps.dat')                           
-open(unit=311, file='F_electro.dat')                       
+!open(unit=310, file='F_eps.dat')                           
+!open(unit=311, file='F_electro.dat')                       
 open(unit=312, file='F_tot2.dat')                          
 endif
 
@@ -104,8 +104,6 @@ Free_Energy = Free_Energy + F_Mix_s
 F_Conf = (sumprolnproall/qall-dlog(qall))*npol
 Free_Energy = Free_Energy + F_Conf
 
-print*, sumprolnproall, qall
-
 ! 7. Chemical Equilibrium                                              
 
 !F_Eq = 0.0                                                       
@@ -144,7 +142,7 @@ F_VdW = 0.0
 do iC = 1, ntot
 do jC = 1, ntot                                         
 
-F_vdW = F_vdW - 0.5*avpol(iC,2)*avpol(jC,2)*st/((vpol*vsol)**2)*jacobian(iC)*delta
+F_vdW = F_vdW - 0.5*Xu(iC,jC)*avpol(iC,2)*avpol(jC,2)*st/((vpol*vsol)**2)*jacobian(iC)*delta
 
 !F_vdW = F_vdW - 0.5000*delta**3*xtotal2(ii,iC)*      
 !&       xtotal2(iii,Xulist_cell(iC, iiC))*                    
@@ -204,16 +202,16 @@ if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 if(rank.eq.0) then                                                                 
 write(301,*)counter, counter2, Free_energy                       
 write(302,*)counter, counter2, F_Mix_s                           
-write(303,*)counter, counter2, F_Mix_pos                         
-write(304,*)counter, counter2, F_Mix_neg                         
-write(305,*)counter, counter2, F_Mix_Hplus                       
-write(306,*)counter, counter2, F_Mix_OHmin                       
+!write(303,*)counter, counter2, F_Mix_pos                         
+!write(304,*)counter, counter2, F_Mix_neg                         
+!write(305,*)counter, counter2, F_Mix_Hplus                       
+!write(306,*)counter, counter2, F_Mix_OHmin                       
 write(307,*)counter, counter2, F_Conf                            
-write(308,*)counter, counter2, F_Eq                              
-write(313,*)counter, counter2, F_Eq_P                              
+!write(308,*)counter, counter2, F_Eq                              
+!write(313,*)counter, counter2, F_Eq_P                              
 write(309,*)counter, counter2, F_vdW                             
-write(310,*)counter, counter2, F_eps                          
-write(311,*)counter, counter2, F_electro                         
+!write(310,*)counter, counter2, F_eps                          
+!write(311,*)counter, counter2, F_electro                         
 write(312,*)counter, counter2, Free_energy2                      
 endif                           
 
