@@ -70,7 +70,8 @@ endmodule
 
 
 module longs
-integer long, long1            ! length of polymer
+integer long            ! length of polymer
+integer, allocatable :: segpoorsv(:)
 endmodule
 
 module pis
