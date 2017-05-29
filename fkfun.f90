@@ -7,6 +7,7 @@ use bulk
 use longs
 use MPI
 use pis
+use mkai
 implicit none
 
 integer*4 ier2
@@ -19,7 +20,7 @@ integer k,i,j,k1,k2,ii, jj,iz       ! dummy indices
 integer is, js
 integer err
 integer n
-real*8 avpol_tmp(0:Npoorsv:2*ntot)
+real*8 avpol_tmp(0:Npoorsv,2*ntot)
 real*8 avpol_tosend(0:Npoorsv, ntot)
 real*8 xpol_tosend(ntot)
 real*8 algo, algo1,algo2

@@ -3,7 +3,7 @@ use globals
 use mkinsol
 use longs
 use partfunc
-use kai
+use mkai
 
 allocate (q(ntot))
 allocate (avpol(0:Npoorsv, ntot))

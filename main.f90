@@ -15,7 +15,7 @@ use bulk
 use seed1
 use longs
 use MPI
-use kai
+use mkai
 
 implicit none
 integer *4 ier ! Kinsol error flag
@@ -271,15 +271,9 @@ maxntotcounter = maxntotcounter_ini !maxntot inicial
 
 npol = npolini
 
-do cc = 1, nst !loop st
-st = sts(cc)
-
-
-
-
 do while (actionflag.lt.3)
 
- 123 if(rank.eq.0)print*, 'st:',st,' npol:', npol, 'maxntot:', maxntotcounter
+ 123 if(rank.eq.0)print*, ' npol:', npol, 'maxntot:', maxntotcounter
 
 
 ! xh bulk
@@ -377,7 +371,7 @@ print*, "norma", rank
 if(rank.eq.0) then
 
 
-write(533,*)st, npol, -dlog(qall)
+write(533,*)npol, -dlog(qall)
 flush(533)
 
 write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', actionflag,'.',countfile,'.dat'
@@ -473,7 +467,6 @@ select case (actionflag)
 endselect
 
 END do ! loop de npol
-end do ! loop de st
 
 close(533)
 

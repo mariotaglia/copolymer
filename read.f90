@@ -3,7 +3,7 @@ use longs
 use globals
 use bulk
 use MPI
-use kai
+use mkai
 implicit none
 integer i, j
 

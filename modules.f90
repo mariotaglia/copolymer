@@ -4,7 +4,7 @@ double precision, allocatable :: pp(:)
 endmodule
 
 
-module kai
+module mkai
 integer Npoorsv ! number of different types of poor solvent
 REAL*8, allocatable ::  xtotal(:,:)
 real*8, allocatable :: st(:,:)
@@ -31,8 +31,7 @@ real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
 INTEGER cuantas
 integer curvature
 
-integer*2, allocatable :: in1n(:,:,:)
-integer*2, allocatable :: in2n(:,:,:)
+integer*2, allocatable :: inn(:,:,:,:)
 integer, allocatable ::  maxpos(:,:)
 integer, allocatable ::  minpos(:,:)
 

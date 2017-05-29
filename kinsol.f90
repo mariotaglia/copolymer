@@ -30,6 +30,7 @@ end
 subroutine fkpset(udata, uscale, fdata, fscale,vtemp1,vtemp2, ier)
 use globals
 use mkinsol
+use mkai
 implicit none
 
 integer*4 ier
@@ -59,6 +60,7 @@ end
 subroutine call_fkfun(x1_old)
 use globals
 use MPI
+use mkai
 implicit none
 
 integer i
@@ -89,6 +91,7 @@ end
 
 subroutine call_kinsol(x1_old, xg1_old, ier)
 use globals
+use mkai
 implicit none
 integer i
 real*8 x1((Npoorsv+1)*ntot), xg1((Npoorsv+1)*ntot)
