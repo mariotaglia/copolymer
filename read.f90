@@ -24,6 +24,7 @@ read(8,*)long
 READ(8,*)nada
 read(8,*)Npoorsv
 
+read(8,*)nada
 allocate(st(Npoorsv,Npoorsv))
 do i = 1, Npoorsv
 read(8,*)(st(i,j), j = 1, i)
