@@ -18,6 +18,8 @@ use MPI
 use mkai
 
 implicit none
+
+integer is
 integer *4 ier ! Kinsol error flag
 real*8 pi
 real*8 Na               
@@ -25,7 +27,7 @@ parameter (Na=6.02d23)
 integer av1(ntot), av2(ntot)
 real*8 xsol(ntot)         ! volume fraction solvent
 real*8 avtmp
-real*8 x1(2*ntot),xg1(2*ntot),x1ini(2*ntot)   ! density solvent iteration vector
+real*8 x1((npoorsv+1)*ntot),xg1((npoorsv+1)*ntot),x1ini((npoorsv+1)*ntot)   ! density solvent iteration vector
 real*8 zc(ntot)           ! z-coordinate layer 
 
 REAL*8 sumrhoz, meanz     ! Espesor medio pesado
@@ -71,8 +73,7 @@ character*26 denssolfilename  ! contains the denisty of the solvent
 character*28 densendfilename
 CHARACTER*24 totalfilename
 CHARACTER*24 xtotalfilename
-character*27 denspol2filename
-character*27 denspol1filename
+character*50, allocatable :: denspolfilename(:)
 
 integer countfile         ! enumerates the outputfiles 
 integer conf              ! counts number of conformations
@@ -90,6 +91,8 @@ integer ier_tosend
 double  precision norma_tosend
 
 integer in1tmp(long)
+
+allocate(denspolfilename(0:Npoorsv))
 
 error = 1.0d-6
 seed=435+ 3232*rank               ! seed for random number generator
@@ -126,8 +129,10 @@ enddo
 do i=1,n
 xg1(i)=1.0
 x1(i)=1.0
-xg1(i+n)=0.0001
-x1(i+n)=0.0001
+  do is=1,npoorsv
+  xg1(i+n*is)=0.0001
+  x1(i+n*is)=0.0001
+  enddo
 zc(i)= (i-0.5) * delta
 enddo
 
@@ -136,13 +141,15 @@ enddo
 if (infile.ge.1) then
 do i=1,n
 read(100,*)trash,xfile(i)   ! solvent
-read(200,*)trash,xfile(i+n)   ! solvent
 x1(i)=xfile(i)
 xg1(i)=xfile(i)
-if(xfile(i+n).lt.1.0d-30)xfile(i+n)=1.0d-30
-x1(i+n)=xfile(i+n)
-xg1(i+n)=xfile(i+n)
-enddo  
+  do is=1,npoorsv 
+  read(100+is,*)trash,xfile(i+n*is)   ! poorsolvent desde 1 a npoorsv 
+  if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
+  x1(i+n*is)=xfile(i+n*is)
+  xg1(i+n*is)=xfile(i+n*is)
+  enddo !is
+enddo !i 
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -279,20 +286,22 @@ do while (actionflag.lt.3)
 ! xh bulk
  xsolbulk=1.0
 
-do i=1,2*n             ! initial guess for x1
+do i=1,(npoorsv+1)*n             ! initial guess for x1
 xg1(i)=x1(i)
 enddo
 
 
 do i=1,n
-if(xg1(i+n).lt.1.0d-30)xg1(i+n)=1.0d-30 ! OJO
+do is=1,npoorsv
+  if(xg1(i+n*is).lt.1.0d-30)xg1(i+n*is)=1.0d-30 ! OJO
+  enddo
 enddo
 
 
 ! JEFE
 if(rank.eq.0) then ! solo el jefe llama al solver
    iter = 0
-   print*, 'solve: Enter solver ', 2*ntot, ' eqs'
+   print*, 'solve: Enter solver ', (npoorsv+1)*ntot, ' eqs'
    call call_kinsol(x1, xg1, ier)
    flagsolver = 0
    CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,err)
@@ -375,29 +384,35 @@ write(533,*)npol, -dlog(qall)
 flush(533)
 
 write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', actionflag,'.',countfile,'.dat'
-write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',actionflag,'.',countfile,'.dat'
-write(denspol2filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer2.',actionflag,'.',countfile,'.dat'
+
+do is=0,Npoorsv
+write(denspolfilename(is),'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitypolymer',is,'.',actionflag,'.',countfile,'.dat'
+enddo
+
 write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', actionflag,'.',countfile,'.dat'
 write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',actionflag,'.',countfile,'.dat'
 write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'xdensitytota.',actionflag,'.',countfile,'.dat'
 
-write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',actionflag,'.',countfile,'.dat'
+!write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',actionflag,'.',countfile,'.dat'
 !write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',actionflag,'.',countfile,'.dat'
 
 open(unit=310,file=sysfilename)
-open(unit=321,file=denspol1filename)
-open(unit=322,file=denspol2filename)
-open(unit=323,file=totalfilename)
-open(unit=325,file=xtotalfilename)
+do is=0,Npoorsv
+open(unit=1320+is,file=denspolfilename(is))
+enddo
+open(unit=328,file=totalfilename)
+open(unit=329,file=xtotalfilename)
 open(unit=330,file=denssolfilename)
 !open(unit=324,file=lnqfilename)
-
+avtmp=0
 do i=1,n
-write(321,*)zc(i),avpol(i,1)
-write(322,*)zc(i),avpol(i,2)
-avtmp = avpol(i,2)+avpol(i,1)
-write(323,*)zc(i),avtmp
-write(325,*)zc(i),xpol(i)
+  do is=0,Npoorsv
+  write(1320+is,*)zc(i),avpol(is,i)
+  avtmp = avtmp + avpol(is,i)
+  enddo
+!avtmp = avpol(i,2)+avpol(i,1)
+write(328,*)zc(i),avtmp
+write(329,*)zc(i),xpol(i)
 !write(324,*)zc(i),dlog(xpol(i))-dlog(q(i))
 write(330,*)zc(i),xsol(i)
 enddo
@@ -425,11 +440,11 @@ write(310,*)'iterations  = ',iter
 
 
 close(310)
-close(320)
-CLOSE(321)
-CLOSE(322)
-CLOSE(323)
-CLOSE(325)
+do is=0,Npoorsv
+CLOSE(1320+is)
+enddo
+CLOSE(328)
+CLOSE(329)
 !CLOSE(324)
 close(330)
 

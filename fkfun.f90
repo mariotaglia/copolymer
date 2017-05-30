@@ -73,7 +73,7 @@ do is = 1, Npoorsv
 
    do js = 1, Npoorsv 
    do j = 1, ntot
-      protemp = protemp+st(is,js)/(vpol*vsol)*Xu(i,j)*xtotal(j,js)
+      protemp = protemp+st(is,js)/(vpol*vsol)*Xu(i,j)*xtotal(js,j)
    enddo
    enddo
 
