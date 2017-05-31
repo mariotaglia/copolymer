@@ -13,7 +13,7 @@ double precision Factorcurv
 
 real*8 Free_energy, F_Mix_s, F_Mix_pos, F_mix_p        
 real*8 F_Mix_neg, F_Mix_Hplus                 
-real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol
+real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol, mupol
 real*8 F_Mix_OHmin, F_Conf       
 real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW, F_eps, F_electro                            
 
@@ -39,6 +39,7 @@ open(unit=309, file='F_vdW.dat')
 !open(unit=310, file='F_eps.dat')                           
 !open(unit=311, file='F_electro.dat')                       
 open(unit=312, file='F_tot2.dat')                          
+open(unit=313, file='F_mixp.dat')                          
 endif
 
 
@@ -188,7 +189,7 @@ sumel=0.0
 sumpol = 0.0
 
 do iC=1,ntot                                                
-sumpi = sumpi+dlog(xsol(iC))*jacobian(iC)                         
+sumpi = sumpi+dlog(xsol(iC))*jacobian(iC)                      
 sumpi = sumpi-dlog(xsolbulk)*jacobian(iC)
 
 sumrho = sumrho + (-xsol(iC)*jacobian(iC)) ! sum over  rho_i i=+,-,si
@@ -197,43 +198,42 @@ enddo
 
 
 do iC=1,maxntot                                                
-sumrho = sumrho + (-xpol(iC)*jacobian(iC)) ! sum over  rho_i i=+,-,si
+sumrho = sumrho + (-xpol(iC)*vsol*jacobian(iC)) ! sum over  rho_i i=+,-,si
 enddo
 
-do iC=1,ntot                                                
+!do iC=1,ntot                                                
 !sumel = sumel - qtot(iC)*psi2(iC)/2.0
 !&               *(dfloat(indexa(iC,1))-0.5)*2*pi
-
 !sumel = sumel + proteinqC(iC)*psi2(iC)*vsol                   
 !&               *(dfloat(indexa(iC,1))-0.5)*2*pi   
-
-enddo                                                            
+!enddo                                                            
 
 Free_Energy2 = (sumpi + sumrho + sumel)/vsol*delta                               
 Free_Energy2 = Free_Energy2 - F_vdW
 
+mupol = dlog(xpol(1))-dlog(q(1))
 do iC = 1, maxntot
-sumpol = sumpol + xpol(iC)*dlog(xpol(iC))*jacobian(iC)*delta
+sumpol = sumpol + xpol(iC)*mupol*jacobian(iC)*delta
 enddo
- 
 Free_Energy2 = Free_Energy2 + sumpol
 
 if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 
 if(rank.eq.0) then                                                                 
-write(301,*)counter, counter2, Free_energy                       
-write(302,*)counter, counter2, F_Mix_s                           
+write(301,*)counter, counter2, Free_energy/npol                       
+write(302,*)counter, counter2, F_Mix_s/npol                           
 !write(303,*)counter, counter2, F_Mix_pos                         
 !write(304,*)counter, counter2, F_Mix_neg                         
 !write(305,*)counter, counter2, F_Mix_Hplus                       
 !write(306,*)counter, counter2, F_Mix_OHmin                       
-write(307,*)counter, counter2, F_Conf                            
+write(307,*)counter, counter2, F_Conf/npol                            
 !write(308,*)counter, counter2, F_Eq                              
 !write(313,*)counter, counter2, F_Eq_P                              
-write(309,*)counter, counter2, F_vdW                             
+write(309,*)counter, counter2, F_vdW/npol                             
 !write(310,*)counter, counter2, F_eps                          
 !write(311,*)counter, counter2, F_electro                         
-write(312,*)counter, counter2, Free_energy2                      
+write(312,*)counter, counter2, Free_energy2/npol                      
+write(313,*)counter, counter2, F_Mix_p/npol                          
 endif                           
 
 ! Save end-to-end distances         
