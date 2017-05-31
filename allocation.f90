@@ -5,6 +5,7 @@ use longs
 use partfunc
 
 allocate (q(ntot))
+allocate (sumprolnpro(ntot))
 allocate (avpol(ntot,2))
 allocate (xpol(ntot))
 allocate (in1n(cuantas,ntot,base))

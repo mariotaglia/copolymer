@@ -48,8 +48,7 @@ endmodule
 
 module partfunc
 real*8, allocatable :: q(:)
-real*8 qall
-real*8 sumprolnproall
+real*8, allocatable ::  sumprolnpro(:)
 endmodule
 
 module layer

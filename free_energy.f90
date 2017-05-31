@@ -11,9 +11,9 @@ implicit none
 
 double precision Factorcurv                   
 
-real*8 Free_energy, F_Mix_s, F_Mix_pos        
+real*8 Free_energy, F_Mix_s, F_Mix_pos, F_mix_p        
 real*8 F_Mix_neg, F_Mix_Hplus                 
-real*8 Free_energy2, sumpi, sumrho, sumel, sum, mupol
+real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol
 real*8 F_Mix_OHmin, F_Conf       
 real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW, F_eps, F_electro                            
 
@@ -59,6 +59,14 @@ enddo
 Free_Energy = Free_Energy + F_Mix_s                              
 
 
+! 1. Solvent translational entropy
+F_Mix_p = 0.0                                                    
+
+do iC = 1, maxntot                                                
+F_Mix_p = F_Mix_p + xpol(iC)*(dlog(xpol(iC))-1.0)*jacobian(iC)*delta                                      
+enddo                                                            
+Free_Energy = Free_Energy + F_Mix_p            
+
 ! 2. Pos ion translational entropy
 
 !F_Mix_pos = 0.0                                                  
@@ -101,7 +109,20 @@ Free_Energy = Free_Energy + F_Mix_s
 !Free_Energy = Free_Energy + F_Mix_OHmin                          
 
 ! 6. Polymer conformational entropy                                         
-F_Conf = (sumprolnproall/qall-dlog(qall))*npol
+
+
+F_Mix_s = 0.0                                                    
+
+do iC = 1, ntot                                                
+F_Mix_s = F_Mix_s + xsol(iC)*(dlog(xsol(iC))-1.0)*jacobian(iC)*delta/vsol                                      
+F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*jacobian(iC)*delta/vsol                              
+enddo                                                            
+Free_Energy = Free_Energy + F_Mix_s                              
+
+F_conf = 0 
+do iC = 1, maxntot 
+F_Conf = F_conf + (sumprolnpro(iC)/q(iC)-dlog(q(iC)))*jacobian(iC)*delta*xpol(iC)
+enddo 
 Free_Energy = Free_Energy + F_Conf
 
 ! 7. Chemical Equilibrium                                              
@@ -172,18 +193,22 @@ Free_Energy2 = 0.0
 sumpi = 0.0                                                   
 sumrho=0.0                                                    
 sumel=0.0                                                     
+sumpol = 0.0
 
 do iC=1,ntot                                                
-
 sumpi = sumpi+dlog(xsol(iC))*jacobian(iC)                         
 sumpi = sumpi-dlog(xsolbulk)*jacobian(iC)
 
 sumrho = sumrho + (-xsol(iC)*jacobian(iC)) ! sum over  rho_i i=+,-,si
-!sumrho = sumrho + (-xsol(iC)-xHplus(iC)-xOHmin(iC)-(xpos(iC)+xneg(iC))/vsalt)*jacobian(iC) ! sum over  rho_i i=+,-,si
-
 sumrho = sumrho - (-xsolbulk)*jacobian(iC) ! sum over  rho_i i=+,-,si
-!sumrho = sumrho - (-xsolbulk-xHplusbulk -xOHminbulk-(xposbulk+xnegbulk)/vsalt)*jacobian(iC) ! sum over  rho_i i=+,-,si
+enddo
 
+
+do iC=1,maxntot                                                
+sumrho = sumrho + (-xpol(iC)*jacobian(iC)) ! sum over  rho_i i=+,-,si
+enddo
+
+do iC=1,ntot                                                
 !sumel = sumel - qtot(iC)*psi2(iC)/2.0
 !&               *(dfloat(indexa(iC,1))-0.5)*2*pi
 
@@ -195,7 +220,11 @@ enddo
 Free_Energy2 = (sumpi + sumrho + sumel)/vsol*delta                               
 Free_Energy2 = Free_Energy2 - F_vdW
 
-Free_Energy2 = Free_Energy2 - npol*dlog(qall)
+do iC = 1, maxntot
+sumpol = sumpol + xpol(iC)*dlog(xpol(iC))*jacobian(iC)*delta
+enddo
+ 
+Free_Energy2 = Free_Energy2 + sumpol
 
 if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 

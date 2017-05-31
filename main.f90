@@ -65,7 +65,7 @@ real*8 sumpi,sumrho,sumrhopol, sumrho2, sumrho2mol !suma de la fraccion de polim
 ! single layer files
 character*18 sysfilename      ! contains value of free energy, input parameter etc
 character*26 denssolfilename  ! contains the denisty of the solvent
-!character*27 lnqfilename  ! contains the denisty of the solvent
+character*27 lnqfilename  ! contains the denisty of the solvent
 character*28 densendfilename
 CHARACTER*24 totalfilename
 CHARACTER*24 xtotalfilename
@@ -391,7 +391,7 @@ call calc_free_energy(actionflag, countfile)
 if(rank.eq.0) then
 
 
-write(533,*)st, npol, -dlog(qall)
+write(533,*)st, npol, dlog(xpol(1))-dlog(q(1))
 flush(533)
 
 write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', actionflag,'.',countfile,'.dat'
@@ -402,7 +402,7 @@ write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',actionflag,'.',co
 write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'xdensitytota.',actionflag,'.',countfile,'.dat'
 
 write(denspol1filename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypolymer1.',actionflag,'.',countfile,'.dat'
-!write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',actionflag,'.',countfile,'.dat'
+write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',actionflag,'.',countfile,'.dat'
 
 open(unit=310,file=sysfilename)
 open(unit=321,file=denspol1filename)
@@ -410,7 +410,7 @@ open(unit=322,file=denspol2filename)
 open(unit=323,file=totalfilename)
 open(unit=325,file=xtotalfilename)
 open(unit=330,file=denssolfilename)
-!open(unit=324,file=lnqfilename)
+open(unit=324,file=lnqfilename)
 
 do i=1,n
 write(321,*)zc(i),avpol(i,1)
@@ -418,8 +418,11 @@ write(322,*)zc(i),avpol(i,2)
 avtmp = avpol(i,2)+avpol(i,1)
 write(323,*)zc(i),avtmp
 write(325,*)zc(i),xpol(i)
-!write(324,*)zc(i),dlog(xpol(i))-dlog(q(i))
 write(330,*)zc(i),xsol(i)
+enddo
+
+do i = 1, maxntot
+write(324,*)zc(i),dlog(xpol(i))-dlog(q(i))
 enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -450,7 +453,7 @@ CLOSE(321)
 CLOSE(322)
 CLOSE(323)
 CLOSE(325)
-!CLOSE(324)
+CLOSE(324)
 close(330)
 
 print*, rank, " escribe"

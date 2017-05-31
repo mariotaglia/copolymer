@@ -25,8 +25,7 @@ real*8 algo, algo1,algo2
 double precision, external :: factorcurv
 real*8 sumpol
 real*8 q_tosend(ntot)
-real*8 qall_tosend
-real*8 sumprolnproall_tosend
+real*8 sumprolnpro_tosend(ntot)
 
 ! Jefe
 if(rank.eq.0) then ! llama a subordinados y pasa vector x
@@ -73,10 +72,8 @@ avpol = 0.0
 xpol = 0.0
 q = 0.0
 q_tosend=0.0d0                   ! init q to zero
-qall_tosend = 0.0
-qall = 0.0
-sumprolnproall_tosend = 0.0
-sumprolnproall = 0.0
+sumprolnpro_tosend = 0.0
+sumprolnpro = 0.0
 
   do ii=1,maxntotcounter ! position of segment #0 
    do i=1,cuantas
@@ -90,8 +87,7 @@ sumprolnproall = 0.0
      enddo
 
       q_tosend(ii)=q_tosend(ii)+pro(i)
-      sumprolnproall_tosend = sumprolnproall_tosend + pro(i)*dlog(pro(i))
-      qall_tosend=qall_tosend + pro(i)
+      sumprolnpro_tosend(ii) = sumprolnpro_tosend(ii) + pro(i)*dlog(pro(i))
       xpol_tosend(ii)=xpol_tosend(ii)+pro(i)
 
      do j=minpos(i,ii), maxpos(i,ii)
@@ -117,18 +113,16 @@ if (rank.eq.0) then
 ! Junta avpol       
   call MPI_REDUCE(avpol_tosend, avpol, 2*ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
-!  call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
-  call MPI_REDUCE(qall_tosend, qall, 1, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
-  call MPI_REDUCE(sumprolnproall_tosend, sumprolnproall, 1, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(sumprolnpro_tosend, sumprolnpro, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 endif
 ! Subordinados
 if(rank.ne.0) then
 ! Junta avpol       
   call MPI_REDUCE(avpol_tosend, avpol, 2*ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
-!  call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
-  call MPI_REDUCE(qall_tosend, qall, 1, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
-  call MPI_REDUCE(sumprolnproall_tosend, sumprolnproall, 1, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(sumprolnpro_tosend, sumprolnpro, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 !!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
   ier2 = 0
   goto 3333
