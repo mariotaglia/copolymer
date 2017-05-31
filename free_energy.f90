@@ -111,14 +111,6 @@ Free_Energy = Free_Energy + F_Mix_p
 ! 6. Polymer conformational entropy                                         
 
 
-F_Mix_s = 0.0                                                    
-
-do iC = 1, ntot                                                
-F_Mix_s = F_Mix_s + xsol(iC)*(dlog(xsol(iC))-1.0)*jacobian(iC)*delta/vsol                                      
-F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*jacobian(iC)*delta/vsol                              
-enddo                                                            
-Free_Energy = Free_Energy + F_Mix_s                              
-
 F_conf = 0 
 do iC = 1, maxntot 
 F_Conf = F_conf + (sumprolnpro(iC)/q(iC)-dlog(q(iC)))*jacobian(iC)*delta*xpol(iC)
