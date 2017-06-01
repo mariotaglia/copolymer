@@ -209,7 +209,7 @@ enddo
 
 do is=1,Npoorsv
 do i=1,n ! xtotal
- f(i+n) = -avpol(is,i)+xtotal(is,i)
+ f(i+n*is) = -avpol(is,i)+xtotal(is,i)
 enddo
 enddo
 
@@ -222,7 +222,7 @@ do i = 1, n*(Npoorsv+1)
 algo = algo + f(i)**2
 end do
 
-if(rank.eq.0)PRINT*, iter, algo, sumpol
+if(rank.eq.0)PRINT*, iter, algo, q(1), Q(2), q(3), q(4)
 norma=algo
 
 3333 continue

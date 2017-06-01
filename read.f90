@@ -49,9 +49,9 @@ read(8,*)nada
 read(8,*)lseg
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Read chain structure from structure.dat
+! Read chain structure from structure.in
 
-open(file='structure.dat', unit = 9)
+open(file='structure.in', unit = 9)
 allocate(segpoorsv(long))
 
 do i = 1, long

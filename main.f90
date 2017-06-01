@@ -50,7 +50,7 @@ integer qqq,www,eee
 
 integer il,inda,ncha
 
-REAL*8 xfile(2*ntot)                        
+REAL*8 xfile((npoorsv+1)*ntot)                        
 real*8 algo, algo2                  
 
 
