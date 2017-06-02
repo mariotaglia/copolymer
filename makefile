@@ -10,6 +10,7 @@ $(info HOST is ${HOST})
 
 # some definitions
 SHELL = /bin/bash
+
 FFLAGS= -O3# -g -fbacktrace -fbounds-check -ffpe-trap=zero,overflow,underflow # -O3
 
 ifeq ($(HOST),skay)

@@ -7,6 +7,7 @@ use MPI
 use bulk
 use layer
 use volume
+use mkai
 implicit none                                 
 
 double precision Factorcurv                   
@@ -19,7 +20,7 @@ real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW, F_eps, F_electro
 
 integer counter, counter2                                    
 
-integer iC, jC                                  
+integer iC, jC, is, js                                  
 
 real*8, external :: jacobian
 
@@ -60,10 +61,10 @@ enddo
 Free_Energy = Free_Energy + F_Mix_s                              
 
 
-! 1. Solvent translational entropy
+! 1. Polymer translational entropy
 F_Mix_p = 0.0                                                    
 
-do iC = 1, maxntot                                                
+do iC = 1, maxntotcounter                                                
 F_Mix_p = F_Mix_p + xpol(iC)*(dlog(xpol(iC))-1.0)*jacobian(iC)*delta                                      
 enddo                                                            
 Free_Energy = Free_Energy + F_Mix_p            
@@ -113,7 +114,7 @@ Free_Energy = Free_Energy + F_Mix_p
 
 
 F_conf = 0 
-do iC = 1, maxntot 
+do iC = 1, maxntotcounter 
 F_Conf = F_conf + (sumprolnpro(iC)/q(iC)-dlog(q(iC)))*jacobian(iC)*delta*xpol(iC)
 enddo 
 Free_Energy = Free_Energy + F_Conf
@@ -153,10 +154,12 @@ Free_Energy = Free_Energy + F_Conf
 
 F_VdW = 0.0                                                      
 
+
 do iC = 1, ntot
 do jC = 1, ntot                                         
-
-F_vdW = F_vdW - 0.5*Xu(iC,jC)*avpol(iC,2)*avpol(jC,2)*st/((vpol*vsol)**2)*jacobian(iC)*delta
+do is = 1, Npoorsv
+do js = 1, Npoorsv
+F_vdW = F_vdW - 0.5*Xu(iC,jC)*avpol(is,iC)*avpol(js,jC)*st(is,js)/((vpol*vsol)**2)*jacobian(iC)*delta
 
 !F_vdW = F_vdW - 0.5000*delta**3*xtotal2(ii,iC)*      
 !&       xtotal2(iii,Xulist_cell(iC, iiC))*                    
@@ -164,6 +167,8 @@ F_vdW = F_vdW - 0.5*Xu(iC,jC)*avpol(iC,2)*avpol(jC,2)*st/((vpol*vsol)**2)*jacobi
 !&       /((vpol*vsol)**2)                   
 !&       *(dfloat(indexa(iC,1))-0.5)*2*pi               
 
+enddo ! js
+enddo ! is
 enddo ! iC          
 enddo ! jC                                             
 
@@ -197,7 +202,7 @@ sumrho = sumrho - (-xsolbulk)*jacobian(iC) ! sum over  rho_i i=+,-,si
 enddo
 
 
-do iC=1,maxntot                                                
+do iC=1,maxntotcounter                                                
 sumrho = sumrho + (-xpol(iC)*vsol*jacobian(iC)) ! sum over  rho_i i=+,-,si
 enddo
 
@@ -212,7 +217,7 @@ Free_Energy2 = (sumpi + sumrho + sumel)/vsol*delta
 Free_Energy2 = Free_Energy2 - F_vdW
 
 mupol = dlog(xpol(1))-dlog(q(1))
-do iC = 1, maxntot
+do iC = 1, maxntotcounter
 sumpol = sumpol + xpol(iC)*mupol*jacobian(iC)*delta
 enddo
 Free_Energy2 = Free_Energy2 + sumpol

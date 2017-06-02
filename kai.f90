@@ -12,6 +12,7 @@ use globals
 use layer
 use volume 
 use MPI
+use mkai
 implicit none
 real*8 suma(ntot, ntot)
 integer seed

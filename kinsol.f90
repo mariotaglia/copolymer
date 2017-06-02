@@ -30,6 +30,7 @@ end
 subroutine fkpset(udata, uscale, fdata, fscale,vtemp1,vtemp2, ier)
 use globals
 use mkinsol
+use mkai
 implicit none
 
 integer*4 ier
@@ -44,7 +45,7 @@ do i = 1, ntot
    pp(i) = 1.0 !0.1 / (1.0+exp(1.0-udata(i)))
 enddo
 
-do i = ntot+1, 2*ntot
+do i = ntot+1, (Npoorsv+1)*ntot
 pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
 enddo
 
@@ -59,14 +60,15 @@ end
 subroutine call_fkfun(x1_old)
 use globals
 use MPI
+use mkai
 implicit none
 
 integer i
 integer*4 ier
 
-real*8 x1_old(2*ntot)
-real*8 x1(2*ntot)
-real*8 f(2*ntot)
+real*8 x1_old((Npoorsv+1)*ntot)
+real*8 x1((Npoorsv+1)*ntot)
+real*8 f((Npoorsv+1)*ntot)
 
 ! MPI
 
@@ -75,11 +77,11 @@ parameter(tag = 0)
 integer err
 
 x1 = 0.0
-do i = 1,2*ntot
+do i = 1,(Npoorsv+1)*ntot
   x1(i) = x1_old(i)
 enddo
 
-CALL MPI_BCAST(x1, 2*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
+CALL MPI_BCAST(x1, (Npoorsv+1)*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
 
 call fkfun(x1,f, ier) ! todavia no hay solucion => fkfun 
 
@@ -89,16 +91,17 @@ end
 
 subroutine call_kinsol(x1_old, xg1_old, ier)
 use globals
+use mkai
 implicit none
 integer i
-real*8 x1(2*ntot), xg1(2*ntot)
-real*8 x1_old(2*ntot), xg1_old(2*ntot)
+real*8 x1((Npoorsv+1)*ntot), xg1((Npoorsv+1)*ntot)
+real*8 x1_old((Npoorsv+1)*ntot), xg1_old((Npoorsv+1)*ntot)
 integer*8 iout(15) ! Kinsol additional output information
 real*8 rout(2) ! Kinsol additional out information
 integer*8 msbpre
 real*8 fnormtol, scsteptol
-real*8 scale(2*ntot)
-real*8 constr(2*ntot)
+real*8 scale((Npoorsv+1)*ntot)
+real*8 constr((Npoorsv+1)*ntot)
 integer*4  globalstrat, maxl, maxlrst
 integer*4 ier ! Kinsol error flag
 integer*8 neq ! Kinsol number of equations
@@ -109,12 +112,12 @@ integer ncells
 
 
 ! INICIA KINSOL
-neq = 2*ntot
+neq = (Npoorsv+1)*ntot
 msbpre  = 10 ! maximum number of iterations without prec. setup (?)
 fnormtol = 1.0d-6 ! Function-norm stopping tolerance
 scsteptol = 1.0d-6 ! Function-norm stopping tolerance
 
-maxl = 200 ! maximum Krylov subspace dimesion (?!?!?!) ! Esto se usa para el preconditioner
+maxl = 2000 ! maximum Krylov subspace dimesion (?!?!?!) ! Esto se usa para el preconditioner
 maxlrst = 50 ! maximum number of restarts
 max_niter = 200
 globalstrat = 0
@@ -142,7 +145,7 @@ do i = 1, ntot  !constraint vector
    constr(i) = 2.0 ! xh > 0
 enddo
 
-do i = ntot+1, 2*ntot
+do i = ntot+1, (Npoorsv+1)*ntot
    constr(i) = 2.0 ! xtotal >= 0
 enddo
 
