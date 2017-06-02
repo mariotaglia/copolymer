@@ -98,12 +98,12 @@ qall_tosend = 0.0
 qall = 0.0
 
 
-  do ii=1,maxntotcounter ! position of segment #0 
-   do i=1,cuantas
+  do ii=1,maxntotcounter ! position of center of mass 
+   do i=1,cuantas ! loop over conformations
 
      pro(i) = 1.0
 
-     do j=minpos(i,ii), maxpos(i,ii) ! posicion dentro del poro
+     do j=minpos(i,ii), maxpos(i,ii) ! loop over lattice position
       k = j-minpos(i,ii)+1 ! k may be lager than ntot
 
       do is = 0, Npoorsv 
