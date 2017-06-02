@@ -225,20 +225,20 @@ Free_Energy2 = Free_Energy2 + sumpol
 if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 
 if(rank.eq.0) then                                                                 
-write(301,*)counter, counter2, Free_energy/npol                       
-write(302,*)counter, counter2, F_Mix_s/npol                           
+write(301,*)counter, counter2, npol, Free_energy/npol                       
+write(302,*)counter, counter2, npol, F_Mix_s/npol                           
 !write(303,*)counter, counter2, F_Mix_pos                         
 !write(304,*)counter, counter2, F_Mix_neg                         
 !write(305,*)counter, counter2, F_Mix_Hplus                       
 !write(306,*)counter, counter2, F_Mix_OHmin                       
-write(307,*)counter, counter2, F_Conf/npol                            
+write(307,*)counter, counter2, npol, F_Conf/npol                            
 !write(308,*)counter, counter2, F_Eq                              
 !write(313,*)counter, counter2, F_Eq_P                              
-write(309,*)counter, counter2, F_vdW/npol                             
+write(309,*)counter, counter2, npol, F_vdW/npol                             
 !write(310,*)counter, counter2, F_eps                          
 !write(311,*)counter, counter2, F_electro                         
-write(312,*)counter, counter2, Free_energy2/npol                      
-write(313,*)counter, counter2, F_Mix_p/npol                          
+write(312,*)counter, counter2, npol, Free_energy2/npol                      
+write(313,*)counter, counter2, npol, F_Mix_p/npol                          
 endif                           
 
 ! Save end-to-end distances         
