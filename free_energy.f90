@@ -17,7 +17,7 @@ real*8 F_Mix_neg, F_Mix_Hplus
 real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol, mupol
 real*8 F_Mix_OHmin, F_Conf       
 real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW, F_eps, F_electro                            
-
+real*8 F_mup
 integer counter, counter2                                    
 
 integer iC, jC, is, js                                  
@@ -41,6 +41,7 @@ open(unit=309, file='F_vdW.dat')
 !open(unit=311, file='F_electro.dat')                       
 open(unit=312, file='F_tot2.dat')                          
 open(unit=313, file='F_mixp.dat')                          
+open(unit=314, file='F_mup.dat')                          
 endif
 
 
@@ -51,6 +52,8 @@ endif
 Free_Energy = 0.0                                                
 Free_Energy2 = 0.0                                               
 
+mupol = dlog(xpol(1))-dlog(q(1))
+
 ! 1. Solvent translational entropy
 F_Mix_s = 0.0                                                    
 
@@ -60,6 +63,13 @@ F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*jacobian(iC)*delta/vsol
 enddo                                                            
 Free_Energy = Free_Energy + F_Mix_s                              
 
+! 1. Solvent translational entropy
+F_mup = 0.0                                                    
+
+do iC = 1, maxntotcounter                                                
+F_mup = F_mup + xpol(iC)*jacobian(iC)*delta*mupol                                      
+enddo                                                            
+Free_Energy = Free_Energy + F_mup                              
 
 ! 1. Polymer translational entropy
 F_Mix_p = 0.0                                                    
@@ -216,11 +226,11 @@ enddo
 Free_Energy2 = (sumpi + sumrho + sumel)/vsol*delta                               
 Free_Energy2 = Free_Energy2 - F_vdW
 
-mupol = dlog(xpol(1))-dlog(q(1))
 do iC = 1, maxntotcounter
 sumpol = sumpol + xpol(iC)*mupol*jacobian(iC)*delta
 enddo
 Free_Energy2 = Free_Energy2 + sumpol
+Free_Energy2 = Free_Energy2 + F_mup
 
 if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 
@@ -239,6 +249,7 @@ write(309,*)counter, counter2, npol, F_vdW/npol
 !write(311,*)counter, counter2, F_electro                         
 write(312,*)counter, counter2, npol, Free_energy2/npol                      
 write(313,*)counter, counter2, npol, F_Mix_p/npol                          
+write(3134,*)counter, counter2, npol, F_mup/npol                          
 endif                           
 
 ! Save end-to-end distances         
