@@ -100,7 +100,7 @@ sumprolnpro = 0.0
   do ii=1,maxntotcounter ! position of center of mass 
    do i=1,cuantas ! loop over conformations
 
-     pro(i) = 1.0
+     pro(i) = exp(-Uchain(i))
 
      do j=minpos(i,ii), maxpos(i,ii) ! loop over lattice position
       k = j-minpos(i,ii)+1 ! k may be lager than ntot

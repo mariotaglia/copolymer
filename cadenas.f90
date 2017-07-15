@@ -119,7 +119,7 @@ end
 !* on a three state RIS-model see Flory book                 *
 !* GENERA CADENAS DE PAH-Os                                  *
 !*************************************************************
-subroutine cadenas(chains,ncha)
+subroutine cadenas(chains,ncha,Uconf)
 use longs
 use seed1
 use pis
@@ -128,16 +128,17 @@ use senos
 use globals
 implicit none
 
-integer i,state,ii,j,k1,k2,ncha
+integer i,state,ii,j,k1,k2,ncha, kk
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3)
 real*8 x(3),xend(3,long+5),xendr(3,long+5), xendcom(3,long+5)
-REAL*8 chains(3,long,ncha_max), chainsw(ncha_max)
+REAL*8 chains(3,long,ncha_max), chainsw(ncha_max), Uconf
 character*1 test
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
 
 tolerancia = 1.0e-5
+Uconf=0.0
 
 223  xend(1,1)=0.0      ! first position 
 xend(2,1)=0.0
@@ -181,6 +182,8 @@ if (state.eq.0) then
   m(ii,j)=mm(ii,j)
   enddo
   enddo
+  Uconf=Uconf+Ut(segpoorsv(i))
+
 elseif (state.eq.1) then
 !********************************** GAUCHE +
   call mrrrr(m,tp,mm)
@@ -189,6 +192,7 @@ elseif (state.eq.1) then
   m(ii,j)=mm(ii,j)
   enddo
   enddo
+  Uconf=Uconf+Ug(segpoorsv(i))
 elseif (state.eq.2) then
 !********************************** GAUCHE -
   call mrrrr(m,tm,mm)
@@ -197,6 +201,7 @@ elseif (state.eq.2) then
   m(ii,j)=mm(ii,j)
   enddo
   enddo
+  Uconf=Uconf+Ug(segpoorsv(i))
 endif
 
 x(1)=m(1,1)*lseg

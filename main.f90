@@ -56,6 +56,7 @@ real*8 algo, algo2
 integer*1 in1(long)
 real*8 chains(3,long,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
 real*8 zp(long)
+real*8 Uconf
 
 real*8 sum,sumel          ! auxiliary variable used in free energy computation  
 real*8 sumpi,sumrho,sumrhopol, sumrho2, sumrho2mol !suma de la fraccion de polimero
@@ -162,13 +163,13 @@ inn = 0
 
    do while (conf.lt.cuantas)
 
-   call cadenas(chains,ncha)
+   call cadenas(chains,ncha,Uconf)
 
    do j=1,ncha
 
    if(conf.lt.cuantas) then
    conf=conf+1
-
+   Uchain(conf)=Uconf
    do ii = 1, maxntot ! position of first segment
 
 
@@ -221,8 +222,12 @@ inn = 0
    enddo ! j
    enddo ! while
 
-if(rank.eq.0)print*," chains ready"
-
+if(rank.eq.0) then
+print*," chains ready"
+do k = 1, 20
+print*,10*k,Uchain(10*k)
+enddo
+endif
 ! CHECK that chains are unbiased
 
 !   av1 = 0

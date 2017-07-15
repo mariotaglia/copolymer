@@ -48,6 +48,13 @@ read(8, *)Xulimit
 read(8,*)nada
 read(8,*)lseg
 
+read(8,*)nada
+allocate(Ut(0:Npoorsv))
+allocate(Ug(0:Npoorsv))
+do i = 0, Npoorsv
+read(8,*), Ut(i), Ug(i)
+enddo
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Read chain structure from structure.in
 
