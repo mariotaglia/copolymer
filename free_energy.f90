@@ -15,7 +15,7 @@ double precision Factorcurv
 real*8 Free_energy, F_Mix_s, F_Mix_pos, F_mix_p        
 real*8 F_Mix_neg, F_Mix_Hplus                 
 real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol, mupol
-real*8 F_Mix_OHmin, F_Conf       
+real*8 F_Mix_OHmin, F_Conf, F_Uchain     
 real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW, F_eps, F_electro                            
 
 integer counter, counter2                                    
@@ -41,6 +41,7 @@ open(unit=309, file='F_vdW.dat')
 !open(unit=311, file='F_electro.dat')                       
 open(unit=312, file='F_tot2.dat')                          
 open(unit=313, file='F_mixp.dat')                          
+open(unit=314, file='F_Uchain.dat')
 endif
 
 
@@ -118,6 +119,14 @@ do iC = 1, maxntotcounter
 F_Conf = F_conf + (sumprolnpro(iC)/q(iC)-dlog(q(iC)))*jacobian(iC)*delta*xpol(iC)
 enddo 
 Free_Energy = Free_Energy + F_Conf
+
+F_Uchain = 0.0
+
+do iC=1, maxntotcounter
+F_Uchain = F_Uchain + delta*xpol(iC)*jacobian(iC)*(sumprouchain(iC)/q(iC))
+enddo
+
+Free_Energy = Free_Energy + F_Uchain
 
 ! 7. Chemical Equilibrium                                              
 
@@ -239,6 +248,7 @@ write(309,*)counter, counter2, npol, F_vdW/npol
 !write(311,*)counter, counter2, F_electro                         
 write(312,*)counter, counter2, npol, Free_energy2/npol                      
 write(313,*)counter, counter2, npol, F_Mix_p/npol                          
+write(314,*)counter, counter2, npol, F_Uchain/npol
 endif                           
 
 ! Save end-to-end distances         

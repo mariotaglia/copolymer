@@ -49,7 +49,7 @@ endmodule
 
 module partfunc
 real*8, allocatable :: q(:)
-real*8, allocatable ::  sumprolnpro(:)
+real*8, allocatable ::  sumprolnpro(:), sumprouchain(:)
 endmodule
 
 module layer

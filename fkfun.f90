@@ -27,7 +27,7 @@ real*8 algo, algo1,algo2
 double precision, external :: factorcurv
 real*8 sumpol
 real*8 q_tosend(ntot)
-real*8 sumprolnpro_tosend(ntot)
+real*8 sumprolnpro_tosend(ntot), sumprouchain_tosend(ntot)
 
 ! Jefe
 if(rank.eq.0) then ! llama a subordinados y pasa vector x
@@ -96,7 +96,8 @@ q = 0.0
 q_tosend=0.0d0                   ! init q to zero
 sumprolnpro_tosend = 0.0
 sumprolnpro = 0.0
-
+sumprouchain_tosend=0.0
+sumprouchain=0.0
   do ii=1,maxntotcounter ! position of center of mass 
    do i=1,cuantas ! loop over conformations
 
@@ -112,6 +113,7 @@ sumprolnpro = 0.0
 
       q_tosend(ii)=q_tosend(ii)+pro(i)
       sumprolnpro_tosend(ii) = sumprolnpro_tosend(ii) + pro(i)*dlog(pro(i))
+      sumprouchain_tosend(ii) = sumprouchain_tosend(ii) + pro(i)*Uchain(i)
       xpol_tosend(ii)=xpol_tosend(ii)+pro(i)
 
      do j=minpos(i,ii), maxpos(i,ii)
@@ -142,6 +144,7 @@ if (rank.eq.0) then
   call MPI_REDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(sumprolnpro_tosend, sumprolnpro, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(sumprouchain_tosend, sumprouchain, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 endif
 ! Subordinados
 if(rank.ne.0) then
@@ -150,6 +153,7 @@ if(rank.ne.0) then
   call MPI_REDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(sumprolnpro_tosend, sumprolnpro, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(sumprouchain_tosend, sumprouchain, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 !!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
   ier2 = 0
   goto 3333
