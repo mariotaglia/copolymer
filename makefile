@@ -21,6 +21,9 @@ ifeq ($(HOST),odin)
 LFLAGS = -lm /usr/lib64/librt.so -L/home/gzaldivar/software/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/home/gzaldivar/software/lib
 endif
 
+ifeq ($(HOST),logan.q1.fcen.uba.ar)
+LFLAGS = -lm /usr/lib64/librt.so -L/home/gerva/bin/kinsol/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/home/gerva/bin/kinsol/lib
+endif
 
 ifeq ($(HOST),spinetta) 
 LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
