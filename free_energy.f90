@@ -127,8 +127,6 @@ F_Conf = F_conf + (sumprolnpro(iC)/q(iC)-dlog(q(iC)))*jacobian(iC)*delta*xpol(iC
 enddo 
 Free_Energy = Free_Energy + F_Conf
 
-<<<<<<< HEAD
-=======
 F_Uchain = 0.0
 
 do iC=1, maxntotcounter
@@ -136,7 +134,6 @@ F_Uchain = F_Uchain + delta*xpol(iC)*jacobian(iC)*(sumprouchain(iC)/q(iC))
 enddo
 
 Free_Energy = Free_Energy + F_Uchain
->>>>>>> a8b633fb8e0fdf05031fbe1740dcec3709ae3592
 
 ! 7. Chemical Equilibrium                                              
 
@@ -258,11 +255,7 @@ write(309,*)counter, counter2, npol, F_vdW/npol
 !write(311,*)counter, counter2, F_electro                         
 write(312,*)counter, counter2, npol, Free_energy2/npol                      
 write(313,*)counter, counter2, npol, F_Mix_p/npol                          
-<<<<<<< HEAD
-!write(314,*)counter, counter2, npol, F_mup/npol                          
-=======
 write(314,*)counter, counter2, npol, F_Uchain/npol
->>>>>>> a8b633fb8e0fdf05031fbe1740dcec3709ae3592
 endif                           
 
 ! Save end-to-end distances         
