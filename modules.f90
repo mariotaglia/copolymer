@@ -42,11 +42,14 @@ real*8 eps1
 integer iter              ! counts number of iterations
 
 integer, parameter :: ncha_max = 700
+
+real*8, allocatable :: Ug(:), Ut(:)
+real*8, allocatable :: Uchain(:)
 endmodule
 
 module partfunc
 real*8, allocatable :: q(:)
-real*8, allocatable ::  sumprolnpro(:)
+real*8, allocatable ::  sumprolnpro(:), sumprouchain(:)
 endmodule
 
 module layer

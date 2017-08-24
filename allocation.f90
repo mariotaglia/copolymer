@@ -5,8 +5,10 @@ use longs
 use partfunc
 use mkai
 
+allocate (Uchain(cuantas))
 allocate (q(ntot))
 allocate (sumprolnpro(ntot))
+allocate (sumprouchain(ntot))
 allocate (avpol(0:Npoorsv, ntot))
 allocate (xpol(ntot))
 allocate (inn(0:Npoorsv,cuantas,ntot,base))
