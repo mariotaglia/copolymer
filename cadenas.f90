@@ -138,9 +138,11 @@ character*1 test
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
 
 tolerancia = 1.0e-5
-Uconf=0.0
 
-223  xend(1,1)=0.0      ! first position 
+
+223 Uconf=0.0
+
+xend(1,1)=0.0      ! first position 
 xend(2,1)=0.0
 xend(3,1)=0.0
 rn=rands(seed)
