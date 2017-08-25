@@ -8,6 +8,7 @@ use longs
 use MPI
 use pis
 use mkai
+use transgauche
 implicit none
 
 integer*4 ier2
@@ -28,6 +29,8 @@ double precision, external :: factorcurv
 real*8 sumpol
 real*8 q_tosend(ntot)
 real*8 sumprolnpro_tosend(ntot), sumprouchain_tosend(ntot)
+real*8 sumtrans_tosend(ntot,long)
+real*8 sumtrans(ntot,long)
 
 ! Jefe
 if(rank.eq.0) then ! llama a subordinados y pasa vector x
@@ -98,6 +101,10 @@ sumprolnpro_tosend = 0.0
 sumprolnpro = 0.0
 sumprouchain_tosend=0.0
 sumprouchain=0.0
+sumtrans_tosend = 0.0
+sumtrans = 0.0
+
+
   do ii=1,maxntotcounter ! position of center of mass 
    do i=1,cuantas ! loop over conformations
 
@@ -116,6 +123,11 @@ sumprouchain=0.0
       sumprouchain_tosend(ii) = sumprouchain_tosend(ii) + pro(i)*Uchain(i)
       xpol_tosend(ii)=xpol_tosend(ii)+pro(i)
 
+
+     do j = 1, long ! loop over number of segments
+     sumtrans_tosend(ii,j) =  sumtrans_tosend(ii,j) +  pro(i)*float(Ntrans(j,i))
+     enddo
+
      do j=minpos(i,ii), maxpos(i,ii)
       k = j-minpos(i,ii)+1 ! k may be larger than ntot
 
@@ -127,7 +139,6 @@ sumprouchain=0.0
 
    enddo ! i
   enddo   ! ii
-
 
 avpol_tosend(:, 1:ntot)=avpol_tmp(:, 1:ntot) 
 
@@ -145,6 +156,7 @@ if (rank.eq.0) then
   call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(sumprolnpro_tosend, sumprolnpro, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(sumprouchain_tosend, sumprouchain, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(sumtrans_tosend, sumtrans, ntot*long, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 endif
 ! Subordinados
 if(rank.ne.0) then
@@ -154,6 +166,7 @@ if(rank.ne.0) then
   call MPI_REDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(sumprolnpro_tosend, sumprolnpro, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
   call MPI_REDUCE(sumprouchain_tosend, sumprouchain, ntot, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
+  call MPI_REDUCE(sumtrans_tosend, sumtrans, ntot*long, MPI_DOUBLE_PRECISION, MPI_SUM,0, MPI_COMM_WORLD, err)
 !!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
   ier2 = 0
   goto 3333
@@ -185,6 +198,8 @@ sumpol = sumpol/(vpol*vsol)/long
 avpol = avpol/sumpol*npol ! integral of avpol is fixed
 
 sumpol = 0.0
+
+
 do i = 1, ntot
 select case (curvature)
 case (0)
@@ -198,7 +213,19 @@ enddo
 xpol = xpol/sumpol*npol ! integral of avpol is fixed
 
 
+trans = 0.0
 
+do i = 1, maxntotcounter
+select case (curvature)
+case (0)
+trans(:) = trans(:) + sumtrans(i,:)/q(i)*xpol(i)*delta ! final result in units of chains/nm^2
+case(1)
+trans(:) = trans(:) + sumtrans(i,:)/q(i)*xpol(i)*(float(i)-0.5)*delta*delta*2.0*pi ! final result in units of chains/nm
+case(2)
+trans(:) = trans(:) + sumtrans(i,:)/q(i)*xpol(i)*(((float(i)-0.5)*delta)**2)*delta*4.0*pi ! final result in units of chains/micelle
+end select
+enddo
+trans(:) = trans(:)/npol
 
 ! contruction of f and the volume fractions
 

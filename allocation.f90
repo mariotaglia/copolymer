@@ -4,7 +4,12 @@ use mkinsol
 use longs
 use partfunc
 use mkai
+use transgauche
 
+
+
+allocate (Ntrans(long,cuantas))
+allocate (trans(long))
 allocate (Uchain(cuantas))
 allocate (q(ntot))
 allocate (sumprolnpro(ntot))

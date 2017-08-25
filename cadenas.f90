@@ -119,7 +119,7 @@ end
 !* on a three state RIS-model see Flory book                 *
 !* GENERA CADENAS DE PAH-Os                                  *
 !*************************************************************
-subroutine cadenas(chains,ncha,Uconf)
+subroutine cadenas(chains,ncha,Uconf, Ntconf)
 use longs
 use seed1
 use pis
@@ -136,12 +136,14 @@ real*8 x(3),xend(3,long+5),xendr(3,long+5), xendcom(3,long+5)
 REAL*8 chains(3,long,ncha_max), chainsw(ncha_max), Uconf
 character*1 test
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
+integer*1 Ntconf(long)
 
 tolerancia = 1.0e-5
 
 
 223 Uconf=0.0
-
+Ntconf(:) = 0
+ 
 xend(1,1)=0.0      ! first position 
 xend(2,1)=0.0
 xend(3,1)=0.0
@@ -184,8 +186,9 @@ if (state.eq.0) then
   m(ii,j)=mm(ii,j)
   enddo
   enddo
-  Uconf=Uconf+Ut(segpoorsv(i))
-
+  if(i.gt.3)Uconf=Uconf+Ut(segpoorsv(i-1)) ! first segment to have a dihedral angle is i = 4
+                                           ! OJO : the order of chain grown changes the assigment of diehdral angles
+  if(i.gt.3)Ntconf(i-1) = 1   
 elseif (state.eq.1) then
 !********************************** GAUCHE +
   call mrrrr(m,tp,mm)
@@ -194,7 +197,7 @@ elseif (state.eq.1) then
   m(ii,j)=mm(ii,j)
   enddo
   enddo
-  Uconf=Uconf+Ug(segpoorsv(i))
+  if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1))
 elseif (state.eq.2) then
 !********************************** GAUCHE -
   call mrrrr(m,tm,mm)
@@ -203,7 +206,7 @@ elseif (state.eq.2) then
   m(ii,j)=mm(ii,j)
   enddo
   enddo
-  Uconf=Uconf+Ug(segpoorsv(i))
+  if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1))
 endif
 
 x(1)=m(1,1)*lseg

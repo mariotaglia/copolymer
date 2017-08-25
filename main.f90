@@ -16,7 +16,7 @@ use seed1
 use longs
 use MPI
 use mkai
-
+use transgauche
 implicit none
 
 integer is
@@ -57,7 +57,7 @@ integer*1 in1(long)
 real*8 chains(3,long,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
 real*8 zp(long)
 real*8 Uconf
-
+integer*1 Ntconf(long)
 real*8 sum,sumel          ! auxiliary variable used in free energy computation  
 real*8 sumpi,sumrho,sumrhopol, sumrho2, sumrho2mol !suma de la fraccion de polimero
 
@@ -73,6 +73,7 @@ character*27 lnqfilename  ! contains the denisty of the solvent
 character*28 densendfilename
 CHARACTER*24 totalfilename
 CHARACTER*24 xtotalfilename
+CHARACTER*18 ntransfilename
 character*50, allocatable :: denspolfilename(:)
 
 integer countfile         ! enumerates the outputfiles 
@@ -163,13 +164,14 @@ inn = 0
 
    do while (conf.lt.cuantas)
 
-   call cadenas(chains,ncha,Uconf)
+   call cadenas(chains,ncha,Uconf,Ntconf)
 
    do j=1,ncha
 
    if(conf.lt.cuantas) then
    conf=conf+1
    Uchain(conf)=Uconf
+   Ntrans(:,conf) = Ntconf(:)
    do ii = 1, maxntot ! position of first segment
 
 
@@ -404,7 +406,10 @@ enddo
 
 write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', actionflag,'.',countfile,'.dat'
 write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',actionflag,'.',countfile,'.dat'
+
+
 write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'xdensitytota.',actionflag,'.',countfile,'.dat'
+write(ntransfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'ntrans.',actionflag,'.',countfile,'.dat'
 
 write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',actionflag,'.',countfile,'.dat'
 
@@ -414,10 +419,14 @@ open(unit=1320+is,file=denspolfilename(is))
 enddo
 open(unit=328,file=totalfilename)
 open(unit=329,file=xtotalfilename)
+open(unit=327,file=ntransfilename)
 open(unit=330,file=denssolfilename)
 
 open(unit=324,file=lnqfilename)
 
+do i = 3, long-1
+write(327,*)i, trans(i)
+enddo
 
 avtmp=0
 do i=1,n
@@ -461,6 +470,7 @@ CLOSE(324)
 do is=0,Npoorsv
 CLOSE(1320+is)
 enddo
+CLOSE(327)
 CLOSE(328)
 CLOSE(329)
 close(330)

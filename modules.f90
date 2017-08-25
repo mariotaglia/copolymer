@@ -1,3 +1,9 @@
+module transgauche
+real*8, allocatable :: trans(:)
+integer*1, allocatable :: Ntrans(:,:)
+real*8, allocatable :: Uchain(:)
+endmodule
+
 
 module mkinsol
 double precision, allocatable :: pp(:)
@@ -30,6 +36,7 @@ real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xsol(:)
 INTEGER cuantas
 integer curvature
+real*8, allocatable :: Ug(:), Ut(:)
 
 integer*2, allocatable :: inn(:,:,:,:)
 integer, allocatable ::  maxpos(:,:)
@@ -43,8 +50,7 @@ integer iter              ! counts number of iterations
 
 integer, parameter :: ncha_max = 700
 
-real*8, allocatable :: Ug(:), Ut(:)
-real*8, allocatable :: Uchain(:)
+
 endmodule
 
 module partfunc
