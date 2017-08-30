@@ -14,14 +14,13 @@ use volume
 use MPI
 use mkai
 implicit none
-real*8 suma(ntot, ntot)
 integer seed
 real*8 xmin,xmax,ymin,ymax,zmin,zmax
 integer MCsteps ! numero de steps de MC
 
 real*8 R,theta,z
 real*8 rn
-integer i, ii
+integer i, ii, is, js
 real*8 rands
 real*8 pi
 real*8 x1,x2,y1, y2, z1, z2, vect
@@ -29,23 +28,19 @@ integer iR, ix,iy,iz, itheta
 integer j
 real*8 radio
 real*8 cutoff
-
-
-cutoff = (float(Xulimit)+0.5)*delta
-
+character*16 kaisfilename
 
 if(rank.eq.0)print*,'Kai calculation'
-open(unit=111, file='kais.dat')
+
+cutoff = (float(Xulimit)+0.5)*delta
 
 pi=dacos(-1.0d0)          ! pi = arccos(-1) 
 radio = float(ntot)*delta
 
-suma = 0.0
 Xu = 0.0 ! vector Xu
 
 seed = 1010
 MCsteps = 200
-
 
 do ii = 1, ntot ! loop sobre cada posicion del segmento
 
@@ -57,7 +52,7 @@ do ii = 1, ntot ! loop sobre cada posicion del segmento
 
       xmax = cutoff + (dfloat(ii) - 0.5)*delta
       xmin = -cutoff + (dfloat(ii) - 0.5)*delta
-    
+      
       do ix = 1, MCsteps
       do iy = 1, MCsteps
       do iz = 1, MCsteps
@@ -86,29 +81,48 @@ do ii = 1, ntot ! loop sobre cada posicion del segmento
 
          if(j.le.ntot) then
 
-         suma(ii, j) = suma(ii, j) + R
 
          if(vect.le.(cutoff)) then ! esta dentro de la esfera del cut-off   
          if(vect.ge.lseg) then ! esta dentro de la esfera del segmento
-             Xu(ii, j) = Xu(ii, j) + ((lseg/vect)**6) ! incluye el jacobiano R(segmento)
+           do is=1,Npoorsv
+           do js=1,Npoorsv
+              Xu(ii, j, is, js) = Xu(ii, j, is, js) + ((lseg/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
+           enddo
+           enddo
          endif
          endif
 
          endif
          
-      enddo
-      enddo
-      enddo
-
+      enddo!iz
+      enddo!iy
+      enddo!ix
+      
       do j = 1, ntot
-      Xu(ii, j) = Xu(ii, j)/(MCsteps**3)*(2.0*cutoff)**3
-      suma(ii, j) = suma(ii, j)/(MCsteps**3)*(2.0*cutoff)**3
-     write(111,*)ii,j,Xu(ii,j) ! residual size of iteration vector
-     enddo
-
+         do is=1,Npoorsv
+         do js=1,Npoorsv
+         Xu(ii, j,is,js) = Xu(ii, j, is, js)/(MCsteps**3)*(2.0*cutoff)**3
+         enddo
+         enddo
+      enddo
 end do ! ii
 
-close(111)
+do is=1,Npoorsv
+do js=1,Npoorsv
+
+write(kaisfilename,'(A5,BZ,I3.3,A1,I3.3,A4)')'kais.',is,'.',js,'.dat'
+open(unit=is*110+js, file=kaisfilename)
+
+  do ii=1,ntot
+  do j=1,ntot
+  write(is*110+js,*)ii,j,Xu(ii,j,is,js) ! residual size of iteration vector
+  enddo
+  enddo
+
+close(is*110+js)
+
+enddo !js
+enddo !is
 
 end
 

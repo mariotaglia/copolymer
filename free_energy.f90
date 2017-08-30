@@ -175,7 +175,7 @@ do iC = 1, ntot
 do jC = 1, ntot                                         
 do is = 1, Npoorsv
 do js = 1, Npoorsv
-F_vdW = F_vdW - 0.5*Xu(iC,jC)*avpol(is,iC)*avpol(js,jC)*st(is,js)/((vpol*vsol)**2)*jacobian(iC)*delta
+F_vdW = F_vdW - 0.5*Xu(iC,jC,is,js)*avpol(is,iC)*avpol(js,jC)*st(is,js)/((vpol*vsol)**2)*jacobian(iC)*delta
 
 !F_vdW = F_vdW - 0.5000*delta**3*xtotal2(ii,iC)*      
 !&       xtotal2(iii,Xulist_cell(iC, iiC))*                    

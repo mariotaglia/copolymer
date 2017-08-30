@@ -21,7 +21,7 @@ allocate (maxpos(cuantas,2*ntot))
 allocate (minpos(cuantas,2*ntot))
 allocate (eps(ntot))
 allocate (xtotal(Npoorsv,2*ntot))
-allocate (Xu(ntot,ntot))
+allocate (Xu(ntot,ntot,Npoorsv, Npoorsv))
 allocate (xsol(ntot))
 allocate (pp((npoorsv+1)*ntot))
 

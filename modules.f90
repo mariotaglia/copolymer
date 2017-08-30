@@ -14,7 +14,8 @@ module mkai
 integer Npoorsv ! number of different types of poor solvent
 REAL*8, allocatable ::  xtotal(:,:)
 real*8, allocatable :: st(:,:)
-real*8, allocatable :: Xu(:,:)
+real*8, allocatable :: dimf(:,:)
+real*8, allocatable :: Xu(:,:,:,:)
 integer Xulimit
 endmodule
 

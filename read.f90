@@ -33,6 +33,15 @@ read(8,*)(st(i,j), j = 1, i)
  enddo
 enddo
 
+read(8,*)nada
+allocate(dimf(Npoorsv,Npoorsv))
+do i = 1, Npoorsv
+read(8,*)(dimf(i,j), j = 1, i)
+ do j = 1, i
+   dimf(j,i) = dimf(i,j)
+ enddo
+enddo
+
 READ(8,*)nada
 read(8,*)infile
 
