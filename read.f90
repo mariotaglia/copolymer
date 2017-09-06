@@ -45,6 +45,9 @@ enddo
 READ(8,*)nada
 read(8,*)infile
 
+read(8,*)nada
+read(8,*)flagkai
+
 READ(8,*)nada
 READ(8,*)npolini, npolfirst, npollast, npolstep
 

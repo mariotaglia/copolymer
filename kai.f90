@@ -18,9 +18,10 @@ integer seed
 real*8 xmin,xmax,ymin,ymax,zmin,zmax
 integer MCsteps ! numero de steps de MC
 
+
 real*8 R,theta,z
 real*8 rn
-integer i, ii, is, js
+integer i, ii, is, js, a, b
 real*8 rands
 real*8 pi
 real*8 x1,x2,y1, y2, z1, z2, vect
@@ -28,9 +29,12 @@ integer iR, ix,iy,iz, itheta
 integer j
 real*8 radio
 real*8 cutoff
+real*8, allocatable :: sumaXu(:,:)
 character*16 kaisfilename
 
 if(rank.eq.0)print*,'Kai calculation'
+
+allocate(sumaXu(Npoorsv,Npoorsv))
 
 cutoff = (float(Xulimit)+0.5)*delta
 
@@ -40,11 +44,14 @@ radio = float(ntot)*delta
 Xu = 0.0 ! vector Xu
 
 seed = 1010
-MCsteps = 200
+MCsteps = 60*Xulimit
+sumaXu(:,:)=0.0
+
+if (flagkai.eq.1) then
 
 do ii = 1, ntot ! loop sobre cada posicion del segmento
 
-      ymax =cutoff
+      ymax = cutoff
       ymin = -cutoff
 
       zmax = cutoff
@@ -107,22 +114,52 @@ do ii = 1, ntot ! loop sobre cada posicion del segmento
       enddo
 end do ! ii
 
+endif
+
 do is=1,Npoorsv
 do js=1,Npoorsv
 
 write(kaisfilename,'(A5,BZ,I3.3,A1,I3.3,A4)')'kais.',is,'.',js,'.dat'
+open(unit=200,file='suma.dat')
 open(unit=is*110+js, file=kaisfilename)
+
 
   do ii=1,ntot
   do j=1,ntot
-  write(is*110+js,*)ii,j,Xu(ii,j,is,js) ! residual size of iteration vector
+
+     if (flagkai.eq.1) then
+     write(is*110+js,*)ii,j,Xu(ii,j,is,js) ! residual size of iteration vector
+     endif
+
+     if (flagkai.eq.0) then
+     read(is*110+js,*)a,b,Xu(ii,j,is,js)
+
+      if (a.ne.ii) then
+      print*,'a non equal ii'
+      stop
+      endif
+ 
+      if (b.ne.j) then
+      print*,'b non equal j'
+      stop
+      endif
+
+     endif
+
   enddo
   enddo
+
+do i = 20-Xulimit, 20+Xulimit
+sumaXu(is,js) = sumaXu(is,js) + Xu(20,i,is,js)
+enddo
+
+write(200,*)is,js,sumaXu(is,js)
 
 close(is*110+js)
 
 enddo !js
 enddo !is
 
+close(200)
 end
 

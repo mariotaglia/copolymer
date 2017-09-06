@@ -17,6 +17,7 @@ real*8, allocatable :: st(:,:)
 real*8, allocatable :: dimf(:,:)
 real*8, allocatable :: Xu(:,:,:,:)
 integer Xulimit
+integer flagkai
 endmodule
 
 module globals
