@@ -119,16 +119,17 @@ end
 !* on a three state RIS-model see Flory book                 *
 !* GENERA CADENAS DE PAH-Os                                  *
 !*************************************************************
-subroutine cadenas(chains,ncha,Uconf, Ntconf)
+subroutine cadenas(chains,ncha,Uconf, Ntconf,Ugyr, Rgyr)
 use longs
 use seed1
 use pis
 use matrices
 use senos
 use globals
+use mkai
 implicit none
 
-integer i,state,ii,j,k1,k2,ncha, kk
+integer i,state,ii,j,k1,k2,ncha, kk, is
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3)
@@ -137,12 +138,18 @@ REAL*8 chains(3,long,ncha_max), chainsw(ncha_max), Uconf
 character*1 test
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
 integer*1 Ntconf(long)
+real*8 Ugyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1)
+real*8 distance(long,long)
 
 tolerancia = 1.0e-5
 
 
 223 Uconf=0.0
 Ntconf(:) = 0
+
+Ugyr=0.0
+Rgyr=0.0
+distance(:,:)=0.0
  
 xend(1,1)=0.0      ! first position 
 xend(2,1)=0.0
@@ -231,6 +238,26 @@ goto 223
 endif
 enddo
 enddo
+
+do i=1,long
+do j=1,long
+if (i.ne.j) then
+distance(i,j)=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-xend(3,j))**2.0)
+distance(i,j)=sqrt(distance(i,j))
+Ugyr(segpoorsv(i))=Ugyr(segpoorsv(i))-0.5*st(segpoorsv(i),segpoorsv(j))*(lseg/distance(i,j))**(dimf(segpoorsv(i),segpoorsv(j)))
+Rgyr(segpoorsv(i))=Rgyr(segpoorsv(i))+distance(i,j)**2.0
+endif
+enddo
+enddo
+
+do is=0,Npoorsv
+Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)+Rgyr(is)
+Ugyr(Npoorsv+1)=Ugyr(Npoorsv+1)+Ugyr(is)
+Rgyr(is)=sqrt(Rgyr(is)/2)
+Rgyr(is)=Rgyr(is)/float(long)
+enddo 
+Rgyr(Npoorsv+1)=sqrt(Rgyr(Npoorsv+1)/2)
+Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)/float(long)
 
 ncha=0
 do i=1,12

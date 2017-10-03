@@ -60,6 +60,7 @@ real*8 Uconf
 integer*1 Ntconf(long)
 real*8 sum,sumel          ! auxiliary variable used in free energy computation  
 real*8 sumpi,sumrho,sumrhopol, sumrho2, sumrho2mol !suma de la fraccion de polimero
+real*8 sumUgyr(0:Npoorsv+1), sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr(0:Npoorsv+1), Rgyrprom(0:Npoorsv+1)
 
 ! global running files
 !character*15 meanzfilename
@@ -158,13 +159,22 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 inn = 0
+sumRgyr(:)=0
+sumUgyr(:)=0
+Rgyrprom(:)=0
 
    call initcha              ! init matrices for chain generation
+
    conf=0                    ! counter of number of conformations
 
    do while (conf.lt.cuantas)
 
-   call cadenas(chains,ncha,Uconf,Ntconf)
+   call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr)
+   
+   do is=0,Npoorsv+1
+   sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr(is))
+   sumUgyr(is)=sumUgyr(is)+exp(-Ugyr(is))
+   enddo
 
    do j=1,ncha
 
@@ -223,12 +233,20 @@ inn = 0
 
    enddo ! j
    enddo ! while
+   
+   do is=0,Npoorsv+1
+   Rgyrprom(is)=sumRgyr(is)/sumUgyr(is)
+   enddo
 
 if(rank.eq.0) then
 print*," chains ready"
-do k = 1, 20
-print*,10*k,Uchain(10*k)
+do is=0,Npoorsv+1
+print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr(is)
 enddo
+
+!do k = 1, 20
+!print*,10*k,Uchain(10*k)
+!enddo
 endif
 ! CHECK that chains are unbiased
 
@@ -260,6 +278,7 @@ iter=0                    ! iteration counter
 
 !if(rank.eq.0) then
 open(unit=533,file='lnq.dat')
+open(unit=534,file='rgyration.dat')
 !open(unit=534,file='ADS-cad.nm-2.dat')
 !open(unit=535,file='meanz.dat')
 !endif
@@ -398,6 +417,7 @@ if(rank.eq.0) then
 write(533,*) npol, dlog(xpol(1))-dlog(q(1))
 flush(533)
 
+
 write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', actionflag,'.',countfile,'.dat'
 
 do is=0,Npoorsv
@@ -510,7 +530,12 @@ endselect
 
 END do ! loop de npol
 
+do is=0,Npoorsv+1
+write(534,*) is, Rgyrprom(is)
+enddo
+
 close(533)
+close(534)
 
 call MPI_FINALIZE(ierr) ! finaliza MPI
 stop

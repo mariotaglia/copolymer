@@ -16,13 +16,15 @@ real*8 Free_energy, F_Mix_s, F_Mix_pos, F_mix_p
 real*8 F_Mix_neg, F_Mix_Hplus                 
 real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol, mupol
 real*8 F_Mix_OHmin, F_Conf, F_Uchain     
-real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW, F_eps, F_electro                            
+real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW(Npoorsv,Npoorsv), F_eps, F_electro                            
 !real*8 F_mup
 integer counter, counter2                                    
 
 integer iC, jC, is, js                                  
 
 real*8, external :: jacobian
+
+character*17 F_vdWfilename(Npoorsv,Npoorsv)
 
 if(rank.eq.0) then 
 print*, 'Starting free energy calculation...'
@@ -36,7 +38,12 @@ open(unit=302, file='F_mixs.dat')
 open(unit=307, file='F_conf.dat')                          
 !open(unit=308, file='F_eq.dat')                            
 !open(unit=313 ,file='F_eq_P.dat')                            
-open(unit=309, file='F_vdW.dat')                           
+do is=1,Npoorsv
+do js=1,Npoorsv
+write(F_vdWfilename(is,js),'(A6,BZ,I3.3,A1,I3.3,A4)')'F_vdW.',is,'.',js,'.dat'
+open(unit=10000*is+js, file=F_vdWfilename(is,js) )                           
+enddo
+enddo
 !open(unit=310, file='F_eps.dat')                           
 !open(unit=311, file='F_electro.dat')                       
 open(unit=312, file='F_tot2.dat')                          
@@ -175,7 +182,7 @@ do iC = 1, ntot
 do jC = 1, ntot                                         
 do is = 1, Npoorsv
 do js = 1, Npoorsv
-F_vdW = F_vdW - 0.5*Xu(iC,jC,is,js)*avpol(is,iC)*avpol(js,jC)*st(is,js)/((vpol*vsol)**2)*jacobian(iC)*delta
+F_vdW (is,js) = F_vdW(is,js) - 0.5*Xu(iC,jC,is,js)*avpol(is,iC)*avpol(js,jC)*st(is,js)/((vpol*vsol)**2)*jacobian(iC)*delta
 
 !F_vdW = F_vdW - 0.5000*delta**3*xtotal2(ii,iC)*      
 !&       xtotal2(iii,Xulist_cell(iC, iiC))*                    
@@ -188,7 +195,11 @@ enddo ! is
 enddo ! iC          
 enddo ! jC                                             
 
-Free_Energy = Free_Energy + F_vdW                                
+do is=1,Npoorsv
+do js=1,Npoorsv
+Free_Energy = Free_Energy + F_vdW (is,js)
+enddo
+enddo                                
 
 !! 9. Electrostati -- no charge on surfaces                            
 !F_electro = 0.0                                                  
@@ -230,7 +241,11 @@ enddo
 !enddo                                                            
 
 Free_Energy2 = (sumpi + sumrho + sumel)/vsol*delta                               
-Free_Energy2 = Free_Energy2 - F_vdW
+do is=1,Npoorsv
+do js=1,Npoorsv
+Free_Energy2 = Free_Energy2 - F_vdW(is,js)
+enddo
+enddo
 
 do iC = 1, maxntotcounter
 sumpol = sumpol + xpol(iC)*mupol*jacobian(iC)*delta
@@ -241,21 +256,25 @@ Free_Energy2 = Free_Energy2 + sumpol
 if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 
 if(rank.eq.0) then                                                                 
-write(301,*)counter, counter2, npol, Free_energy/npol                       
-write(302,*)counter, counter2, npol, F_Mix_s/npol                           
+write(301,*) npol, Free_energy/npol                       
+write(302,*) npol, F_Mix_s/npol                           
 !write(303,*)counter, counter2, F_Mix_pos                         
 !write(304,*)counter, counter2, F_Mix_neg                         
 !write(305,*)counter, counter2, F_Mix_Hplus                       
 !write(306,*)counter, counter2, F_Mix_OHmin                       
-write(307,*)counter, counter2, npol, F_Conf/npol                            
-!write(308,*)counter, counter2, F_Eq                              
+write(307,*) npol, F_Conf/npol                            
+!write(308,*)ounter, counter2, F_Eq                              
 !write(313,*)counter, counter2, F_Eq_P                              
-write(309,*)counter, counter2, npol, F_vdW/npol                             
+do is=1,Npoorsv
+do js=1,Npoorsv
+write(10000*is+js,*) npol, F_vdW(is,js)/npol                             
+enddo
+enddo
 !write(310,*)counter, counter2, F_eps                          
 !write(311,*)counter, counter2, F_electro                         
-write(312,*)counter, counter2, npol, Free_energy2/npol                      
-write(313,*)counter, counter2, npol, F_Mix_p/npol                          
-write(314,*)counter, counter2, npol, F_Uchain/npol
+write(312,*) npol, Free_energy2/npol                      
+write(313,*) npol, F_Mix_p/npol                          
+write(314,*) npol, F_Uchain/npol
 endif                           
 
 ! Save end-to-end distances         
