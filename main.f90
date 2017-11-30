@@ -172,8 +172,8 @@ Rgyrprom(:)=0
    call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr)
    
    do is=0,Npoorsv+1
-   sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr(is))
-   sumUgyr(is)=sumUgyr(is)+exp(-Ugyr(is))
+   sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr(Npoorsv+1))
+   sumUgyr(Npoorsv+1)=sumUgyr(Npoorsv+1)+exp(-Ugyr(Npoorsv+1))
    enddo
 
    do j=1,ncha
@@ -235,13 +235,13 @@ Rgyrprom(:)=0
    enddo ! while
    
    do is=0,Npoorsv+1
-   Rgyrprom(is)=sumRgyr(is)/sumUgyr(is)
+   Rgyrprom(is)=sumRgyr(is)/sumUgyr(Npoorsv+1)
    enddo
 
 if(rank.eq.0) then
 print*," chains ready"
 do is=0,Npoorsv+1
-print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr(is)
+print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr(Npoorsv+1)
 enddo
 
 !do k = 1, 20

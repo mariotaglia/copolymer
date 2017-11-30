@@ -25,8 +25,11 @@ READ(8,*)nada
 read(8,*)Npoorsv
 
 read(8,*)nada
-allocate(st(Npoorsv,Npoorsv))
+allocate(st(0:Npoorsv,0:Npoorsv))
+st(0,0)=0.
 do i = 1, Npoorsv
+st(0,i)=0.
+st(i,0)=0.
 read(8,*)(st(i,j), j = 1, i)
  do j = 1, i
    st(j,i) = st(i,j)
@@ -34,8 +37,11 @@ read(8,*)(st(i,j), j = 1, i)
 enddo
 
 read(8,*)nada
-allocate(dimf(Npoorsv,Npoorsv))
+allocate(dimf(0:Npoorsv,0:Npoorsv))
+dimf(0,0)=0
 do i = 1, Npoorsv
+dimf(0,i)=0.
+dimf(i,0)=0.
 read(8,*)(dimf(i,j), j = 1, i)
  do j = 1, i
    dimf(j,i) = dimf(i,j)
