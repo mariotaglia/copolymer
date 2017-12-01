@@ -60,7 +60,7 @@ real*8 Uconf
 integer*1 Ntconf(long)
 real*8 sum,sumel          ! auxiliary variable used in free energy computation  
 real*8 sumpi,sumrho,sumrhopol, sumrho2, sumrho2mol !suma de la fraccion de polimero
-real*8 sumUgyr(0:Npoorsv+1), sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr(0:Npoorsv+1), Rgyrprom(0:Npoorsv+1)
+real*8 sumUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
 
 ! global running files
 !character*15 meanzfilename
@@ -159,9 +159,9 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 inn = 0
-sumRgyr(:)=0
-sumUgyr(:)=0
-Rgyrprom(:)=0
+sumRgyr(:)=0.
+sumUgyr=0.
+Rgyrprom(:)=0.
 
    call initcha              ! init matrices for chain generation
 
@@ -172,9 +172,9 @@ Rgyrprom(:)=0
    call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr)
    
    do is=0,Npoorsv+1
-   sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr(Npoorsv+1))
-   sumUgyr(Npoorsv+1)=sumUgyr(Npoorsv+1)+exp(-Ugyr(Npoorsv+1))
+   sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr)
    enddo
+   sumUgyr=sumUgyr+exp(-Ugyr)
 
    do j=1,ncha
 
@@ -235,13 +235,13 @@ Rgyrprom(:)=0
    enddo ! while
    
    do is=0,Npoorsv+1
-   Rgyrprom(is)=sumRgyr(is)/sumUgyr(Npoorsv+1)
+   Rgyrprom(is)=sumRgyr(is)/sumUgyr
    enddo
 
 if(rank.eq.0) then
 print*," chains ready"
 do is=0,Npoorsv+1
-print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr(Npoorsv+1)
+print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr
 enddo
 
 !do k = 1, 20

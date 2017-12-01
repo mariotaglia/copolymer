@@ -138,7 +138,7 @@ REAL*8 chains(3,long,ncha_max), chainsw(ncha_max), Uconf
 character*1 test
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
 integer*1 Ntconf(long), seglength(0:Npoorsv)
-real*8 Ugyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1)
+real*8 Ugyr, Rgyr(0:Npoorsv+1)
 real*8 distance(long,long)
 
 tolerancia = 1.0e-5
@@ -248,16 +248,16 @@ distance(i,j)=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-
 distance(i,j)=sqrt(distance(i,j))
 if (segpoorsv(i).eq.segpoorsv(j))Rgyr(segpoorsv(i))=Rgyr(segpoorsv(i))+distance(i,j)**2.0
 Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)+distance(i,j)**2.0
-Ugyr(Npoorsv+1)=Ugyr(Npoorsv+1)-0.5*st(segpoorsv(i),segpoorsv(j))*(lseg/distance(i,j))**(dimf(segpoorsv(i),segpoorsv(j)))
+Ugyr=Ugyr-0.5*st(segpoorsv(i),segpoorsv(j))*(lseg/distance(i,j))**(dimf(segpoorsv(i),segpoorsv(j)))
 endif
 enddo
 enddo
 
 do is=0,Npoorsv
-Rgyr(is)=sqrt(Rgyr(is)/2)
+Rgyr(is)=sqrt(Rgyr(is)/2.0)
 Rgyr(is)=Rgyr(is)/float(seglength(is))
 enddo 
-Rgyr(Npoorsv+1)=sqrt(Rgyr(Npoorsv+1)/2)
+Rgyr(Npoorsv+1)=sqrt(Rgyr(Npoorsv+1)/2.0)
 Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)/float(long)
 
 ncha=0
