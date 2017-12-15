@@ -1,4 +1,5 @@
 subroutine read
+use mcharge
 use longs
 use globals
 use bulk
@@ -48,6 +49,15 @@ read(8,*)(dimf(i,j), j = 1, i)
  enddo
 enddo
 
+read(8,*)nada
+read(8,*)Ncharge
+
+read(8,*)nada
+allocate(charge(Ncharge))
+do i=1,Ncharge
+read(8,*)charge(i)
+enddo
+
 READ(8,*)nada
 read(8,*)infile
 
@@ -73,13 +83,16 @@ do i = 0, Npoorsv
 read(8,*), Ut(i), Ug(i)
 enddo
 
+read(8,*)nada
+read(8,*)Csalt
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Read chain structure from structure.in
 
 open(file='structure.in', unit = 9)
 allocate(segpoorsv(long))
-
+allocate(chargetype(long))
 do i = 1, long
-read(9,*),segpoorsv(i)
+read(9,*),segpoorsv(i), chargetype(i)
 enddo
+
 end

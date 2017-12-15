@@ -33,14 +33,16 @@ CHARACTER nada
 real*8 norma
 INTEGER adsmax
 integer ntot, maxntot, maxntotcounter_ini, maxntotcounter ! lattice sites
-real*8, allocatable :: avpol(:,:) ! volume fraction polymers already adsorbed
+real*8, allocatable :: avpol(:,:) ! volume fraction polymers 
+real*8, allocatable :: avpolc(:,:) ! volume fraction of charged segments 
 real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xsol(:)
 INTEGER cuantas
 integer curvature
 real*8, allocatable :: Ug(:), Ut(:)
 
-integer*2, allocatable :: inn(:,:,:,:)
+
+integer*2, allocatable :: innc(:,:,:,:),inn(:,:,:,:)
 integer, allocatable ::  maxpos(:,:)
 integer, allocatable ::  minpos(:,:)
 
@@ -65,9 +67,15 @@ real*8, parameter :: delta = 0.2
 endmodule
 
 module volume
-real*8 vpol, vsol
+real*8 vpol, vsol, vpos, vneg
 endmodule
 
+module mcharge
+integer*8 Ncharge
+integer*8, allocatable :: charge(:), chargetype(:)
+real*8, allocatable :: phi(:), avpos(:), avneg(:)
+real*8 Csalt, wperm, xsalt
+endmodule
 
 module bulk
 REAL*8 expmupol

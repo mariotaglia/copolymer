@@ -8,6 +8,7 @@ end
 
 subroutine solve
 use globals
+use mcharge 
 use partfunc
 use layer
 use volume
@@ -26,7 +27,7 @@ real*8 Na
 parameter (Na=6.02d23)
 integer av1(ntot), av2(ntot)
 real*8 avtmp
-real*8 x1((npoorsv+1)*ntot),xg1((npoorsv+1)*ntot),x1ini((npoorsv+1)*ntot)   ! density solvent iteration vector
+real*8 x1((npoorsv+2)*ntot),xg1((npoorsv+2)*ntot),x1ini((npoorsv+2)*ntot)   ! density solvent iteration vector
 real*8 zc(ntot)           ! z-coordinate layer 
 
 REAL*8 sumrhoz, meanz     ! Espesor medio pesado
@@ -49,7 +50,7 @@ integer qqq,www,eee
 
 integer il,inda,ncha
 
-REAL*8 xfile((npoorsv+1)*ntot)                        
+REAL*8 xfile((npoorsv+2)*ntot)                        
 real*8 algo, algo2                  
 
 
@@ -69,12 +70,15 @@ real*8 sumUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoors
 
 ! single layer files
 character*18 sysfilename      ! contains value of free energy, input parameter etc
+character*29 phifilename      ! electric potential 
 character*26 denssolfilename  ! contains the denisty of the solvent
 character*27 lnqfilename  ! contains the denisty of the solvent
 character*28 densendfilename
 CHARACTER*24 totalfilename
 CHARACTER*24 xtotalfilename
 CHARACTER*18 ntransfilename
+character*27 densposfilename
+character*27 densnegfilename
 character*50, allocatable :: denspolfilename(:)
 
 integer countfile         ! enumerates the outputfiles 
@@ -112,6 +116,12 @@ conf=0                    ! counter for conformations
 
 vsol=0.030                ! volume solvent molecule in (nm)^3
 vpol= ((4.0/3.0)*pi*(0.3)**3)/vsol  ! volume polymer segment in units of vsol
+vneg=1. !volume of anion in units of vsol
+vpos=1. !volume of cation in units of vsol LOKE
+
+xsalt=Csalt*6.02e23*1e-24 !salt conc. in unit of nº of particles/nm³
+xsolbulk=1-xsalt*vsol*(vneg+vpos) ! bulk volume fraction of solvent 
+wperm = 0.114 !water permitivity in units of e^2/kT.nm
 
 ! eps
 
@@ -131,7 +141,7 @@ enddo
 do i=1,n
 xg1(i)=1.0
 x1(i)=1.0
-  do is=1,npoorsv
+  do is=1,npoorsv+1
   xg1(i+n*is)=0.0001
   x1(i+n*is)=0.0001
   enddo
@@ -151,6 +161,7 @@ xg1(i)=xfile(i)
   x1(i+n*is)=xfile(i+n*is)
   xg1(i+n*is)=xfile(i+n*is)
   enddo !is
+read(200,*)trash,xfile(i+n*(Npoorsv+1))
 enddo !i 
 endif
 
@@ -159,6 +170,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 inn = 0
+innc = 0
 sumRgyr(:)=0.
 sumUgyr=0.
 Rgyrprom(:)=0.
@@ -182,7 +194,7 @@ Rgyrprom(:)=0.
    conf=conf+1
    Uchain(conf)=Uconf
    Ntrans(:,conf) = Ntconf(:)
-   do ii = 1, maxntot ! position of first segment
+   do ii = 1, maxntot ! position of first segment (or Center of mass?) LOKE
 
 
       minpos(conf,ii) = ntot
@@ -226,8 +238,9 @@ Rgyrprom(:)=0.
        do k = 1, long
        temp = in1tmp(k)-minpos(conf,ii)+1 
        inn(segpoorsv(k),conf,ii,temp) = inn(segpoorsv(k),conf,ii,temp) + 1      
+       innc(chargetype(k),conf,ii,temp) = innc(chargetype(k),conf,ii,temp) + 1
        enddo
-
+       
    enddo ! ii
    endif
 
@@ -309,15 +322,15 @@ do while (actionflag.lt.3)
 
 
 ! xh bulk
- xsolbulk=1.0
+! xsolbulk=1.0
 
-do i=1,(npoorsv+1)*n             ! initial guess for x1
+do i=1,(npoorsv+2)*n             ! initial guess for x1
 xg1(i)=x1(i)
 enddo
 
 
 do i=1,n
-do is=1,npoorsv
+do is=1,npoorsv+1
   if(xg1(i+n*is).lt.1.0d-30)xg1(i+n*is)=1.0d-30 ! OJO
   enddo
 enddo
@@ -326,7 +339,7 @@ enddo
 ! JEFE
 if(rank.eq.0) then ! solo el jefe llama al solver
    iter = 0
-   print*, 'solve: Enter solver ', (npoorsv+1)*ntot, ' eqs'
+   print*, 'solve: Enter solver ', (npoorsv+2)*ntot, ' eqs'
    call call_kinsol(x1, xg1, ier)
    flagsolver = 0
    CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,err)
@@ -420,11 +433,16 @@ flush(533)
 
 write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', actionflag,'.',countfile,'.dat'
 
+write(phifilename,'(A18,BZ,I3.3,A1,I3.3,A4)')'electricpotential.', actionflag,'.',countfile,'.dat'
+
 do is=0,Npoorsv
 write(denspolfilename(is),'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitypolymer',is,'.',actionflag,'.',countfile,'.dat'
 enddo
 
 write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', actionflag,'.',countfile,'.dat'
+write(densposfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypositive.',actionflag,'.',countfile,'.dat'
+write(densnegfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitynegative.',actionflag,'.',countfile,'.dat'
+
 write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',actionflag,'.',countfile,'.dat'
 
 
@@ -434,6 +452,7 @@ write(ntransfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'ntrans.',actionflag,'.',countfil
 write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',actionflag,'.',countfile,'.dat'
 
 open(unit=310,file=sysfilename)
+open(unit=311,file=phifilename)
 do is=0,Npoorsv
 open(unit=1320+is,file=denspolfilename(is))
 enddo
@@ -441,7 +460,8 @@ open(unit=328,file=totalfilename)
 open(unit=329,file=xtotalfilename)
 open(unit=327,file=ntransfilename)
 open(unit=330,file=denssolfilename)
-
+open(unit=331,file=densposfilename)
+open(unit=332,file=densnegfilename)
 open(unit=324,file=lnqfilename)
 
 do i = 3, long-1
@@ -457,7 +477,12 @@ do i=1,n
 write(328,*)zc(i),avtmp
 write(329,*)zc(i),xpol(i)
 write(330,*)zc(i),xsol(i)
+write(331,*)zc(i),avpos(i)
+write(332,*)zc(i),avneg(i)
+write(311,*)zc(i),phi(i)
 enddo
+
+
 
 do i = 1, maxntot
 write(324,*)zc(i),dlog(xpol(i))-dlog(q(i))
@@ -494,6 +519,9 @@ CLOSE(327)
 CLOSE(328)
 CLOSE(329)
 close(330)
+close(331)
+close(332)
+close(311)
 
 print*, rank, " escribe"
 
@@ -541,4 +569,3 @@ call MPI_FINALIZE(ierr) ! finaliza MPI
 stop
 
 end
-
