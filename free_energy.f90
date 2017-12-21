@@ -1,6 +1,7 @@
 subroutine calc_free_energy(counter, counter2)
 
 use globals
+use mcharge
 use partfunc
 use pis
 use MPI
@@ -31,8 +32,8 @@ print*, 'Starting free energy calculation...'
 ! open files
 open(unit=301, file='F_tot.dat')                           
 open(unit=302, file='F_mixs.dat')                          
-!open(unit=303, file='F_mixpos.dat')                        
-!open(unit=304, file='F_mixneg.dat')                        
+open(unit=303, file='F_mixpos.dat')                        
+open(unit=304, file='F_mixneg.dat')                        
 !open(unit=305, file='F_mixH.dat')                          
 !open(unit=306, file='F_mixOH.dat')                         
 open(unit=307, file='F_conf.dat')                          
@@ -45,7 +46,7 @@ open(unit=10000*is+js, file=F_vdWfilename(is,js) )
 enddo
 enddo
 !open(unit=310, file='F_eps.dat')                           
-!open(unit=311, file='F_electro.dat')                       
+open(unit=311, file='F_electro.dat')                       
 open(unit=312, file='F_tot2.dat')                          
 open(unit=313, file='F_mixp.dat')                          
 open(unit=314, file='F_Uchain.dat')
@@ -86,7 +87,12 @@ Free_Energy = Free_Energy + F_Mix_p
 
 ! 2. Pos ion translational entropy
 
-!F_Mix_pos = 0.0                                                  
+F_Mix_pos = 0.0                                                  
+
+do iC=1,ntot
+F_Mix_pos = F_Mix_pos + avpos(iC)*(dlog(avpos(iC)/vpos)-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos) 
+enddo
+Free_energy = Free_Energy + F_Mix_pos
 
 !do iC = 1, ntot                                               
 !F_Mix_pos = F_Mix_pos + xpos(iC)*(dlog(xpos(iC)/vsalt)-1.0-dlog(expmupos) + dlog(vsalt))*jacobian(iC)*delta/vsol
@@ -96,13 +102,12 @@ Free_Energy = Free_Energy + F_Mix_p
 
 !3. Neg ion translational entropy
 
-!F_Mix_neg = 0.0                                                  
+F_Mix_neg = 0.0                                                  
 
-!do iC = 1, ntot                                                
-!F_Mix_neg = F_Mix_neg + xneg(iC)*(dlog(xneg(iC)/vsalt)-1.0-dlog(expmuneg) + dlog(vsalt))*jacobian(iC)*delta/vsol       
-!F_Mix_neg = F_Mix_neg - xnegbulk*(dlog(xnegbulk/vsalt)-1.0-dlog(expmuneg) + dlog(vsalt))*jacobian(iC)*delta/vsol       
-!enddo                                                            
-!Free_Energy = Free_Energy + F_Mix_neg                            
+do iC = 1, ntot                                                
+F_Mix_neg = F_Mix_neg + avneg(iC)*(dlog(avneg(iC)/vneg)-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg) 
+enddo
+Free_Energy = Free_Energy + F_Mix_neg                            
 
 
 ! 4. H+ translational entropy
@@ -202,12 +207,16 @@ enddo
 enddo                                
 
 !! 9. Electrostati -- no charge on surfaces                            
-!F_electro = 0.0                                                  
-!do iC  = 1, ncells                                               
-!F_electro = F_electro + delta**3*psi2(iC)*qtot(iC)/2.0/vsol      
+!LOKE
+F_electro = 0.0                                                  
+do iC  = 1, ntot                                               
+F_electro = F_electro + (xcharge(ic)*phi(ic)-wperm/2*(ic-0.5)*((phi(iC)-phi(iC-1))/delta)**2)*jacobian(iC)*delta
+enddo
+
+
 !&               *(dfloat(indexa(iC,1))-0.5)*2*pi                  
 !enddo                                                            
-!Free_Energy = Free_Energy + F_electro                            
+Free_Energy = Free_Energy + F_electro                            
 
 if(rank.eq.0)print*, 'Free Energy, method I: ', Free_Energy
 
@@ -226,12 +235,15 @@ sumpi = sumpi-dlog(xsolbulk)*jacobian(iC)
 
 sumrho = sumrho + (-xsol(iC)*jacobian(iC)) ! sum over  rho_i i=+,-,si
 sumrho = sumrho - (-xsolbulk)*jacobian(iC) ! sum over  rho_i i=+,-,si
+sumrho = sumrho + (-avpos(iC)/vpos)*jacobian(iC)
+sumrho = sumrho + (-avneg(iC)/vneg)*jacobian(iC)
 enddo
 
 
 do iC=1,maxntotcounter                                                
 sumrho = sumrho + (-xpol(iC)*vsol*jacobian(iC)) ! sum over  rho_i i=+,-,si
 enddo
+
 
 !do iC=1,ntot                                                
 !sumel = sumel - qtot(iC)*psi2(iC)/2.0
@@ -241,16 +253,21 @@ enddo
 !enddo                                                            
 
 Free_Energy2 = (sumpi + sumrho + sumel)/vsol*delta                               
+
 do is=1,Npoorsv
 do js=1,Npoorsv
 Free_Energy2 = Free_Energy2 - F_vdW(is,js)
 enddo
 enddo
 
-do iC = 1, maxntotcounter
-sumpol = sumpol + xpol(iC)*mupol*jacobian(iC)*delta
+do iC=1,ntot
+Free_Energy2 = Free_Energy2 - (wperm/2*(ic-0.5)*((phi(iC)-phi(iC-1))/delta)**2)*jacobian(iC)*delta
 enddo
-Free_Energy2 = Free_Energy2 + sumpol
+
+do iC = 1, maxntotcounter
+sumpol = sumpol + xpol(iC)*mupol*jacobian(iC)*delta !LOKE
+enddo
+Free_Energy2 = Free_Energy2 + sumpol 
 !Free_Energy2 = Free_Energy2 + F_mup
 
 if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
@@ -258,8 +275,8 @@ if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 if(rank.eq.0) then                                                                 
 write(301,*) npol, Free_energy/npol                       
 write(302,*) npol, F_Mix_s/npol                           
-!write(303,*)counter, counter2, F_Mix_pos                         
-!write(304,*)counter, counter2, F_Mix_neg                         
+write(303,*) npol, F_Mix_pos                         
+write(304,*) npol, F_Mix_neg                         
 !write(305,*)counter, counter2, F_Mix_Hplus                       
 !write(306,*)counter, counter2, F_Mix_OHmin                       
 write(307,*) npol, F_Conf/npol                            
@@ -271,7 +288,7 @@ write(10000*is+js,*) npol, F_vdW(is,js)/npol
 enddo
 enddo
 !write(310,*)counter, counter2, F_eps                          
-!write(311,*)counter, counter2, F_electro                         
+write(311,*) npol, F_electro                         
 write(312,*) npol, Free_energy2/npol                      
 write(313,*) npol, F_Mix_p/npol                          
 write(314,*) npol, F_Uchain/npol

@@ -10,7 +10,7 @@ use transgauche
 
 
 allocate (phi(0:2*ntot))
-allocate (avpos(ntot),avneg(ntot))
+allocate (avpos(ntot),avneg(ntot),xcharge(ntot))
 allocate (Ntrans(long,cuantas))
 allocate (trans(long))
 allocate (Uchain(cuantas))

@@ -73,8 +73,8 @@ endmodule
 module mcharge
 integer*8 Ncharge
 integer*8, allocatable :: charge(:), chargetype(:)
-real*8, allocatable :: phi(:), avpos(:), avneg(:)
-real*8 Csalt, wperm, xsalt
+real*8, allocatable :: phi(:), avpos(:), avneg(:), xcharge(:)
+real*8 Csalt, wperm, xsalt, expmupos, expmuneg
 endmodule
 
 module bulk

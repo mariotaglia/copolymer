@@ -24,7 +24,6 @@ integer err
 integer n
 real*8 avpol_tmp(0:Npoorsv+2,2*ntot), avpolc_tmp(Ncharge,2*ntot)
 real*8 avpol_tosend(0:Npoorsv+2, ntot), avpolc_tosend(Ncharge,2*ntot)
-real*8 xcharge(ntot) 
 real*8 xpol_tosend(ntot)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
@@ -127,10 +126,16 @@ sumprouchain=0.0
 sumtrans_tosend = 0.0
 sumtrans = 0.0
 
+expmupos=xsalt*vsol/xsolbulk**vpos
+expmuneg=xsalt*vsol/xsolbulk**vneg
 do j=1,ntot
-avneg(j)=xsalt*vneg*vsol/(xsolbulk**vneg)*xh(j)**vneg*dexp(phi(j)) !volume fraction of anion, vneg in units of vsol
-avpos(j)=xsalt*vpos*vsol/(xsolbulk**vpos)*xh(j)**vpos*dexp(-phi(j)) !volume fraction of cation, vpos in units of vsol
+avpos(j)=vpos*expmupos*xsolbulk**vpos*xh(j)**vpos*dexp(-phi(j))
+avneg(j)=vneg*expmuneg*xsolbulk**vneg*xh(j)**vneg*dexp(phi(j))
 enddo
+!do j=1,ntot
+!avneg(j)=xsalt*vneg*vsol/(xsolbulk**vneg)*xh(j)**vneg*dexp(phi(j)) !volume fraction of anion, vneg in units of vsol
+!avpos(j)=xsalt*vpos*vsol/(xsolbulk**vpos)*xh(j)**vpos*dexp(-phi(j)) !volume fraction of cation, vpos in units of vsol
+!enddo
 
   do ii=1,maxntotcounter ! position of center of mass 
    do i=1,cuantas ! loop over conformations
