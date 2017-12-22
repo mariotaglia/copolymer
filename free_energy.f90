@@ -275,8 +275,8 @@ if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 if(rank.eq.0) then                                                                 
 write(301,*) npol, Free_energy/npol                       
 write(302,*) npol, F_Mix_s/npol                           
-write(303,*) npol, F_Mix_pos                         
-write(304,*) npol, F_Mix_neg                         
+write(303,*) npol, F_Mix_pos/npol                       
+write(304,*) npol, F_Mix_neg/npol                         
 !write(305,*)counter, counter2, F_Mix_Hplus                       
 !write(306,*)counter, counter2, F_Mix_OHmin                       
 write(307,*) npol, F_Conf/npol                            
@@ -288,7 +288,7 @@ write(10000*is+js,*) npol, F_vdW(is,js)/npol
 enddo
 enddo
 !write(310,*)counter, counter2, F_eps                          
-write(311,*) npol, F_electro                         
+write(311,*) npol, F_electro/npol                         
 write(312,*) npol, Free_energy2/npol                      
 write(313,*) npol, F_Mix_p/npol                          
 write(314,*) npol, F_Uchain/npol

@@ -127,14 +127,14 @@ sumtrans_tosend = 0.0
 sumtrans = 0.0
 
 expmupos=xsalt*vsol/xsolbulk**vpos
-expmuneg=xsalt*vsol/xsolbulk**vneg
+expmuneg=xsalt*vsol/xsolbulk**vneg !LOKE
 do j=1,ntot
-avpos(j)=vpos*expmupos*xsolbulk**vpos*xh(j)**vpos*dexp(-phi(j))
-avneg(j)=vneg*expmuneg*xsolbulk**vneg*xh(j)**vneg*dexp(phi(j))
+avpos(j)=vpos*expmupos*xh(j)**vpos*dexp(-phi(j))
+avneg(j)=vneg*expmuneg*xh(j)**vneg*dexp(phi(j))
 enddo
 !do j=1,ntot
-!avneg(j)=xsalt*vneg*vsol/(xsolbulk**vneg)*xh(j)**vneg*dexp(phi(j)) !volume fraction of anion, vneg in units of vsol
-!avpos(j)=xsalt*vpos*vsol/(xsolbulk**vpos)*xh(j)**vpos*dexp(-phi(j)) !volume fraction of cation, vpos in units of vsol
+!avneg(j)=xsalt*vneg*vsol*xh(j)**vneg*dexp(phi(j))/xsolbulk**vneg !volume fraction of anion, vneg in units of vsol
+!avpos(j)=xsalt*vpos*vsol*xh(j)**vpos*dexp(-phi(j))/xsolbulk**vpos !volume fraction of cation, vpos in units of vsol
 !enddo
 
   do ii=1,maxntotcounter ! position of center of mass 

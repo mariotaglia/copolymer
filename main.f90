@@ -116,8 +116,8 @@ conf=0                    ! counter for conformations
 
 vsol=0.030                ! volume solvent molecule in (nm)^3
 vpol= ((4.0/3.0)*pi*(0.3)**3)/vsol  ! volume polymer segment in units of vsol
-vneg=1. !volume of anion in units of vsol
-vpos=1. !volume of cation in units of vsol LOKE
+vneg=0.5 !volume of anion in units of vsol
+vpos=0.5 !volume of cation in units of vsol LOKE
 
 xsalt=Csalt*6.02e23*1e-24 !salt conc. in unit of nº of particles/nm³
 xsolbulk=1-xsalt*vsol*(vneg+vpos) ! bulk volume fraction of solvent 
