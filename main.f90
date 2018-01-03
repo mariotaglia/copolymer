@@ -162,6 +162,8 @@ xg1(i)=xfile(i)
   xg1(i+n*is)=xfile(i+n*is)
   enddo !is
 read(200,*)trash,xfile(i+n*(Npoorsv+1))
+x1(i+n*(npoorsv+1))=xfile(i+n*(npoorsv+1))
+xg1(i+n*(npoorsv+1))=xfile(i+n*(npoorsv+1))
 enddo !i 
 endif
 
