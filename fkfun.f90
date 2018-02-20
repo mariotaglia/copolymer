@@ -18,6 +18,7 @@ real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
 real*8 xh(2*ntot) 
 real*8 xpot(0:Npoorsv,2*ntot),xpotc(Ncharge,2*ntot)
 real*8 pro(cuantas)
+real*8 time1, time2, duration
 integer k,i,j,k1,k2,ii, jj,iz,ic       ! dummy indices
 integer is, js
 integer err
@@ -35,6 +36,7 @@ real*8 sumtrans(ntot,long)
 
 ! Jefe
 if(rank.eq.0) then ! llama a subordinados y pasa vector x
+   call CPU_TIME(time1)
    flagsolver = 1
    CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,err)
    CALL MPI_BCAST(x, (Npoorsv+1)*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
@@ -126,11 +128,11 @@ sumprouchain=0.0
 sumtrans_tosend = 0.0
 sumtrans = 0.0
 
-expmupos=xsalt*vsol/xsolbulk**vpos
-expmuneg=xsalt*vsol/xsolbulk**vneg !LOKE
+expmupos=xsalt*vsol*vpos/xsolbulk**vpos
+expmuneg=xsalt*vsol*vneg/xsolbulk**vneg !LOKE
 do j=1,ntot
-avpos(j)=vpos*expmupos*xh(j)**vpos*dexp(-phi(j))
-avneg(j)=vneg*expmuneg*xh(j)**vneg*dexp(phi(j))
+avpos(j)=expmupos*xh(j)**vpos*dexp(-phi(j))
+avneg(j)=expmuneg*xh(j)**vneg*dexp(phi(j))
 enddo
 !do j=1,ntot
 !avneg(j)=xsalt*vneg*vsol*xh(j)**vneg*dexp(phi(j))/xsolbulk**vneg !volume fraction of anion, vneg in units of vsol
@@ -318,7 +320,13 @@ do i = 1, n*(Npoorsv+1)
 algo = algo + f(i)**2
 end do
 
-if(rank.eq.0)PRINT*, iter, algo, q(1), Q(2), q(3), q(4)
+if(rank.eq.0) then 
+   PRINT*, iter, algo, q(1), Q(2), q(3), q(4)
+   call CPU_TIME(time2)
+   duration=time2-time1
+   print*, duration, "sec"
+endif
+
 norma=algo
 
 3333 continue
