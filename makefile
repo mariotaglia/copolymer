@@ -1,4 +1,4 @@
-TARGET = assembly
+TARGET = mpi_assembly
 
 #SRC = modules.f90 SPmain.f90 parser.f90 init.f90 allocation.f90 allocateell.f90 3D.f90 cadenas.f90 cadenasMK.f90 fe.f90  fkfun.f90  kai.f90  kinsol.f90  pxs.f90  savetodisk.f90 rands.f90 ellipsoid.f90 dielectric.f90 monomers.definitions-onck.f90 chains.definitions.f90 sphere.f90 kapfromfile.f90
 
@@ -12,6 +12,10 @@ $(info HOST is ${HOST})
 SHELL = /bin/bash
 
 FFLAGS= -O3 #-g -fbacktrace -fbounds-check -ffpe-trap=zero,overflow,underflow # -O3
+
+ifeq ($(HOST),service0)
+LFLAGS = -lm  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial
+endif
 
 ifeq ($(HOST),skay)
 LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
@@ -68,17 +72,17 @@ endif
 GIT_VERSION := $(shell git describe --abbrev=6 --dirty --always --tags)
 GFLAGS=-cpp -D_VERSION=\"$(GIT_VERSION)\"
 
-FF = mpif77 #${F90}
+FF = mpif90 #${F90}
 VER = ~/bin/copolymer
 
 all:	$(TARGET)
 
 $(TARGET): $(SRC:.f90=.o)
-	$(FF) -o $(TARGET) $(SRC:.f90=.o) $(LFLAGS) $(GFLAGS)
+	$(FF) -o $(TARGET) $(SRC:.f90=.o) $(LFLAGS) 
 	cp $(TARGET) $(VER)
 
 $(SRC:.f90=.o): $(SRC)
-	${FF} -c ${FFLAGS}  $(SRC) $(LFLAGS) $(GFLAGS)
+	${FF} -c ${FFLAGS}  $(SRC) $(LFLAGS) $(GFLAGS) 
 
 install: all
 	cp $(TARGET) $(VER)

@@ -4,9 +4,11 @@ call read
 call allocation
 call kai
 call solve
+
 end
 
 subroutine solve
+
 use globals
 use mcharge 
 use partfunc
@@ -18,8 +20,10 @@ use longs
 use MPI
 use mkai
 use transgauche
+
 implicit none
 
+real*8 solvetime1, solvetime2, solveduration
 integer is
 integer *4 ier ! Kinsol error flag
 real*8 pi
@@ -53,7 +57,6 @@ integer il,inda,ncha
 REAL*8 xfile((npoorsv+2)*ntot)                        
 real*8 algo, algo2                  
 
-
 integer*1 in1(long)
 real*8 chains(3,long,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
 real*8 zp(long)
@@ -86,7 +89,6 @@ integer conf              ! counts number of conformations
 
 integer readsalt          !integer to read salt concentrations
 
-
 INTEGER cc
 
 ! MPI
@@ -98,10 +100,12 @@ double  precision norma_tosend
 
 integer in1tmp(long)
 
+!if (rank.eq.0)solvetime1=MPI_WTIME()
+
 allocate(denspolfilename(0:Npoorsv))
 
 error = 1.0d-6
-seed=435+ 3232*rank               ! seed for random number generator
+seed=435 !+ 3232*rank               ! seed for random number generator
 
 print*, 'I am', rank, ' and my seed is', seed
 
@@ -123,13 +127,34 @@ xsalt=Csalt*6.02e23*1e-24 !salt conc. in unit of nº of particles/nm³
 xsolbulk=1-xsalt*vsol*(vneg+vpos) ! bulk volume fraction of solvent 
 wperm = 0.114 !water permitivity in units of e^2/kT.nm
 
+iter_per_rank = int(cuantas/size)
+restcuantas = cuantas - iter_per_rank*size
+
+if ((restcuantas.ne.0).and.(rank.lt.restcuantas)) then
+   iter_per_rank = iter_per_rank + 1
+endif
+
+first=0
+last=0
+
+if ((restcuantas.eq.0).or.((restcuantas.ne.0).and.(rank.lt.restcuantas))) then
+   first= rank*iter_per_rank+1
+   last= (rank+1)*iter_per_rank
+else
+   first= rank*iter_per_rank+restcuantas+1
+   last= (rank+1)*iter_per_rank+restcuantas
+endif
 ! eps
 
-eps(1)=eps1
-do i=2,ntot
-eps(i)=0
-enddo
 
+print*, "I am rank", rank, "and I calculate", iter_per_rank, "conformations out of", cuantas
+
+
+eps(1)=eps1
+
+do i=2,ntot
+   eps(i)=0
+enddo
 
 !!!!
 ! solver
@@ -139,32 +164,42 @@ enddo
 !     init guess all 1.0 
 
 do i=1,n
-xg1(i)=1.0
-x1(i)=1.0
-  do is=1,npoorsv+1
-  xg1(i+n*is)=0.0001
-  x1(i+n*is)=0.0001
-  enddo
-zc(i)= (i-0.5) * delta
+   xg1(i)=1.0
+   x1(i)=1.0
+
+   do is=1,npoorsv+1
+      xg1(i+n*is)=0.0001
+      x1(i+n*is)=0.0001
+   enddo
+
+   zc(i)= (i-0.5) * delta
 enddo
 
 !     init guess from files fort.100 (solvent) and fort.200 (potential)                      
 
 if (infile.ge.1) then
-do i=1,n
-read(100,*)trash,xfile(i)   ! solvent
-x1(i)=xfile(i)
-xg1(i)=xfile(i)
-  do is=1,npoorsv 
-  read(100+is,*)trash,xfile(i+n*is)   ! poorsolvent desde 1 a npoorsv 
-  if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
-  x1(i+n*is)=xfile(i+n*is)
-  xg1(i+n*is)=xfile(i+n*is)
-  enddo !is
-read(200,*)trash,xfile(i+n*(Npoorsv+1))
-x1(i+n*(npoorsv+1))=xfile(i+n*(npoorsv+1))
-xg1(i+n*(npoorsv+1))=xfile(i+n*(npoorsv+1))
-enddo !i 
+
+   do i=1,n
+
+     read(100,*)trash,xfile(i)   ! solvent
+     x1(i)=xfile(i)
+     xg1(i)=xfile(i)
+
+     do is=1,npoorsv 
+
+       read(100+is,*)trash,xfile(i+n*is)   ! poorsolvent desde 1 a npoorsv 
+       if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
+       x1(i+n*is)=xfile(i+n*is)
+       xg1(i+n*is)=xfile(i+n*is)
+
+     enddo !is
+
+     read(200,*)trash,xfile(i+n*(Npoorsv+1))
+     x1(i+n*(npoorsv+1))=xfile(i+n*(npoorsv+1))
+     xg1(i+n*(npoorsv+1))=xfile(i+n*(npoorsv+1))
+
+   enddo !i 
+
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -177,92 +212,99 @@ sumRgyr(:)=0.
 sumUgyr=0.
 Rgyrprom(:)=0.
 
-   call initcha              ! init matrices for chain generation
+call initcha              ! init matrices for chain generation
 
-   conf=0                    ! counter of number of conformations
+conf=0                    ! counter of number of conformations
 
-   do while (conf.lt.cuantas)
+do while (conf.lt.cuantas)
 
    call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr)
    
    do is=0,Npoorsv+1
-   sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr)
+      sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr)
    enddo
+
    sumUgyr=sumUgyr+exp(-Ugyr)
 
    do j=1,ncha
 
-   if(conf.lt.cuantas) then
-   conf=conf+1
-   Uchain(conf)=Uconf
-   Ntrans(:,conf) = Ntconf(:)
-   do ii = 1, maxntot ! position of first segment (or Center of mass?) LOKE
+      if(conf.lt.cuantas) then
 
+         conf=conf+1
+         Uchain(conf)=Uconf
+         Ntrans(:,conf) = Ntconf(:)
 
-      minpos(conf,ii) = ntot
-      maxpos(conf,ii) = 0 
+         do ii = 1, maxntot ! position of first segment (or Center of mass?) LOKE
 
-      in1tmp = 0
-
-
-      do k=1,long
-      select case (abs(curvature))
-      case (2)
-        tempr=((chains(1,k,j)+(float(ii)-0.5)*delta)**2 + chains(2,k,j)**2 +chains(3,k,j)**2 )**(0.5)
-        temp=int(tempr/delta)+1  ! put them into the correct layer
-      case (1)
-        tempr=((chains(1,k,j)+(float(ii)-0.5)*delta)**2+chains(2,k,j)**2)**(0.5)
-        temp=int(tempr/delta)+1  ! put them into the correct layer
-      case (0) 
-        tempr=abs(chains(1,k,j)+(float(ii)-0.5)*delta)
-        temp=int(tempr/delta)+1  ! put them into the correct layer
+            minpos(conf,ii) = ntot
+            maxpos(conf,ii) = 0 
+            in1tmp = 0
+  
+            do k=1,long
+ 
+               select case (abs(curvature))
+                 case (2)
+                  tempr=((chains(1,k,j)+(float(ii)-0.5)*delta)**2 + chains(2,k,j)**2 +chains(3,k,j)**2 )**(0.5)
+                  temp=int(tempr/delta)+1  ! put them into the correct layer
+                 case (1)
+                  tempr=((chains(1,k,j)+(float(ii)-0.5)*delta)**2+chains(2,k,j)**2)**(0.5)
+                  temp=int(tempr/delta)+1  ! put them into the correct layer
+                 case (0) 
+                  tempr=abs(chains(1,k,j)+(float(ii)-0.5)*delta)
+                  temp=int(tempr/delta)+1  ! put them into the correct layer
+               endselect
         
-      endselect
-        
-       if(temp.gt.ntot) then
-        if(rank.eq.0)print*, 'Increase ntot'
-        stop
-       endif
+               if(temp.gt.ntot) then
+                  if(rank.eq.0)print*, 'Increase ntot'
+                  stop
+               endif
 
+               in1tmp(k) = temp
+  
+               if(temp.lt.minpos(conf,ii))minpos(conf,ii)=temp
+               if(temp.gt.maxpos(conf,ii))maxpos(conf,ii)=temp
 
-       in1tmp(k) = temp
+            enddo ! k
 
-       if(temp.lt.minpos(conf,ii))minpos(conf,ii)=temp
-       if(temp.gt.maxpos(conf,ii))maxpos(conf,ii)=temp
-       enddo ! k
+            if((maxpos(conf,ii)-minpos(conf,ii)).ge.base) then
 
-       if((maxpos(conf,ii)-minpos(conf,ii)).ge.base) then
-       print*,'Rank', rank, 'Increase base'
-       call MPI_FINALIZE(ierr) ! finaliza MPI
-       stop
-       endif
+                print*,'Rank', rank, 'Increase base'
+                call MPI_FINALIZE(ierr) ! finaliza MPI
+                stop
 
-       do k = 1, long
-       temp = in1tmp(k)-minpos(conf,ii)+1 
-       inn(segpoorsv(k),conf,ii,temp) = inn(segpoorsv(k),conf,ii,temp) + 1      
-       innc(chargetype(k),conf,ii,temp) = innc(chargetype(k),conf,ii,temp) + 1
-       enddo
+            endif
+
+            do k = 1, long
+              temp = in1tmp(k)-minpos(conf,ii)+1 
+              inn(segpoorsv(k),conf,ii,temp) = inn(segpoorsv(k),conf,ii,temp) + 1      
+              innc(chargetype(k),conf,ii,temp) = innc(chargetype(k),conf,ii,temp) + 1
+            enddo
        
-   enddo ! ii
-   endif
+         enddo ! ii
+
+      endif
 
    enddo ! j
-   enddo ! while
+enddo ! while
    
-   do is=0,Npoorsv+1
-   Rgyrprom(is)=sumRgyr(is)/sumUgyr
-   enddo
-
-if(rank.eq.0) then
-print*," chains ready"
 do is=0,Npoorsv+1
-print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr
+   Rgyrprom(is)=sumRgyr(is)/sumUgyr
 enddo
 
-!do k = 1, 20
-!print*,10*k,Uchain(10*k)
-!enddo
+if(rank.eq.0) then
+
+   print*," chains ready"
+
+   do is=0,Npoorsv+1
+      print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr
+   enddo
+
+   !do k = 1, 20
+      !print*,10*k,Uchain(10*k)
+   !enddo
+
 endif
+
 ! CHECK that chains are unbiased
 
 !   av1 = 0
@@ -314,52 +356,63 @@ actionflag = 0 ! Actionflag controls the current action of loop
                ! = 1 increases npol from npolini to npollast
                ! = 2 decreases npol from npolini to npolfirst
                ! = 3 finalize
+
 maxntotcounter = maxntotcounter_ini !maxntot inicial
 
 npol = npolini
 
 do while (actionflag.lt.3)
 
- 123 if(rank.eq.0)print*, ' npol:', npol, 'maxntot:', maxntotcounter
+   123 if(rank.eq.0)print*, ' npol:', npol, 'maxntot:', maxntotcounter
 
 
 ! xh bulk
 ! xsolbulk=1.0
 
-do i=1,(npoorsv+2)*n             ! initial guess for x1
-xg1(i)=x1(i)
-enddo
+   do i=1,(npoorsv+2)*n             ! initial guess for x1
+      xg1(i)=x1(i)
+   enddo
 
-
-do i=1,n
-do is=1,npoorsv+1
-  if(xg1(i+n*is).lt.1.0d-30)xg1(i+n*is)=1.0d-30 ! OJO
-  enddo
-enddo
-
+   do i=1,n
+     do is=1,npoorsv+1
+        if(xg1(i+n*is).lt.1.0d-30)xg1(i+n*is)=1.0d-30 ! OJO
+     enddo
+   enddo
 
 ! JEFE
-if(rank.eq.0) then ! solo el jefe llama al solver
-   iter = 0
-   print*, 'solve: Enter solver ', (npoorsv+2)*ntot, ' eqs'
+   if(rank.eq.0) then ! solo el jefe llama al solver
+      print*, 'solve: Enter solver ', (npoorsv+2)*ntot, ' eqs'
+   endif   
+
+   iter=0
    call call_kinsol(x1, xg1, ier)
-   flagsolver = 0
-   CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,err)
-endif
-! Subordinados
+!      flagsolver = 0
+!   endif
 
+!   CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,err)
 
-if(rank.ne.0) then
-  do
-     flagsolver = 0
-     source = 0
-     CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,err)
-     if(flagsolver.eq.1) then
-        call call_fkfun(x1) ! todavia no hay solucion => fkfun 
-     endif ! flagsolver
-     if(flagsolver.eq.0) exit ! Detiene el programa para este nodo
-   enddo
-endif
+!   print*, "I am rank", rank, "and I receive flagsolver"
+
+!   call MPI_BARRIER
+   
+!   Subordinados
+
+!   if(rank.ne.0) then
+
+!      do
+
+!         flagsolver = 1
+!         source = 0
+
+!         if(flagsolver.eq.1) then
+!           call call_fkfun(x1) ! todavia no hay solucion => fkfun 
+!         endif ! flagsolver
+
+!         if(flagsolver.eq.0) exit ! Detiene el programa para este nodo
+
+!      enddo
+
+!   endif
 
 
 ! Recupero el valor de ier y de la norma
@@ -367,207 +420,226 @@ endif
 ! cambiar la   estrategia...
 ! Jefe
 
-if (rank.eq.0) then
-   norma_tosend = norma
-   ier_tosend = ier ! distinto tipo de integer
-   CALL MPI_BCAST(norma_tosend, 1, MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,err)
-   CALL MPI_BCAST(ier_tosend,1, MPI_INTEGER,0,MPI_COMM_WORLD,err)
-endif
+!   if (rank.eq.0) then
+!      norma_tosend = norma
+!      ier_tosend = ier ! distinto tipo de integer
+!   endif
+!      CALL MPI_BCAST(norma_tosend, 1, MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,err)
+!      CALL MPI_BCAST(ier_tosend,1, MPI_INTEGER,0,MPI_COMM_WORLD,err)
+!   endif
 
 ! Subordinados
 
-if (rank.ne.0) then
-   CALL MPI_BCAST(norma_tosend, 1, MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,err)
-   CALL MPI_BCAST(ier_tosend, 1, MPI_INTEGER,0,MPI_COMM_WORLD,err)
-   norma = norma_tosend
-   ier = ier_tosend
-endif
+!   if (rank.ne.0) then
+!      CALL MPI_BCAST(norma_tosend, 1, MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,err)
+!      CALL MPI_BCAST(ier_tosend, 1, MPI_INTEGER,0,MPI_COMM_WORLD,err)
+!      norma = norma_tosend
+!      ier = ier_tosend
+!   endif
 
 
-do i=1,n
-xsol(i)=x1(i)
-enddo
+   do i=1,n
+      xsol(i)=x1(i)
+   enddo
 
 
-if((norma.gt.error).or.(ier.lt.0).or.(isnan(norma))) then
-  if(actionflag.gt.0)stop
-!stop
-!if(rank.eq.0)print*, 'Fail', npol
-!if(ccc.eq.1) then
-!npol = npol/2.0
-!if(rank.eq.0)print*, 'Try', npol
-!x1 = xg1
-!goto 123
-!endif
-!npol=(npols(ccc-1)+npol)/2.0
-!if(rank.eq.0)print*, 'Try', npol
-!x1 = xg1
-!goto 123
-endif
+   if((norma.gt.error).or.(ier.lt.0).or.(isnan(norma))) then
+      if(actionflag.gt.0) then
+         print*, " I am ", rank, " I stopped the work"
+         stop
+      endif
+      !stop
+      !if(rank.eq.0)print*, 'Fail', npol
+      !if(ccc.eq.1) then
+      !npol = npol/2.0
+      !if(rank.eq.0)print*, 'Try', npol
+      !x1 = xg1
+      !goto 123
+      !endif
+      !npol=(npols(ccc-1)+npol)/2.0
+      !if(rank.eq.0)print*, 'Try', npol
+      !x1 = xg1
+      !goto 123
+   endif
 
-print*, "norma", rank
+   print*, "norma", rank
 
-!if(npols(ccc).ne.npol) then
-!npols(ccc-1) = npol
-!npol = npols(ccc)
-!goto 123
-!endif
-
+   !if(npols(ccc).ne.npol) then
+   !npols(ccc-1) = npol
+   !npol = npols(ccc)
+   !goto 123
+   !endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! calc free energy
 !
 !
 
-call calc_free_energy(actionflag, countfile)
-
+   call calc_free_energy(actionflag, countfile)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! Determination of adsorbed polymer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-if(rank.eq.0) then
+   if(rank.eq.0) then
 
+      write(533,*) npol, dlog(xpol(1))-dlog(q(1))
+      flush(533)
 
-write(533,*) npol, dlog(xpol(1))-dlog(q(1))
-flush(533)
+      write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', actionflag,'.',countfile,'.dat'
 
+      write(phifilename,'(A18,BZ,I3.3,A1,I3.3,A4)')'electricpotential.', actionflag,'.',countfile,'.dat'
 
-write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', actionflag,'.',countfile,'.dat'
+      do is=0,Npoorsv
+         write(denspolfilename(is),'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitypolymer',is,'.',actionflag,'.',countfile,'.dat'
+      enddo
 
-write(phifilename,'(A18,BZ,I3.3,A1,I3.3,A4)')'electricpotential.', actionflag,'.',countfile,'.dat'
+      write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', actionflag,'.',countfile,'.dat'
+      write(densposfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypositive.',actionflag,'.',countfile,'.dat'
+      write(densnegfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitynegative.',actionflag,'.',countfile,'.dat'
 
-do is=0,Npoorsv
-write(denspolfilename(is),'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitypolymer',is,'.',actionflag,'.',countfile,'.dat'
-enddo
+      write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',actionflag,'.',countfile,'.dat'
 
-write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', actionflag,'.',countfile,'.dat'
-write(densposfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypositive.',actionflag,'.',countfile,'.dat'
-write(densnegfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitynegative.',actionflag,'.',countfile,'.dat'
+      write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'xdensitytota.',actionflag,'.',countfile,'.dat'
+      write(ntransfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'ntrans.',actionflag,'.',countfile,'.dat'
 
-write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',actionflag,'.',countfile,'.dat'
+      write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',actionflag,'.',countfile,'.dat'
 
+      open(unit=310,file=sysfilename)
+      open(unit=311,file=phifilename)
 
-write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'xdensitytota.',actionflag,'.',countfile,'.dat'
-write(ntransfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'ntrans.',actionflag,'.',countfile,'.dat'
+      do is=0,Npoorsv
+         open(unit=1320+is,file=denspolfilename(is))
+      enddo
 
-write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',actionflag,'.',countfile,'.dat'
+      open(unit=328,file=totalfilename)
+      open(unit=329,file=xtotalfilename)
+      open(unit=327,file=ntransfilename)
+      open(unit=330,file=denssolfilename)
+      open(unit=331,file=densposfilename)
+      open(unit=332,file=densnegfilename)
+      open(unit=324,file=lnqfilename)
 
-open(unit=310,file=sysfilename)
-open(unit=311,file=phifilename)
-do is=0,Npoorsv
-open(unit=1320+is,file=denspolfilename(is))
-enddo
-open(unit=328,file=totalfilename)
-open(unit=329,file=xtotalfilename)
-open(unit=327,file=ntransfilename)
-open(unit=330,file=denssolfilename)
-open(unit=331,file=densposfilename)
-open(unit=332,file=densnegfilename)
-open(unit=324,file=lnqfilename)
+      do i = 3, long-1
+         write(327,*)i, trans(i)
+      enddo
 
-do i = 3, long-1
-write(327,*)i, trans(i)
-enddo
+      avtmp=0
 
-avtmp=0
-do i=1,n
-  do is=0,Npoorsv
-  write(1320+is,*)zc(i),avpol(is,i)
-  avtmp = avtmp + avpol(is,i)
-  enddo
-write(328,*)zc(i),avtmp
-write(329,*)zc(i),xpol(i)
-write(330,*)zc(i),xsol(i)
-write(331,*)zc(i),avpos(i)
-write(332,*)zc(i),avneg(i)
-write(311,*)zc(i),phi(i)
-enddo
+      do i=1,n
 
+         do is=0,Npoorsv
+            write(1320+is,*)zc(i),avpol(is,i)
+            avtmp = avtmp + avpol(is,i)
+         enddo
 
+         write(328,*)zc(i),avtmp
+         write(329,*)zc(i),xpol(i)
+         write(330,*)zc(i),xsol(i)
+         write(331,*)zc(i),avpos(i)
+         write(332,*)zc(i),avneg(i)
+         write(311,*)zc(i),phi(i)
 
-do i = 1, maxntot
-write(324,*)zc(i),dlog(xpol(i))-dlog(q(i))
-enddo
+      enddo
+
+      do i = 1, maxntot
+          write(324,*)zc(i),dlog(xpol(i))-dlog(q(i))
+      enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !     additional system information
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-write(310,*)'GIT Version: ', _VERSION
-write(310,*)'system      = neutral polymer'
-write(310,*)'fnorm       = ', norma ! residual size of iteration vector
-write(310,*)'error       = ',error
-write(310,*)'q           = ',q
-write(310,*)'length seg  = ',0.50 ! value see subroutine cadenas
-write(310,*)'delta       = ',delta
-write(310,*)'vsol        = ',vsol
-write(310,*)'vpol        = ',vpol*vsol
+      write(310,*)'GIT Version: ', _VERSION
+      write(310,*)'system      = neutral polymer'
+      write(310,*)'fnorm       = ', norma ! residual size of iteration vector
+      write(310,*)'error       = ',error
+      write(310,*)'q           = ',q
+      write(310,*)'length seg  = ',0.50 ! value see subroutine cadenas
+      write(310,*)'delta       = ',delta
+      write(310,*)'vsol        = ',vsol
+      write(310,*)'vpol        = ',vpol*vsol
 
-write(310,*)'npol       = ', npol
-write(310,*)'st         = ', st
-write(310,*)'Actionflag = ', actionflag
+      write(310,*)'npol       = ', npol
+      write(310,*)'st         = ', st
+      write(310,*)'Actionflag = ', actionflag
 
-write(310,*)'cuantas     = ',cuantas
-write(310,*)'iterations  = ',iter
+      write(310,*)'cuantas     = ',cuantas
+      write(310,*)'iterations  = ',iter
 
+      close(310)
+      CLOSE(324)
 
-close(310)
-CLOSE(324)
-do is=0,Npoorsv
-CLOSE(1320+is)
-enddo
-CLOSE(327)
-CLOSE(328)
-CLOSE(329)
-close(330)
-close(331)
-close(332)
-close(311)
+      do is=0,Npoorsv
+         CLOSE(1320+is)
+      enddo
 
-print*, rank, " escribe"
+      CLOSE(327)
+      CLOSE(328)
+      CLOSE(329)
+      close(330)
+      close(331)
+      close(332)
+      close(311)
 
-endif ! rank
+      print*, rank, " escribe"
 
+   endif ! rank
 
-countfile = countfile+1 ! next
-!npolini, npolfirst, npollast, npolstep
-select case (actionflag)
- case(0) ! maxntot loop
-!    countfile = 1
-    if (maxntotcounter.lt.maxntot) then
-!    write(1000+maxntotcounter,*), maxntotcounter
-    maxntotcounter=maxntotcounter+1
-!    xg1 = x1
-    endif
-    if(maxntotcounter.eq.maxntot) then
-    actionflag=1 
-    countfile = 1
-    endif
- case(1)  ! increases from npolini to npollast
-    if(npol.eq.npolini)x1ini=x1
-    npol = npol + npolstep      
-    if(npol.gt.npollast) then
-       npol = npolini
-       actionflag = 2
-       countfile = 1
-       x1 = x1ini
-    endif       
- case(2)
-    npol = npol - npolstep
-    if(npol.lt.npolfirst)actionflag = 3
-endselect
+   countfile = countfile+1 ! next
+   !npolini, npolfirst, npollast, npolstep
 
-END do ! loop de npol
+   select case (actionflag)
+
+     case(0) ! maxntot loop
+
+!     countfile = 1
+      if (maxntotcounter.lt.maxntot) then
+!       write(1000+maxntotcounter,*), maxntotcounter
+        maxntotcounter=maxntotcounter+1
+!       xg1 = x1
+      endif
+
+      if(maxntotcounter.eq.maxntot) then
+        actionflag=1 
+        countfile = 1
+      endif
+
+     case(1)  ! increases from npolini to npollast
+
+      if(npol.eq.npolini)x1ini=x1
+      npol = npol + npolstep      
+      if(npol.gt.npollast) then
+      npol = npolini
+      actionflag = 2
+      countfile = 1
+      x1 = x1ini
+
+      endif       
+
+     case(2)
+      npol = npol - npolstep
+      if(npol.lt.npolfirst)actionflag = 3
+
+   endselect
+
+end do ! loop de npol
 
 do is=0,Npoorsv+1
-write(534,*) is, Rgyrprom(is)
+   write(534,*) is, Rgyrprom(is)
 enddo
 
 close(533)
 close(534)
 
+!if (rank.eq.0) then
+!   solvetime2=MPI_WTIME()
+!   solveduration=solvetime2-solvetime1
+!   print*, "The solver took", solveduration, "seconds."
+!endif
+
 call MPI_FINALIZE(ierr) ! finaliza MPI
+
 stop
 
 end

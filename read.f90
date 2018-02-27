@@ -19,6 +19,14 @@ read(8,*)ntot, maxntotcounter_ini, maxntot
 read(8,*)nada
 read(8,*)cuantas
 
+!cuantas=int(totalcuantas/size)
+!restofcuantas=totalcuantas-cuantas*size
+!
+!if ((restofcuantas.ne.0).and.(rank.lt.restofcuantas)) then
+!   cuantas=cuantas+1
+!endif
+
+
 read(8,*)nada
 read(8,*)long 
 

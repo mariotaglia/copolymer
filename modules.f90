@@ -37,10 +37,11 @@ real*8, allocatable :: avpol(:,:) ! volume fraction polymers
 real*8, allocatable :: avpolc(:,:) ! volume fraction of charged segments 
 real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xsol(:)
-INTEGER cuantas
+INTEGER totalcuantas, cuantas, restcuantas, iter_per_rank
 integer curvature
 real*8, allocatable :: Ug(:), Ut(:)
 
+integer first, last
 
 integer*2, allocatable :: innc(:,:,:,:),inn(:,:,:,:)
 integer, allocatable ::  maxpos(:,:)

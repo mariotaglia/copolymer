@@ -61,9 +61,11 @@ end
      
 
 subroutine call_fkfun(x1_old)
+
 use globals
 use MPI
 use mkai
+
 implicit none
 
 integer i
@@ -80,17 +82,26 @@ parameter(tag = 0)
 integer err
 
 x1 = 0.0
-do i = 1,(Npoorsv+2)*ntot
-  x1(i) = x1_old(i)
-enddo
+x1 = x1_old
+
+!print*,"going into kinsol", Npoorsv, ntot, (Npoorsv+2)*ntot,
+!call flush()
+!call MPI_BARRIER(MPI_COMM_WORLD,err)
 
 CALL MPI_BCAST(x1, (Npoorsv+2)*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
 
-call fkfun(x1,f, ier) ! todavia no hay solucion => fkfun 
+!print*,"kinsol ok"
+
+print*, "I AM RANK !!!!!",rank, "calling fkfun"
+
+call fkfun(x1, f, ier) ! todavia no hay solucion => fkfun 
+
+print*, "call_fkfun1 done", rank
 
 ier = 0
 
 end
+
 
 subroutine call_kinsol(x1_old, xg1_old, ier)
 use globals
@@ -126,6 +137,7 @@ max_niter = 200
 globalstrat = 0
 
 call fnvinits(3, neq, ier) ! fnvinits inits NVECTOR module
+
 if (ier .ne. 0) then       ! 3 for Kinsol, neq ecuantion number, ier error flag (0 is OK)
   print*, 'call_kinsol: SUNDIALS_ERROR: FNVINITS returned IER = ', ier
   call MPI_FINALIZE(ierr) ! finaliza MPI
@@ -133,6 +145,7 @@ if (ier .ne. 0) then       ! 3 for Kinsol, neq ecuantion number, ier error flag 
 endif
 
 call fkinmalloc(iout, rout, ier)    ! Allocates memory and output additional information
+
 if (ier .ne. 0) then
    print*, 'call_kinsol: SUNDIALS_ERROR: FKINMALLOC returned IER = ', ier
    call MPI_FINALIZE(ierr) ! finaliza MPI
