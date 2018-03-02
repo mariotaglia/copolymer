@@ -148,7 +148,7 @@ enddo
 
 do ii=1,maxntotcounter ! position of center of mass 
 
-   do i=first, last ! loop over conformations
+   do i=1, cuantas ! loop over conformations
  
       pro(i) = exp(-Uchain(i))
 

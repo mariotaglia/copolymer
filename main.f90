@@ -105,9 +105,14 @@ integer in1tmp(long)
 allocate(denspolfilename(0:Npoorsv))
 
 error = 1.0d-6
-seed=435 !+ 3232*rank               ! seed for random number generator
+!seed=435 !+ 3232*rank               ! seed for random number generator
 
-print*, 'I am', rank, ' and my seed is', seed
+if(rank.eq.0) then
+  seed=435
+  print*, 'I am', rank, ' and my seed is', seed
+else 
+  seed=0
+endif
 
 if(rank.eq.0)print*, 'Program Multicapa'
 if(rank.eq.0)print*, 'GIT Version: ', _VERSION
@@ -127,28 +132,44 @@ xsalt=Csalt*6.02e23*1e-24 !salt conc. in unit of nº of particles/nm³
 xsolbulk=1-xsalt*vsol*(vneg+vpos) ! bulk volume fraction of solvent 
 wperm = 0.114 !water permitivity in units of e^2/kT.nm
 
-iter_per_rank = int(cuantas/size)
-restcuantas = cuantas - iter_per_rank*size
+!rest_rot_tosend=mod(cuantas,12)
+!rest_rot_toreceive=0
 
-if ((restcuantas.ne.0).and.(rank.lt.restcuantas)) then
-   iter_per_rank = iter_per_rank + 1
-endif
 
-first=0
-last=0
+!cuantas = int(totalcuantas/size)
+!restcuantas = totalcuantas - cuantas*size
 
-if ((restcuantas.eq.0).or.((restcuantas.ne.0).and.(rank.lt.restcuantas))) then
-   first= rank*iter_per_rank+1
-   last= (rank+1)*iter_per_rank
-else
-   first= rank*iter_per_rank+restcuantas+1
-   last= (rank+1)*iter_per_rank+restcuantas
-endif
+!iter_per_rank = int(cuantas/size)
+!restcuantas = cuantas - iter_per_rank*size
+
+!if ((restcuantas.ne.0).and.(rank.lt.restcuantas)) then
+!   iter_per_rank = iter_per_rank + 1
+!    cuantas = cuantas + 1
+!endif
+
+!allocate (Ntrans(long,cuantas))
+!allocate (Uchain(cuantas))
+!allocate (inn(0:Npoorsv,cuantas,ntot,base))
+!allocate (innc(0:Ncharge,cuantas,ntot,base))
+!allocate (maxpos(cuantas,2*ntot))
+!allocate (minpos(cuantas,2*ntot))
+
+!first=0
+!last=0
+
+!if ((restcuantas.eq.0).or.((restcuantas.ne.0).and.(rank.lt.restcuantas))) then
+!   first= rank*iter_per_rank+1
+!   last= (rank+1)*iter_per_rank
+    
+!else
+!   first= rank*iter_per_rank+restcuantas+1
+!   last= (rank+1)*iter_per_rank+restcuantas
+!endif
 ! eps
 
 
-print*, "I am rank", rank, "and I calculate", iter_per_rank, "conformations out of", cuantas
-
+!print*, "I am rank", rank, "and I calculate", iter_per_rank, "conformations out of", cuantas
+print*, "I am rank", rank, "and I generate and calculate", cuantas, "conformation out of", totalcuantas
 
 eps(1)=eps1
 
@@ -212,9 +233,18 @@ sumRgyr(:)=0.
 sumUgyr=0.
 Rgyrprom(:)=0.
 
+
+
 call initcha              ! init matrices for chain generation
 
 conf=0                    ! counter of number of conformations
+
+if (rank.gt.0) then
+   call MPI_RECV(seed, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
+!   call MPI_RECV(rest_rot_toreceive, 1, MPI_INTEGER, rank-1, size+rank-1, MPI_COMM_WORLD, status, ierr)
+!   cuantas= cuantas+rest_rot_toreceive
+   print*, "rank", rank, "received from rank", rank-1,"seed =", seed
+endif
 
 do while (conf.lt.cuantas)
 
@@ -286,10 +316,18 @@ do while (conf.lt.cuantas)
 
    enddo ! j
 enddo ! while
-   
+
+if (rank.lt.size-1) then
+   call MPI_SEND(seed, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
+!  call MPI_SEND(rest_rot_tosend, 1, MPI_INTEGER, rank+1, rank+size, MPI_COMM_WORLD, ierr)
+   print*, "rank", rank, "sent to rank", rank+1,"seed=", seed
+endif
+
 do is=0,Npoorsv+1
    Rgyrprom(is)=sumRgyr(is)/sumUgyr
 enddo
+
+call MPI_BARRIER(MPI_COMM_WORLD, ierr)
 
 if(rank.eq.0) then
 
