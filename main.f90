@@ -132,10 +132,6 @@ xsalt=Csalt*6.02e23*1e-24 !salt conc. in unit of nº of particles/nm³
 xsolbulk=1-xsalt*vsol*(vneg+vpos) ! bulk volume fraction of solvent 
 wperm = 0.114 !water permitivity in units of e^2/kT.nm
 
-!rest_rot_tosend=mod(cuantas,12)
-!rest_rot_toreceive=0
-
-
 !cuantas = int(totalcuantas/size)
 !restcuantas = totalcuantas - cuantas*size
 
@@ -146,13 +142,6 @@ wperm = 0.114 !water permitivity in units of e^2/kT.nm
 !   iter_per_rank = iter_per_rank + 1
 !    cuantas = cuantas + 1
 !endif
-
-!allocate (Ntrans(long,cuantas))
-!allocate (Uchain(cuantas))
-!allocate (inn(0:Npoorsv,cuantas,ntot,base))
-!allocate (innc(0:Ncharge,cuantas,ntot,base))
-!allocate (maxpos(cuantas,2*ntot))
-!allocate (minpos(cuantas,2*ntot))
 
 !first=0
 !last=0
@@ -227,27 +216,41 @@ endif
 ! CHAIN GENERATION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+call initcha              ! init matrices for chain generation
+
+conf=0                    ! counter of number of conformations
+rest_rot_tosend=0
+rest_rot_toreceive=0
+
+if (rank.gt.0) then
+   call MPI_RECV(seed, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
+   call MPI_RECV(rest_rot_toreceive, 1, MPI_INTEGER, rank-1, size+rank-1, MPI_COMM_WORLD, status, ierr)
+   print*, "rank", rank, "received from rank", rank-1,"seed =", seed
+endif
+
+cuantas= cuantas+rest_rot_toreceive
+rest_rot_tosend= mod(cuantas,12)
+
+print*, "rank",rank,"rest of rot",rest_rot_tosend
+
+allocate (Ntrans(long,cuantas))
+allocate (Uchain(cuantas))
+allocate (inn(0:Npoorsv,cuantas,ntot,base))
+allocate (innc(0:Ncharge,cuantas,ntot,base))
+allocate (maxpos(cuantas,2*ntot))
+allocate (minpos(cuantas,2*ntot))
+
 inn = 0
 innc = 0
 sumRgyr(:)=0.
 sumUgyr=0.
 Rgyrprom(:)=0.
 
-
-
-call initcha              ! init matrices for chain generation
-
-conf=0                    ! counter of number of conformations
-
-if (rank.gt.0) then
-   call MPI_RECV(seed, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
-!   call MPI_RECV(rest_rot_toreceive, 1, MPI_INTEGER, rank-1, size+rank-1, MPI_COMM_WORLD, status, ierr)
-!   cuantas= cuantas+rest_rot_toreceive
-   print*, "rank", rank, "received from rank", rank-1,"seed =", seed
-endif
-
 do while (conf.lt.cuantas)
 
+!   print*, "conf is",conf,". Seed is", seed
+   last_seed=seed
    call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr)
    
    do is=0,Npoorsv+1
@@ -318,8 +321,12 @@ do while (conf.lt.cuantas)
 enddo ! while
 
 if (rank.lt.size-1) then
-   call MPI_SEND(seed, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
-!  call MPI_SEND(rest_rot_tosend, 1, MPI_INTEGER, rank+1, rank+size, MPI_COMM_WORLD, ierr)
+   call MPI_SEND(rest_rot_tosend, 1, MPI_INTEGER, rank+1, rank+size, MPI_COMM_WORLD, ierr)
+   if (rest_rot_tosend.eq.0) then
+      call MPI_SEND(seed, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
+   else
+      call MPI_SEND(last_seed, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
+   endif
    print*, "rank", rank, "sent to rank", rank+1,"seed=", seed
 endif
 

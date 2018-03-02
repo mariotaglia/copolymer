@@ -101,16 +101,18 @@ sga=sin(gama)
 
 do i=1,n+1               ! rotation segmentos
 
-a=xend(1,i)
-b=xend(2,i)
-c=xend(3,i)
+  a=xend(1,i)
+  b=xend(2,i)
+  c=xend(3,i)
 
-xendr(1,i)=a*(-cbe*sal*sga+cal*cga)-b*(cbe*sal*cga+cal*sga)+c*sbe*sal
-xendr(2,i)=a*(cbe*cal*sga+sal*cga)+b*(cbe*cal*cga-sal*sga)-c*sbe*cal
-xendr(3,i)=a*sbe*sga+b*sbe*cga+c*cbe
+  xendr(1,i)=a*(-cbe*sal*sga+cal*cga)-b*(cbe*sal*cga+cal*sga)+c*sbe*sal
+  xendr(2,i)=a*(cbe*cal*sga+sal*cga)+b*(cbe*cal*cga-sal*sga)-c*sbe*cal
+  xendr(3,i)=a*sbe*sga+b*sbe*cga+c*cbe
 
 enddo
+
 return
+
 end
 
 
@@ -182,40 +184,48 @@ do i=3,long          ! loop over remaining positions!
 123     rn=rands(seed)
 state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
 
-if (state.eq.3) then 
-state=2
-endif
+  if (state.eq.3) then 
+    state=2
+  endif
 
-if (state.eq.0) then
+  if (state.eq.0) then
 !*********************************** TRANS     
-  call mrrrr(m,tt,mm)
-  do ii=1,3
-  do j=1,3
-  m(ii,j)=mm(ii,j)
-  enddo
-  enddo
-  if(i.gt.3)Uconf=Uconf+Ut(segpoorsv(i-1)) ! first segment to have a dihedral angle is i = 4
+    call mrrrr(m,tt,mm)
+
+    do ii=1,3
+       do j=1,3
+          m(ii,j)=mm(ii,j)
+       enddo
+    enddo
+
+    if(i.gt.3)Uconf=Uconf+Ut(segpoorsv(i-1)) ! first segment to have a dihedral angle is i = 4
                                            ! OJO : the order of chain grown changes the assigment of diehdral angles
-  if(i.gt.3)Ntconf(i-1) = 1   
-elseif (state.eq.1) then
+    if(i.gt.3)Ntconf(i-1) = 1   
+
+  elseif (state.eq.1) then
+
 !********************************** GAUCHE +
-  call mrrrr(m,tp,mm)
-  do ii=1,3
-  do j=1,3
-  m(ii,j)=mm(ii,j)
-  enddo
-  enddo
-  if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1))
-elseif (state.eq.2) then
+    call mrrrr(m,tp,mm)
+    do ii=1,3
+      do j=1,3
+         m(ii,j)=mm(ii,j)
+      enddo
+    enddo
+
+    if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1))
+
+  elseif (state.eq.2) then
 !********************************** GAUCHE -
-  call mrrrr(m,tm,mm)
-  do ii=1,3
-  do j=1,3
-  m(ii,j)=mm(ii,j)
-  enddo
-  enddo
-  if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1))
-endif
+    call mrrrr(m,tm,mm)
+    do ii=1,3
+      do j=1,3
+         m(ii,j)=mm(ii,j)
+      enddo
+    enddo
+
+    if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1))
+
+  endif
 
 x(1)=m(1,1)*lseg
 x(2)=m(2,1)*lseg
@@ -228,50 +238,55 @@ xend(3,i)=xend(3,i-1)+x(3)
 enddo
 
 dista=0.0                       ! check self avoiding constraint (segmentos)
+
 do k1=1,long
-do k2=k1+1,long
-dista=(xend(1,k2)-xend(1,k1))**(2.0)
-dista=dista+(xend(2,k2)-xend(2,k1))**(2.0)
-dista=dista+(xend(3,k2)-xend(3,k1))**(2.0)
-dista=sqrt(dista)+tolerancia
-if (dista.lt.lseg) then
-goto 223
-endif
-enddo
+  do k2=k1+1,long
+    dista=(xend(1,k2)-xend(1,k1))**(2.0)
+    dista=dista+(xend(2,k2)-xend(2,k1))**(2.0)
+    dista=dista+(xend(3,k2)-xend(3,k1))**(2.0)
+    dista=sqrt(dista)+tolerancia
+    if (dista.lt.lseg) then
+       goto 223
+    endif
+  enddo
 enddo
 
 do i=1,long
-seglength(segpoorsv(i))=seglength(segpoorsv(i))+1
-do j=1,long
-if (i.ne.j) then
-distance(i,j)=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-xend(3,j))**2.0)
-distance(i,j)=sqrt(distance(i,j))
-if (segpoorsv(i).eq.segpoorsv(j))Rgyr(segpoorsv(i))=Rgyr(segpoorsv(i))+distance(i,j)**2.0
-Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)+distance(i,j)**2.0
-Ugyr=Ugyr-0.5*st(segpoorsv(i),segpoorsv(j))*(lseg/distance(i,j))**(dimf(segpoorsv(i),segpoorsv(j)))
-endif
-enddo
+  seglength(segpoorsv(i))=seglength(segpoorsv(i))+1
+  do j=1,long
+
+    if (i.ne.j) then
+      distance(i,j)=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-xend(3,j))**2.0)
+      distance(i,j)=sqrt(distance(i,j))
+      if (segpoorsv(i).eq.segpoorsv(j))Rgyr(segpoorsv(i))=Rgyr(segpoorsv(i))+distance(i,j)**2.0
+      Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)+distance(i,j)**2.0
+      Ugyr=Ugyr-0.5*st(segpoorsv(i),segpoorsv(j))*(lseg/distance(i,j))**(dimf(segpoorsv(i),segpoorsv(j)))
+    endif
+
+  enddo
 enddo
 
 do is=0,Npoorsv
-Rgyr(is)=sqrt(Rgyr(is)/2.0)
-Rgyr(is)=Rgyr(is)/float(seglength(is))
+  Rgyr(is)=sqrt(Rgyr(is)/2.0)
+  Rgyr(is)=Rgyr(is)/float(seglength(is))
 enddo 
+
 Rgyr(Npoorsv+1)=sqrt(Rgyr(Npoorsv+1)/2.0)
 Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)/float(long)
 
 ncha=0
+
 do i=1,12
 
-call com(xend,xendcom,long)       ! substracts center of mass
-call rota(xendcom,xendr,long,test)   ! rotate chain conformation ncha time
-ncha=ncha+1
+  call com(xend,xendcom,long)       ! substracts center of mass
+  call rota(xendcom,xendr,long,test)   ! rotate chain conformation ncha time
+  ncha=ncha+1
 
-do j=1,long
- chains(1,j,ncha)=xendr(1,j)       ! output 
- chains(2,j,ncha)=xendr(2,j)
- chains(3,j,ncha)=xendr(3,j)
-enddo
+  do j=1,long
+    chains(1,j,ncha)=xendr(1,j)       ! output 
+    chains(2,j,ncha)=xendr(2,j)
+    chains(3,j,ncha)=xendr(3,j)
+  enddo
 enddo
 
 if (ncha.eq.0) goto 223
@@ -288,16 +303,21 @@ implicit none
 integer n, i, k, long
 real*8 xend(3,long+5),xendcom(3,long+5)
 real*8 cm(3)
+
 cm = 0.0
+
 do k = 1, long
-do i = 1,3
-cm(i) = cm(i) + xend(i,k)
+  do i = 1,3
+    cm(i) = cm(i) + xend(i,k)
+  enddo
 enddo
-enddo
+
 cm = cm/float(k)
+
 do k = 1, long
-do i = 1,3
-xendcom(i,k) = xend(i,k) - cm(i)
+  do i = 1,3
+     xendcom(i,k) = xend(i,k) - cm(i)
+  enddo
 enddo
-enddo
+
 end subroutine

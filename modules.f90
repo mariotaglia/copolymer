@@ -84,7 +84,7 @@ real*8 xsolbulk, phibulkpol           ! volume fraction of solvent in bulk
 endmodule
 
 module seed1
-integer seed              ! seed for random number generator
+integer seed, last_seed              ! seed for random number generator
 endmodule
 
 
