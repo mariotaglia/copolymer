@@ -7,6 +7,7 @@ use MPI
 use mkai
 implicit none
 integer i, j
+integer block_cuantas, restcuantas
 
 !     reading in of variables from stdin
 
@@ -19,13 +20,10 @@ read(8,*)ntot, maxntotcounter_ini, maxntot
 read(8,*)nada
 read(8,*)totalcuantas
 
-cuantas=int(totalcuantas/size)
-restcuantas=totalcuantas-cuantas*size
-
-if ((restcuantas.ne.0).and.(rank.lt.restcuantas)) then
-   cuantas=cuantas+1
-endif
-
+block_cuantas=int(totalcuantas/size/12)
+cuantas=block_cuantas*12
+restcuantas=totalcuantas-size*12*block_cuantas
+if (rank.eq.(size-1))cuantas=cuantas+restcuantas
 
 read(8,*)nada
 read(8,*)long 
@@ -103,4 +101,10 @@ do i = 1, long
 read(9,*),segpoorsv(i), chargetype(i)
 enddo
 
+electroflag=0
+
+do i=1,long
+   if (chargetype(i).ne.0)electroflag=1
+enddo
+print*, "electroflag is", electroflag
 end

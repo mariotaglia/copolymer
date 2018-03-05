@@ -37,7 +37,7 @@ real*8, allocatable :: avpol(:,:) ! volume fraction polymers
 real*8, allocatable :: avpolc(:,:) ! volume fraction of charged segments 
 real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xsol(:)
-INTEGER totalcuantas, cuantas, restcuantas, rest_rot_tosend, rest_rot_toreceive, iter_per_rank
+INTEGER totalcuantas, cuantas
 integer curvature
 real*8, allocatable :: Ug(:), Ut(:)
 
@@ -72,6 +72,7 @@ real*8 vpol, vsol, vpos, vneg
 endmodule
 
 module mcharge
+integer electroflag
 integer*8 Ncharge
 integer*8, allocatable :: charge(:), chargetype(:)
 real*8, allocatable :: phi(:), avpos(:), avneg(:), xcharge(:)
