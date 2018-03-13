@@ -90,10 +90,14 @@ do i = 1, ntot
 
   enddo
 
-  do ic = 1,Ncharge
-     protemp=-phi(i)*float(charge(ic))
-     xpotc(ic,i)=dexp(protemp)
-  enddo
+!  if (electroflag.eq.0) then
+!    xpotc(:,i)=1
+!  else
+    do ic = 1,Ncharge
+      protemp=-phi(i)*float(charge(ic))
+      xpotc(ic,i)=dexp(protemp)
+    enddo
+!  endif
 
 enddo
 
@@ -326,7 +330,8 @@ do i = 1,ntot
      f(i+n*(Npoorsv+1))=xcharge(i)*inverse_of_wperm+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)  
 !     f(i+n*(Npoorsv+1))=xcharge(i)/wperm+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)  
     case(2)
-     f(i+n*(Npoorsv+1))=xcharge(i)*inverse_of_wperm+2*(phi(i+1)-phi(i))*delta**(-2)/(i+1/2)+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)
+     f(i+n*(Npoorsv+1))=xcharge(i)*inverse_of_wperm + 2*(phi(i+1)-phi(i))*delta**(-2)/(float(i)+0.5)
+     f(i+n*(Npoorsv+1))=f(i+n*(Npoorsv+1))+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)
 !     f(i+n*(Npoorsv+1))=xcharge(i)/wperm+2*(phi(i+1)-phi(i))*delta**(-2)/(i+1/2)+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)
     end select
 
@@ -354,10 +359,6 @@ end do
 
 if(rank.eq.0) then 
    print*, iter, algo, q(1), Q(2), q(3), q(4)
-!   time2= MPI_WTIME()
-!   duration=time2-time1
-!   print*, "big loop took", loopduration, "out of a total of", duration
-!   if (duration.le.loopduration)print*, "DANGER ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! ! DANGER --------> loop duration > duration"
 endif
 
 norma=algo
