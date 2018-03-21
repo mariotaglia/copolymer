@@ -24,8 +24,8 @@ integer k,i,j,k1,k2,ii, jj,iz,ic       ! dummy indices
 integer is, js
 integer err
 integer n
-real*8 avpol_tmp(0:Npoorsv+2,2*ntot), avpolc_tmp(Ncharge,2*ntot)
-real*8 avpol_tosend(0:Npoorsv+2, ntot), avpolc_tosend(Ncharge,2*ntot)
+real*8 avpol_tmp(0:Npoorsv,2*ntot), avpolc_tmp(Ncharge,2*ntot)
+real*8 avpol_tosend(0:Npoorsv, ntot), avpolc_tosend(Ncharge,ntot)
 real*8 xpol_tosend(ntot)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
