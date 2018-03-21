@@ -1,0 +1,74 @@
+File name: fort.8
+Description: general input file
+Example with comments:
+
+# curvature # 
+0
+#dimz maxntotcounter_ini maxntot# ! comment: dimz is the nº of layers of the box, maxntotcounter_ini is the first value of the maxntot loop and maxntot is the final value.
+80 18 18
+# cuantas# ! comment: total number of conformations
+100000
+#long# ! comment: length of the chain
+15
+#Npoorsv# ! comment: number of types of poor solvent segments (2 for triblock anphiphiles)
+2
+#scale interations intermolecule# ! comment: values of interaction parameter between segments
+3.0 ! comment: 1 - 1 interaction
+0.0     3.0 ! comment: 1 - 2 and 2 - 2 interaction
+#dimf# ! comment: exponent for the geometric dependency of interactions (6 for vdW interactions)
+6
+0       6
+#Ncharge# (# of charge types) 
+1
+#charge# !comment: charge of each charge type
+1
+#infile# ! comment: flag that indicates if the initial guess should be read from files (1) (fort.100 fort.101 etc) or not
+1
+#flagkai# ! comment: flag that indicates if the geometric dependency of interactions should be calculated (1) or read (0) from files (kais.001.001.dat kais.001.002.dat etc) 
+0
+#npolini, npolfirst, npollast, npolstep#  
+0.51 0.1 1.0 0.01
+#eps#
+0.0
+#Xulimit#
+5
+#lseg# ! length of one segment
+0.5
+#Ut(0:Npoorsv), Ug(0:Npoorsv)# ! comment:  energy of the trans and gauche states of each block
+0.0 0.0
+0.0 0.0
+0.0 0.0
+#Csalt /M# ! comment: concentration of salt in molar
+0.1
+
+File name: kais.001.001.dat kais.001.002.dat etc
+Description: geometric dependency of 1-1 interactions, 1-2 interactions, etc. Should be added if flagkai is 0.
+
+File name: fort.100 
+Description: densitysolvent of the first case. Should be added if infile is 1.
+
+File name: fort.101 fort.102 etc
+Description: densitypolymer001 densitypolymer102 etc of the first case. Should be added if infile is 1.
+
+File name: structure.in
+Description: a text file with 2 columns. The first column indicates which type is each segments. The second column indicates which type of charge has each segment. Poor solvent segments are 1, 2, 3, etc. Hydrophilic segments are 0. Usually 1 indicates tail segments and 2 indicates linker segmentes.
+
+Example:
+
+1	0	
+1	0
+1	0	
+1	0	
+2	0
+2	0
+2	0
+2	0
+0	0
+0	0
+0	0
+0	0
+0	0
+0	0
+0	1
+
+
