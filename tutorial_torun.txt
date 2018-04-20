@@ -50,6 +50,11 @@ Description: densitysolvent of the first case. Should be added if infile is 1.
 File name: fort.101 fort.102 etc
 Description: densitypolymer001 densitypolymer102 etc of the first case. Should be added if infile is 1.
 
+File: epsilon.in
+Description: a textfile with a matrix with inter segments interactions. It is generated automatically by the python script from martini parameters 
+Example: 
+
+
 File name: structure.in
 Description: a text file with 2 columns. The first column indicates which type is each segments. The second column indicates which type of charge has each segment. Poor solvent segments are 1, 2, 3, etc. Hydrophilic segments are 0. Usually 1 indicates tail segments and 2 indicates linker segmentes.
 
