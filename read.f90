@@ -31,17 +31,17 @@ read(8,*)long
 READ(8,*)nada
 read(8,*)Npoorsv
 
-read(8,*)nada
-allocate(st(0:Npoorsv,0:Npoorsv))
-st(0,0)=0.
-do i = 1, Npoorsv
-st(0,i)=0.
-st(i,0)=0.
-read(8,*)(st(i,j), j = 1, i)
- do j = 1, i
-   st(j,i) = st(i,j)
- enddo
-enddo
+!read(8,*)nada
+!allocate(st(0:Npoorsv,0:Npoorsv))
+!st(0,0)=0.
+!do i = 1, Npoorsv
+!st(0,i)=0.
+!st(i,0)=0.
+!read(8,*)(st(i,j), j = 1, i)
+! do j = 1, i
+!   st(j,i) = st(i,j)
+! enddo
+!enddo
 
 read(8,*)nada
 allocate(dimf(0:Npoorsv,0:Npoorsv))
@@ -99,6 +99,21 @@ allocate(segpoorsv(long))
 allocate(chargetype(long))
 do i = 1, long
 read(9,*),segpoorsv(i), chargetype(i)
+enddo
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Read st(i,j) from epsilon.in
+
+open(file='epsilon.in', unit=10)
+allocate(st(0:Npoorsv,0:Npoorsv))
+st(0,0)=0.
+do i = 1, Npoorsv
+st(0,i)=0.
+st(i,0)=0.
+read(10,*)(st(i,j), j = 1, i)
+ do j = 1, i
+   st(j,i) = st(i,j)
+ enddo
 enddo
 
 electroflag=0
