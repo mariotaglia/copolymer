@@ -91,12 +91,11 @@ x1 = x1_old
 CALL MPI_BCAST(x1, (Npoorsv+2)*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
 
 !print*,"kinsol ok"
-
-print*, "I AM RANK !!!!!",rank, "calling fkfun"
+!print*, "I AM RANK !!!!!",rank, "calling fkfun"
 
 call fkfun(x1, f, ier) ! todavia no hay solucion => fkfun 
 
-print*, "call_fkfun1 done", rank
+!print*, "call_fkfun1 done", rank
 
 ier = 0
 
