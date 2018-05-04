@@ -12,9 +12,6 @@ Example with comments:
 15
 #Npoorsv# ! comment: number of types of poor solvent segments (2 for triblock anphiphiles)
 2
-#scale interations intermolecule# ! comment: values of interaction parameter between segments
-3.0 ! comment: 1 - 1 interaction
-0.0     3.0 ! comment: 1 - 2 and 2 - 2 interaction
 #dimf# ! comment: exponent for the geometric dependency of interactions (6 for vdW interactions)
 6
 0       6
@@ -51,9 +48,14 @@ File name: fort.101 fort.102 etc
 Description: densitypolymer001 densitypolymer102 etc of the first case. Should be added if infile is 1.
 
 File: epsilon.in
-Description: a textfile with a matrix with inter segments interactions. It is generated automatically by the python script from martini parameters 
+Description: a textfile with a matrix with inter segment interactions. It is generated automatically by the python script from martini parameters 
 Example: 
 
+2.1604414403 4.32088288061 4.32088288061 5.18505945673
+4.32088288061 6.48132432091 4.32088288061 7.34550089703
+4.32088288061 4.32088288061 6.48132432091 9.50594233733
+5.18505945673 7.34550089703 9.50594233733 19.4439729627
+0: W    1: PEO  2: Gly  3: Ala  4: Tail
 
 File name: structure.in
 Description: a text file with 2 columns. The first column indicates which type is each segments. The second column indicates which type of charge has each segment. Poor solvent segments are 1, 2, 3, etc. Hydrophilic segments are 0. Usually 1 indicates tail segments and 2 indicates linker segmentes.

@@ -1,8 +1,6 @@
 import numpy
 
 beadslist=["Qda","Qd","Qa","Q0","P5","P4","P3","P2","P1","Nda","Nd","Na","N0","C5","C4","C3","C2","C1"]
-epslist=[5.6, 5.0, 4.5, 4.0, 3.5, 3.1, 2.7, 2.3, 2.0, 2.0]
-sigmalist=[0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.62]
 
 print("------------------------------------------------------------------------------------------------")
 print("Possible types of martini beads: Qda  Qd  Qa  Q0  P5  P4  P3  P2  P1  Nda  Nd  Na  N0  C5  C4  C3  C2  C1")
@@ -29,6 +27,8 @@ for i in range(0,n):
    name= name+str(i)+": "+name_tmp+"	"
 
 data=numpy.loadtxt("table_martini.dat", skiprows=1, usecols=(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18))
+epslist=data[:][18]
+sigmalist=data[:][19]
 
 epsilon=numpy.zeros((n,n))
 epsilon_th=numpy.zeros((n,n))
