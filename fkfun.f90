@@ -36,13 +36,14 @@ real*8 sumtrans_tosend(ntot,long)
 real*8 sumtrans(ntot,long)
 real*8 inverse_of_vpolvsol, inverse_of_wperm, inverse_of_two
 
-! Jefe
-!flagsolver=1
+print*, 'SOY ', rank
 
-!if(rank.eq.0) then ! llama a subordinados y pasa vector x
-!   time1=MPI_WTIME()
-!   CALL MPI_BCAST(x, (Npoorsv+1)*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
-!endif
+! Jefe
+if(rank.eq.0) then ! llama a subordinados y pasa vector x
+   flagsolver = 1
+   CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,err)
+   CALL MPI_BCAST(x, 2*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
+endif
 
 n = ntot
 
@@ -214,22 +215,17 @@ avpolc_tosend(:, 1:ntot)=avpolc_tmp(:, 1:ntot)
 
 !  Junta avpol       
 
-   call MPI_ALLREDUCE(avpolc_tosend, avpolc, Ncharge*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(avpol_tosend, avpol, (Npoorsv+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-!   call MPI_ALLREDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(all_tosend, all_toreceive, ntot*4, MPI_DOUBLE_PRECISION,MPI_SUM, MPI_COMM_WORLD, err)
-!   call MPI_ALLREDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-!   call MPI_ALLREDUCE(sumprolnpro_tosend, sumprolnpro, ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-!   call MPI_ALLREDUCE(sumprouchain_tosend, sumprouchain, ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(sumtrans_tosend, sumtrans, ntot*long, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_REDUCE(avpolc_tosend, avpolc, Ncharge*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_REDUCE(avpol_tosend, avpol, (Npoorsv+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_REDUCE(all_tosend, all_toreceive, ntot*4, MPI_DOUBLE_PRECISION,MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_REDUCE(sumtrans_tosend, sumtrans, ntot*long, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
 !!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 
 
-!if(rank.ne.0) then
-!   ier2 = 0
-!   goto 3333
-
-!endif
+if(rank.ne.0) then
+   ier2 = 0
+   goto 3333
+endif
 
 !if (rank.eq.0) then
 !   looptime2=MPI_WTIME()
@@ -363,7 +359,7 @@ endif
 
 norma=algo
 
-!3333 continue
+3333 continue
 
 
 ier2 = 0
