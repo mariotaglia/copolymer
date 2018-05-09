@@ -48,16 +48,16 @@ n = ntot
 
 ! chain parameters
 
-xh(1:n)=x(1:n) !solvent volume fraction
+xh(1:n)=x(1:n) ! solvent volume fraction (xh) ir read from the x provided by kinsol
 xh(n+1:2*n)=xsolbulk
 
-phi(1:n)=x(n*(Npoorsv+1)+1:(Npoorsv+2)*n)
-phi(n+1:2*n)=0.0 !bulk
+phi(1:n)=x(n*(Npoorsv+1)+1:(Npoorsv+2)*n) ! electric potential (phi) is read from the x provided by kinsol
+phi(n+1:2*n)=0.0 ! bulk
 
-xtotal(:,n+1:2*n)=0.0 !bulk
+xtotal(:,n+1:2*n)=0.0 ! bulk
 
 do is = 1,Npoorsv
-   xtotal(is,1:n) = x(1+n*is:n+n*is) !segments volume fraction
+   xtotal(is,1:n) = x(1+n*is:n+n*is) !  segments volume fractions (xtotal) are read from the x provided by kinsol
 enddo
 
 
@@ -90,14 +90,10 @@ do i = 1, ntot
 
   enddo
 
-!  if (electroflag.eq.0) then
-!    xpotc(:,i)=1
-!  else
-    do ic = 1,Ncharge
-      protemp=-phi(i)*float(charge(ic))
-      xpotc(ic,i)=dexp(protemp)
-    enddo
-!  endif
+  do ic = 1,Ncharge
+    protemp=-phi(i)*float(charge(ic))
+    xpotc(ic,i)=dexp(protemp)
+  enddo
 
 enddo
 
@@ -134,21 +130,27 @@ sumtrans = 0.0
 all_tosend = 0.0
 all_toreceive = 0.0
 
-expmupos=xsalt*vsol*vpos/xsolbulk**vpos
-expmuneg=xsalt*vsol*vneg/xsolbulk**vneg !LOKE
 
 do j=1,ntot
-   avpos(j)=expmupos*xh(j)**vpos*dexp(-phi(j))
-   avneg(j)=expmuneg*xh(j)**vneg*dexp(phi(j))
+   avpos(j)=vpos*expmupos*xh(j)**vpos*dexp(-phi(j)) ! volume fraction of cations
+   avneg(j)=vneg*expmuneg*xh(j)**vneg*dexp(phi(j)) ! volume fraction of anions
+   avHplus(j)=expmuHplus*xh(j)*dexp(phi(j)) ! volume fraction of H+
+   avOHmin(j)=expmuOHmin*xh(j)*dexp(-phi(j)) ! volume fraction of OH-
+
+   do is=1,Nacids
+      fAmin(is,j)=1.0/(ka(is)*xh(j)/avHplus(j)+1.0)
+   enddo
+
+   do is=1,Nbasics
+      fBHplus(is,j)=1.0/(kb(is)*xh(j)/avHplus(j)+1.0)
+   enddo
+
 enddo
 
 !do j=1,ntot
 !avneg(j)=xsalt*vneg*vsol*xh(j)**vneg*dexp(phi(j))/xsolbulk**vneg !volume fraction of anion, vneg in units of vsol
 !avpos(j)=xsalt*vpos*vsol*xh(j)**vpos*dexp(-phi(j))/xsolbulk**vpos !volume fraction of cation, vpos in units of vsol
 !enddo
-
-!if (rank.eq.0)looptime1=MPI_WTIME()
-
 
 do ii=1,maxntotcounter ! position of center of mass 
 

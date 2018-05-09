@@ -100,8 +100,6 @@ double  precision norma_tosend
 
 integer in1tmp(long)
 
-!if (rank.eq.0)solvetime1=MPI_WTIME()
-
 allocate(denspolfilename(0:Npoorsv))
 
 error = 1.0d-6
@@ -128,11 +126,27 @@ vpol= ((4.0/3.0)*pi*(0.3)**3)/vsol  ! volume polymer segment in units of vsol
 vneg=0.5 !volume of anion in units of vsol
 vpos=0.5 !volume of cation in units of vsol LOKE
 
-xsalt=Csalt*6.02e23*1e-24 !salt conc. in unit of nº of particles/nm³
-xsolbulk=1-xsalt*vsol*(vneg+vpos) ! bulk volume fraction of solvent 
+pKw=14.0
+
+cHplus = 10**(-pHbulk)    ! concentration H+ in bulk
+xHplusbulk = (cHplus*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
+pOHbulk= pKw -pHbulk
+cOHmin = 10**(-pOHbulk)   ! concentration OH- in bulk
+xOHminbulk = (cOHmin*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol  
+
+rhosalt=Csalt*Na/(1.0d24) !salt conc. in unit of nº of particles/nm³
+xsolbulk=1-rhosalt*vsol*(vneg+vpos)-xHplusbulk-xOHminbulk ! bulk volume fraction of solvent 
 wperm = 0.114 !water permitivity in units of e^2/kT.nm
 
-!print*, "I am rank", rank, "and I calculate", iter_per_rank, "conformations out of", cuantas
+!expmupos=xsalt*vsol*vpos/xsolbulk**vpos
+expmupos=rhosalt*vsol/xsolbulk**vpos ! OJO modificar free energy 
+!expmuneg=xsalt*vsol*vneg/xsolbulk**vneg 
+expmuneg=rhosalt*vsol/xsolbulk**vneg           
+
+expmuHplus=xHplusbulk/xsalt ! vHplus=vsol
+expmuOHmin=xOHminbulk/xsalt ! vOHminus=vsol
+
+
 print*, "I am rank", rank, "and I generate and calculate", cuantas, "conformation out of", totalcuantas
 
 ! eps

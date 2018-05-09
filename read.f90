@@ -26,10 +26,10 @@ restcuantas=totalcuantas-size*12*block_cuantas
 if (rank.eq.(size-1))cuantas=cuantas+restcuantas
 
 read(8,*)nada
-read(8,*)long 
+read(8,*)long !number of segments 
 
 READ(8,*)nada
-read(8,*)Npoorsv
+read(8,*)Npoorsv !number of types of poor sv segments
 
 !read(8,*)nada
 !allocate(st(0:Npoorsv,0:Npoorsv))
@@ -56,12 +56,18 @@ read(8,*)(dimf(i,j), j = 1, i)
 enddo
 
 read(8,*)nada
-read(8,*)Ncharge
+read(8,*)Nacids, Nbasics ! number of types of acid segments and basic segments
+
+allocate(Ka(Nacids),Kb(Nbasics))
 
 read(8,*)nada
-allocate(charge(Ncharge))
-do i=1,Ncharge
-read(8,*)charge(i)
+do i=1,Nacids
+read(8,*)ka(i) ! acid constants of each acid segment
+enddo
+
+read(8,*)nada
+do i=1,Nbasics ! basic constants of each basic segment
+read(8,*)kb(i)
 enddo
 
 READ(8,*)nada
@@ -91,14 +97,19 @@ enddo
 
 read(8,*)nada
 read(8,*)Csalt
+
+read(8,*)nada
+read(8,*)pHbulk
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Read chain structure from structure.in
 
 open(file='structure.in', unit = 9)
 allocate(segpoorsv(long))
-allocate(chargetype(long))
+allocate(acidtype(long))
+allocate(basictype(long))
 do i = 1, long
-read(9,*),segpoorsv(i), chargetype(i)
+read(9,*),segpoorsv(i), acidtype(i), basictype(i) 
 enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -118,8 +129,4 @@ enddo
 
 electroflag=0
 
-do i=1,long
-   if (chargetype(i).ne.0)electroflag=1
-enddo
-print*, "electroflag is", electroflag
 end
