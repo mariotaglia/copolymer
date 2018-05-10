@@ -201,15 +201,15 @@ do ii=1,maxntotcounter ! position of center of mass
          k = j-minpos(i,ii)+1 ! k may be larger than ntot
 
          do is = 0, Npoorsv 
-            avpol_tmp(is,j)=avpol_tmp(is,j)+pro(i)*vpol*inn(is,i,ii,k)*factorcurv(ii,j) ! avpol is volume fraction of segment "is" divided by vsol 
+            avpol_tmp(is,j)=avpol_tmp(is,j)+pro(i)*inn(is,i,ii,k)*factorcurv(ii,j) ! avpol_tmp is avg number of segments "is" at position "j" 
          enddo
 
          do ic = 1,Nacids
-            avpola_tmp(ic,j)=avpola_tmp(ic,j)+pro(i)*vpol*inn_a(ic,i,ii,k)*factorcurv(ii,j) ! avpol_a is volume fraction of acid segment "ic" divided by vsol
+            avpola_tmp(ic,j)=avpola_tmp(ic,j)+pro(i)*inn_a(ic,i,ii,k)*factorcurv(ii,j) ! avpola_tmp is avg number of acid segments "ic" at position "j"
          enddo
 
          do ic = 1,Nbasics
-            avpolb_tmp(ic,j)=avpolb_tmp(ic,j)+pro(i)*vpol*inn_b(ic,i,ii,k)*factorcurv(ii,j) ! avpol_b is volume fraction of basic segments "ic" divided by vsol
+            avpolb_tmp(ic,j)=avpolb_tmp(ic,j)+pro(i)*inn_b(ic,i,ii,k)*factorcurv(ii,j) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
          enddo
      
       enddo
@@ -288,7 +288,7 @@ do i = 1, ntot
 enddo
 
 
-sumpol = sumpol/(vpol*vsol)/long
+sumpol = sumpol/(vpol*vsol)/long !LOKE
 avpol = avpol/sumpol*npol ! integral of avpol is fixed
 avpola = avpola/sumpol*npol
 avpolb = avpolb/sumpol*npol
