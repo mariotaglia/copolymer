@@ -133,6 +133,8 @@ xHplusbulk = (cHplus*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
 pOHbulk= pKw -pHbulk
 cOHmin = 10**(-pOHbulk)   ! concentration OH- in bulk
 xOHminbulk = (cOHmin*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol  
+Ka = 10**(-pKa)
+Kb = 10**(-pKb)
 
 rhosalt=Csalt*Na/(1.0d24) !salt conc. in unit of nº of particles/nm³
 xsolbulk=1-rhosalt*vsol*(vneg+vpos)-xHplusbulk-xOHminbulk ! bulk volume fraction of solvent 
@@ -217,7 +219,8 @@ if (rank.gt.0) then
 endif
 
 inn = 0
-innc = 0
+inn_a = 0
+inn_b = 0 
 sumRgyr(:)=0.
 sumUgyr=0.
 Rgyrprom(:)=0.
@@ -285,7 +288,8 @@ do while (conf.lt.cuantas)
             do k = 1, long
               temp = in1tmp(k)-minpos(conf,ii)+1 
               inn(segpoorsv(k),conf,ii,temp) = inn(segpoorsv(k),conf,ii,temp) + 1      
-              innc(chargetype(k),conf,ii,temp) = innc(chargetype(k),conf,ii,temp) + 1
+              inn_a(acidtype(k),conf,ii,temp) = inn_a(acidtype(k),conf,ii,temp) + 1
+              inn_b(basictype,conf,ii,temp) = inn_b(basictype,conf,ii,temp) + 1
             enddo
        
          enddo ! ii

@@ -33,8 +33,8 @@ CHARACTER nada
 real*8 norma
 INTEGER adsmax
 integer ntot, maxntot, maxntotcounter_ini, maxntotcounter ! lattice sites
-real*8, allocatable :: avpol(:,:) ! volume fraction polymers 
-real*8, allocatable :: avpolc(:,:) ! volume fraction of charged segments 
+real*8, allocatable :: avpol(:,:) ! volume fraction of chains 
+real*8, allocatable :: avpola(:,:), avpolb(:,:) ! volume fraction of acid and basic segments 
 real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xsol(:)
 INTEGER totalcuantas, cuantas
@@ -43,7 +43,7 @@ real*8, allocatable :: Ug(:), Ut(:)
 
 integer first, last
 
-integer*2, allocatable :: innc(:,:,:,:),inn(:,:,:,:)
+integer*2, allocatable :: inn_a(:,:,:,:),inn_b(:,:,:,:), inn(:,:,:,:)
 integer, allocatable ::  maxpos(:,:)
 integer, allocatable ::  minpos(:,:)
 

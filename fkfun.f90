@@ -17,15 +17,15 @@ integer*4 ier2
 real*8 protemp, sttemp
 real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
 real*8 xh(2*ntot) 
-real*8 xpot(0:Npoorsv,2*ntot),xpotc(Ncharge,2*ntot)
+real*8 xpot(0:Npoorsv,2*ntot), xpot_a(Nacids,2*ntot), xpot_b(Nbasics,2*ntot)
 real*8 pro(cuantas)
 real*8 time1, time2, duration, looptime1, looptime2, loopduration
 integer k,i,j,k1,k2,ii, jj,iz,ic       ! dummy indices
 integer is, js
 integer err
 integer n
-real*8 avpol_tmp(0:Npoorsv,2*ntot), avpolc_tmp(Ncharge,2*ntot)
-real*8 avpol_tosend(0:Npoorsv, ntot), avpolc_tosend(Ncharge,ntot)
+real*8 avpol_tmp(0:Npoorsv,2*ntot), avpola_tmp(Nacids,2*ntot), avpolb_tmp(Nbasics,2*ntot)
+real*8 avpol_tosend(0:Npoorsv, ntot), avpola_tosend(Nacids,ntot), avpolb_tosend(Nbasics,ntot)
 real*8 xpol_tosend(ntot)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
@@ -66,10 +66,27 @@ enddo
 do i = 1, ntot
 !   protemp = dlog(xh(i)**(vpol)) !DANGER, vpol in units of vsol (dimensionless)
 !   xpot(0,i) = dexp(protemp)
-   xpot(0,i) = xh(i)**vpol
+   xpot(0,i) = xh(i)**vpol ! exp(-pi(r)v_pol) / units of v_pol: nm^3
 enddo 
 
 inverse_of_vpolvsol=1/(vpol*vsol)
+
+
+do j=1,ntot
+   avpos(j)=vpos*expmupos*xh(j)**vpos*dexp(-phi(j)) ! volume fraction of cations
+   avneg(j)=vneg*expmuneg*xh(j)**vneg*dexp(phi(j)) ! volume fraction of anions
+   avHplus(j)=expmuHplus*xh(j)*dexp(phi(j)) ! volume fraction of H+
+   avOHmin(j)=expmuOHmin*xh(j)*dexp(-phi(j)) ! volume fraction of OH-
+
+   do is=1,Nacids
+      fAmin(is,j)=1.0/(Ka(is)*xh(j)/avHplus(j)+1.0)
+   enddo
+
+   do is=1,Nbasics
+      fBHplus(is,j)=1.0/(Kb(is)*xh(j)/avHplus(j)+1.0)
+   enddo
+
+enddo
 
 do i = 1, ntot
   do is = 1, Npoorsv
@@ -90,28 +107,43 @@ do i = 1, ntot
 
   enddo
 
-  do ic = 1,Ncharge
-    protemp=-phi(i)*float(charge(ic))
-    xpotc(ic,i)=dexp(protemp)
+!  do ic = 1,Ncharge
+!    protemp=-phi(i)*float(charge(ic))
+!    xpotc(ic,i)=dexp(protemp)
+!  enddo
+
+  do ic = 1,Nacids
+    xpot_a(ic,i) = 1.0 - fAmin(ic,i) 
+  enddo
+
+  do ic = 1,Nbasics
+    xpot_b(ic,i)= 1.0 - fBHplus(ic,i)
   enddo
 
 enddo
+
 
 do is = 0,Npoorsv
    xpot(is,n+1:2*n)=xpot(is,n)
 enddo
 
-
-
-do ic = 1,Ncharge
-   xpotc(ic,n+1:2*n)=xpotc(ic,n)
+do ic = 1,Nacids
+   xpot_a(ic,n+1:2*n)=xpotc(ic,n)
 enddo
+
+do ic = 1,Nbasics
+   xpot_b(ic,n+1:2*n)=xpot_b(ic,n)
+enddo
+
 
 !    probability distribution
 
-avpolc_tosend = 0.0
-avpolc_tmp = 0.0
-avpolc = 0.0
+avpola_tosend = 0.0
+avpola_tmp = 0.0
+avpola = 0.0
+avpolb_tosend = 0.0
+avpolb_tmp = 0.0
+avpolb = 0.0
 avpol_tosend = 0.0
 xpol_tosend = 0.0
 avpol_tmp = 0.0
@@ -131,27 +163,6 @@ all_tosend = 0.0
 all_toreceive = 0.0
 
 
-do j=1,ntot
-   avpos(j)=vpos*expmupos*xh(j)**vpos*dexp(-phi(j)) ! volume fraction of cations
-   avneg(j)=vneg*expmuneg*xh(j)**vneg*dexp(phi(j)) ! volume fraction of anions
-   avHplus(j)=expmuHplus*xh(j)*dexp(phi(j)) ! volume fraction of H+
-   avOHmin(j)=expmuOHmin*xh(j)*dexp(-phi(j)) ! volume fraction of OH-
-
-   do is=1,Nacids
-      fAmin(is,j)=1.0/(ka(is)*xh(j)/avHplus(j)+1.0)
-   enddo
-
-   do is=1,Nbasics
-      fBHplus(is,j)=1.0/(kb(is)*xh(j)/avHplus(j)+1.0)
-   enddo
-
-enddo
-
-!do j=1,ntot
-!avneg(j)=xsalt*vneg*vsol*xh(j)**vneg*dexp(phi(j))/xsolbulk**vneg !volume fraction of anion, vneg in units of vsol
-!avpos(j)=xsalt*vpos*vsol*xh(j)**vpos*dexp(-phi(j))/xsolbulk**vpos !volume fraction of cation, vpos in units of vsol
-!enddo
-
 do ii=1,maxntotcounter ! position of center of mass 
 
    do i=1, cuantas ! loop over conformations
@@ -166,8 +177,12 @@ do ii=1,maxntotcounter ! position of center of mass
             pro(i)= pro(i) * xpot(is,j)**inn(is,i,ii,k)
          enddo
 
-         do ic = 1, Ncharge
-            pro(i)= pro(i) * xpotc(ic,j)**innc(ic,i,ii,k) 
+         do ic = 1, Nacids
+            pro(i)= pro(i) * xpot_a(ic,j)**inn_a(ic,i,ii,k) 
+         enddo
+
+         do ic = 1, Nbasics
+            pro(i)= pro(i) * xpot_b(ic,j)**inn_b(ic,i,ii,k)
          enddo
 
       enddo
@@ -186,11 +201,15 @@ do ii=1,maxntotcounter ! position of center of mass
          k = j-minpos(i,ii)+1 ! k may be larger than ntot
 
          do is = 0, Npoorsv 
-            avpol_tmp(is,j)=avpol_tmp(is,j)+pro(i)*vpol*inn(is,i,ii,k)*factorcurv(ii,j) 
+            avpol_tmp(is,j)=avpol_tmp(is,j)+pro(i)*vpol*inn(is,i,ii,k)*factorcurv(ii,j) ! avpol is volume fraction of segment "is" divided by vsol 
          enddo
 
-         do ic = 1,Ncharge
-            avpolc_tmp(ic,j)=avpolc_tmp(ic,j)+pro(i)*vpol*innc(ic,i,ii,k)*factorcurv(ii,j) ! avpol for charged segments
+         do ic = 1,Nacids
+            avpola_tmp(ic,j)=avpola_tmp(ic,j)+pro(i)*vpol*inn_a(ic,i,ii,k)*factorcurv(ii,j) ! avpol_a is volume fraction of acid segment "ic" divided by vsol
+         enddo
+
+         do ic = 1,Nbasics
+            avpolb_tmp(ic,j)=avpolb_tmp(ic,j)+pro(i)*vpol*inn_b(ic,i,ii,k)*factorcurv(ii,j) ! avpol_b is volume fraction of basic segments "ic" divided by vsol
          enddo
      
       enddo
@@ -200,7 +219,8 @@ do ii=1,maxntotcounter ! position of center of mass
 enddo   ! ii
 
 avpol_tosend(:, 1:ntot)=avpol_tmp(:, 1:ntot) 
-avpolc_tosend(:, 1:ntot)=avpolc_tmp(:, 1:ntot)
+avpola_tosend(:, 1:ntot)=avpola_tmp(:, 1:ntot)
+avpolb_tosend(:, 1:ntot)=avpolb_tmp(:, 1:ntot)
 
 !------------------ MPI -----------------`-----------------------------
 !1. Todos al jefe
@@ -216,7 +236,8 @@ avpolc_tosend(:, 1:ntot)=avpolc_tmp(:, 1:ntot)
 
 !  Junta avpol       
 
-   call MPI_ALLREDUCE(avpolc_tosend, avpolc, Ncharge*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(avpola_tosend, avpola, Nacids*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(avpolb_tosend, avpolb, Nbasics*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(avpol_tosend, avpol, (Npoorsv+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
 !   call MPI_ALLREDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(all_tosend, all_toreceive, ntot*4, MPI_DOUBLE_PRECISION,MPI_SUM, MPI_COMM_WORLD, err)
@@ -269,7 +290,8 @@ enddo
 
 sumpol = sumpol/(vpol*vsol)/long
 avpol = avpol/sumpol*npol ! integral of avpol is fixed
-avpolc = avpolc/sumpol*npol
+avpola = avpola/sumpol*npol
+avpolb = avpolb/sumpol*npol
 sumpol = 0.0
 
 
