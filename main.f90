@@ -82,6 +82,8 @@ CHARACTER*24 xtotalfilename
 CHARACTER*18 ntransfilename
 character*27 densposfilename
 character*27 densnegfilename
+character*24 densHplusfilename
+character*24 densOHminfilename
 character*50, allocatable :: denspolfilename(:)
 
 integer countfile         ! enumerates the outputfiles 
@@ -133,20 +135,30 @@ xHplusbulk = (cHplus*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
 pOHbulk= pKw -pHbulk
 cOHmin = 10**(-pOHbulk)   ! concentration OH- in bulk
 xOHminbulk = (cOHmin*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol  
-Ka = 10**(-pKa)
-Kb = 10**(-pKb)
+
+if (Nacids.gt.0) then
+  do i=1,Nacids
+    Ka(i) = 10**(-pKa(i))
+  enddo
+endif
+
+if (Nbasics.gt.0) then
+  do i=1,Nbasics
+    Kb(i) = 10**(-pKb(i))
+  enddo
+endif
 
 rhosalt=Csalt*Na/(1.0d24) !salt conc. in unit of nº of particles/nm³
 xsolbulk=1-rhosalt*vsol*(vneg+vpos)-xHplusbulk-xOHminbulk ! bulk volume fraction of solvent 
 wperm = 0.114 !water permitivity in units of e^2/kT.nm
 
-!expmupos=xsalt*vsol*vpos/xsolbulk**vpos
-expmupos=rhosalt*vsol/xsolbulk**vpos ! OJO modificar free energy 
-!expmuneg=xsalt*vsol*vneg/xsolbulk**vneg 
+!expmupos=rhosalt*vsol*vpos/xsolbulk**vpos
+expmupos=rhosalt*vsol/xsolbulk**vpos  
+!expmuneg=rhosalt*vsol*vneg/xsolbulk**vneg 
 expmuneg=rhosalt*vsol/xsolbulk**vneg           
 
-expmuHplus=xHplusbulk/xsalt ! vHplus=vsol
-expmuOHmin=xOHminbulk/xsalt ! vOHminus=vsol
+expmuHplus=xHplusbulk/xsolbulk ! vHplus=vsol
+expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
 
 
 print*, "I am rank", rank, "and I generate and calculate", cuantas, "conformation out of", totalcuantas
@@ -289,7 +301,7 @@ do while (conf.lt.cuantas)
               temp = in1tmp(k)-minpos(conf,ii)+1 
               inn(segpoorsv(k),conf,ii,temp) = inn(segpoorsv(k),conf,ii,temp) + 1      
               inn_a(acidtype(k),conf,ii,temp) = inn_a(acidtype(k),conf,ii,temp) + 1
-              inn_b(basictype,conf,ii,temp) = inn_b(basictype,conf,ii,temp) + 1
+              inn_b(basictype(k),conf,ii,temp) = inn_b(basictype(k),conf,ii,temp) + 1
             enddo
        
          enddo ! ii
@@ -516,6 +528,8 @@ do while (actionflag.lt.3)
       write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', actionflag,'.',countfile,'.dat'
       write(densposfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypositive.',actionflag,'.',countfile,'.dat'
       write(densnegfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitynegative.',actionflag,'.',countfile,'.dat'
+      write(densHplusfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densityHplus.',actionflag,'.',countfile,'.dat'
+      write(densOHminfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densityOHmin.',actionflag,'.',countfile,'.dat'
 
       write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',actionflag,'.',countfile,'.dat'
 
@@ -537,6 +551,8 @@ do while (actionflag.lt.3)
       open(unit=330,file=denssolfilename)
       open(unit=331,file=densposfilename)
       open(unit=332,file=densnegfilename)
+      open(unit=333,file=densHplusfilename)
+      open(unit=334,file=densOHminfilename)
       open(unit=324,file=lnqfilename)
 
       do i = 3, long-1
@@ -557,6 +573,8 @@ do while (actionflag.lt.3)
          write(330,*)zc(i),xsol(i)
          write(331,*)zc(i),avpos(i)
          write(332,*)zc(i),avneg(i)
+         write(333,*)zc(i),avHplus(i)
+         write(334,*)zc(i),avOHmin(i)
          write(311,*)zc(i),phi(i)
 
       enddo
@@ -599,6 +617,8 @@ do while (actionflag.lt.3)
       close(330)
       close(331)
       close(332)
+      close(333)
+      close(334)
       close(311)
 
       print*, rank, " escribe"

@@ -104,7 +104,7 @@ F_Mix_pos = 0.0
 
    do iC=1,ntot
       F_Mix_pos = F_Mix_pos + avpos(iC)*(dlog(avpos(iC))-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos) 
-      F_Mix_pos = F_Mix_pos - xsalt*vsol*vpos*(dlog(xsalt*vsol*vpos)-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos)
+      F_Mix_pos = F_Mix_pos - rhosalt*vsol*vpos*(dlog(rhosalt*vsol*vpos)-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos)
    enddo
 
 !endif
@@ -125,7 +125,7 @@ F_Mix_neg = 0.0
 
    do iC = 1, ntot                                                
       F_Mix_neg = F_Mix_neg + avneg(iC)*(dlog(avneg(iC))-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg)
-      F_Mix_neg = F_Mix_neg - xsalt*vsol*vneg*(dlog(xsalt*vsol*vneg)-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg)
+      F_Mix_neg = F_Mix_neg - rhosalt*vsol*vneg*(dlog(rhosalt*vsol*vneg)-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg)
    enddo
 
 !endif
@@ -268,9 +268,9 @@ do iC=1,ntot
   sumrho = sumrho + (-xsol(iC)*jacobian(iC)) ! sum over  rho_i i=+,-,si
   sumrho = sumrho - (-xsolbulk)*jacobian(iC) ! sum over  rho_i i=+,-,si
   sumrho = sumrho + (-avpos(iC)/vpos)*jacobian(iC)
-  sumrho = sumrho - (-xsalt*vsol)*jacobian(iC)
+  sumrho = sumrho - (-rhosalt*vsol)*jacobian(iC)
   sumrho = sumrho + (-avneg(iC)/vneg)*jacobian(iC)
-  sumrho = sumrho - (-xsalt*vsol)*jacobian(iC)
+  sumrho = sumrho - (-rhosalt*vsol)*jacobian(iC)
 enddo
 
 

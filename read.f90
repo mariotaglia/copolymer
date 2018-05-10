@@ -58,17 +58,24 @@ enddo
 read(8,*)nada
 read(8,*)Nacids, Nbasics ! number of types of acid segments and basic segments
 
-allocate(pKa(Nacids),pKb(Nbasics))
+allocate(Ka(Nacids), Kb(Nbasics), pKa(Nacids), pKb(Nbasics))
 
-read(8,*)nada
-do i=1,Nacids
-read(8,*)pKa(i) ! acid constants of each acid segment
-enddo
+pKa=0.0
+pKb=0.0
 
-read(8,*)nada
-do i=1,Nbasics ! basic constants of each basic segment
-read(8,*)pKb(i)
-enddo
+if (Nacids.gt.0) then
+  read(8,*)nada
+  do i=1,Nacids
+    read(8,*)pKa(i) ! acid constants of each acid segment
+  enddo
+endif
+
+if (Nbasics.gt.0) then
+  read(8,*)nada
+  do i=1,Nbasics ! basic constants of each basic segment
+    read(8,*)pKb(i)
+  enddo
+endif
 
 READ(8,*)nada
 read(8,*)infile
@@ -126,7 +133,5 @@ read(10,*)(st(i,j), j = 1, i)
    st(j,i) = st(i,j)
  enddo
 enddo
-
-electroflag=0
 
 end

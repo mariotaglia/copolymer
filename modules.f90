@@ -74,19 +74,12 @@ endmodule
 module mcharge
 integer electroflag
 integer*8 Nacids, Nbasics
-integer*8, allocatable :: ka(:), kb(:), acidtype(:), basictype(:)
-real*8, allocatable :: phi(:), avpos(:), avneg(:), avHplus(:), avOHmin(:), xcharge(:),f_Amin(:,:), f_BHplus(:,:)
+integer*8, allocatable :: acidtype(:), basictype(:)
+real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
+real*8, allocatable :: phi(:), avpos(:), avneg(:), avHplus(:), avOHmin(:), xcharge(:), fAmin(:,:), fBHplus(:,:)
 real*8 Csalt, wperm, rhosalt, expmupos, expmuneg
-real*8 cHplus, cOHmin, pHbulk, pOH, pKw, xHplusbulk, xOHminbulk, expmuHplus, expmuOHmin, 
-
+real*8 cHplus, cOHmin, pHbulk, pOHbulk, pKw, xHplusbulk, xOHminbulk, expmuHplus, expmuOHmin 
 endmodule
-
-cHplus = 10**(-pHbulk)    ! concentration H+ in bulk
-xHplusbulk = (cHplus*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
-pOHbulk= pKw -pHbulk
-cOHmin = 10**(-pOHbulk)   ! concentration OH- in bulk
-xOHminbulk = (cOHmin*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol  
-
 
 
 module bulk

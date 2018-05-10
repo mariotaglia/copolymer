@@ -71,20 +71,26 @@ enddo
 
 inverse_of_vpolvsol=1/(vpol*vsol)
 
+avpos=0.0
+avneg=0.0
 
 do j=1,ntot
    avpos(j)=vpos*expmupos*xh(j)**vpos*dexp(-phi(j)) ! volume fraction of cations
    avneg(j)=vneg*expmuneg*xh(j)**vneg*dexp(phi(j)) ! volume fraction of anions
-   avHplus(j)=expmuHplus*xh(j)*dexp(phi(j)) ! volume fraction of H+
-   avOHmin(j)=expmuOHmin*xh(j)*dexp(-phi(j)) ! volume fraction of OH-
+   avHplus(j)=expmuHplus*xh(j)*dexp(-phi(j)) ! volume fraction of H+
+   avOHmin(j)=expmuOHmin*xh(j)*dexp(phi(j)) ! volume fraction of OH-
 
-   do is=1,Nacids
-      fAmin(is,j)=1.0/(Ka(is)*xh(j)/avHplus(j)+1.0)
-   enddo
+   if (Nacids.gt.0) then
+     do is=1,Nacids
+       fAmin(is,j)=1.0/(Ka(is)*xh(j)/avHplus(j)+1.0)
+     enddo
+   endif
 
-   do is=1,Nbasics
-      fBHplus(is,j)=1.0/(Kb(is)*xh(j)/avHplus(j)+1.0)
-   enddo
+   if (Nbasics.gt.0) then
+     do is=1,Nbasics
+       fBHplus(is,j)=1.0/(Kb(is)*xh(j)/avOHmin(j)+1.0)
+     enddo
+   endif
 
 enddo
 
@@ -112,13 +118,17 @@ do i = 1, ntot
 !    xpotc(ic,i)=dexp(protemp)
 !  enddo
 
-  do ic = 1,Nacids
-    xpot_a(ic,i) = 1.0 - fAmin(ic,i) 
-  enddo
+  if (Nacids.gt.0) then
+    do ic = 1,Nacids
+      xpot_a(ic,i) = 1.0/(1.0 - fAmin(ic,i))
+    enddo
+  endif
 
-  do ic = 1,Nbasics
-    xpot_b(ic,i)= 1.0 - fBHplus(ic,i)
-  enddo
+  if (Nbasics.gt.0) then
+    do ic = 1,Nbasics
+      xpot_b(ic,i)= 1.0/(1.0 - fBHplus(ic,i))
+    enddo
+  endif
 
 enddo
 
@@ -127,14 +137,17 @@ do is = 0,Npoorsv
    xpot(is,n+1:2*n)=xpot(is,n)
 enddo
 
-do ic = 1,Nacids
-   xpot_a(ic,n+1:2*n)=xpotc(ic,n)
-enddo
+if (Nacids.gt.0) then
+  do ic = 1,Nacids
+    xpot_a(ic,n+1:2*n)=xpot_a(ic,n)
+  enddo
+endif
 
-do ic = 1,Nbasics
-   xpot_b(ic,n+1:2*n)=xpot_b(ic,n)
-enddo
-
+if (Nbasics.gt.0) then
+  do ic = 1,Nbasics
+    xpot_b(ic,n+1:2*n)=xpot_b(ic,n)
+  enddo
+endif
 
 !    probability distribution
 
@@ -148,8 +161,6 @@ avpol_tosend = 0.0
 xpol_tosend = 0.0
 avpol_tmp = 0.0
 avpol = 0.0
-avneg = 0.0
-avpos = 0.0
 xpol = 0.0
 q = 0.0
 q_tosend=0.0d0                   ! init q to zero
@@ -177,15 +188,19 @@ do ii=1,maxntotcounter ! position of center of mass
             pro(i)= pro(i) * xpot(is,j)**inn(is,i,ii,k)
          enddo
 
-         do ic = 1, Nacids
-            pro(i)= pro(i) * xpot_a(ic,j)**inn_a(ic,i,ii,k) 
-         enddo
-
-         do ic = 1, Nbasics
-            pro(i)= pro(i) * xpot_b(ic,j)**inn_b(ic,i,ii,k)
-         enddo
-
-      enddo
+         if (Nacids.gt.0) then
+           do ic = 1, Nacids
+             pro(i)= pro(i) * xpot_a(ic,j)**inn_a(ic,i,ii,k) 
+           enddo
+         endif
+     
+         if (Nbasics.gt.0) then
+           do ic = 1, Nbasics
+             pro(i)= pro(i) * xpot_b(ic,j)**inn_b(ic,i,ii,k)
+           enddo
+         endif
+ 
+      enddo !j
 
       all_tosend(ii) = all_tosend(ii) + pro(i) !q_tosend(ii)=q_tosend(ii)+pro(i)
       all_tosend(ntot+ii) = all_tosend(ntot+ii) + pro(i)*dlog(pro(i)) !sumprolnpro_tosend(ii) = sumprolnpro_tosend(ii) + pro(i)*dlog(pro(i))
@@ -204,14 +219,18 @@ do ii=1,maxntotcounter ! position of center of mass
             avpol_tmp(is,j)=avpol_tmp(is,j)+pro(i)*inn(is,i,ii,k)*factorcurv(ii,j) ! avpol_tmp is avg number of segments "is" at position "j" 
          enddo
 
-         do ic = 1,Nacids
-            avpola_tmp(ic,j)=avpola_tmp(ic,j)+pro(i)*inn_a(ic,i,ii,k)*factorcurv(ii,j) ! avpola_tmp is avg number of acid segments "ic" at position "j"
-         enddo
+         if (Nacids.gt.0) then
+           do ic = 1,Nacids
+             avpola_tmp(ic,j)=avpola_tmp(ic,j)+pro(i)*inn_a(ic,i,ii,k)*factorcurv(ii,j) ! avpola_tmp is avg number of acid segments "ic" at position "j"
+           enddo
+         endif
 
-         do ic = 1,Nbasics
-            avpolb_tmp(ic,j)=avpolb_tmp(ic,j)+pro(i)*inn_b(ic,i,ii,k)*factorcurv(ii,j) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
-         enddo
-     
+         if (Nbasics.gt.0) then
+           do ic = 1,Nbasics
+             avpolb_tmp(ic,j)=avpolb_tmp(ic,j)+pro(i)*inn_b(ic,i,ii,k)*factorcurv(ii,j) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
+           enddo
+         endif
+
       enddo
 
    enddo ! i
@@ -288,7 +307,7 @@ do i = 1, ntot
 enddo
 
 
-sumpol = sumpol/(vpol*vsol)/long !LOKE
+sumpol = sumpol/(vpol*vsol)/long 
 avpol = avpol/sumpol*npol ! integral of avpol is fixed
 avpola = avpola/sumpol*npol
 avpolb = avpolb/sumpol*npol
@@ -327,7 +346,7 @@ trans(:) = trans(:)/npol
 
 do i=1,n
 
-   f(i)=xh(i)+avneg(i)+avpos(i)-1.0d0
+   f(i)=xh(i)+avneg(i)+avpos(i)+avHplus(i)+avOHmin(i)-1.0d0
 
    do is=0, Npoorsv
       f(i) = f(i) + avpol(is,i)
@@ -335,16 +354,24 @@ do i=1,n
 
 enddo
 
-xcharge(:)=avpos(:)/(vpos*vsol)-avneg(:)/(vneg*vsol)
+xcharge(:) = avpos(:)/(vpos*vsol)-avneg(:)/(vneg*vsol)+avHplus(:)/vsol-avOHmin(:)/vsol ! xcharge is avg charge density
 
 inverse_of_wperm=1/wperm
 inverse_of_two=1/2.0
 
 do i = 1,ntot
 
-   do ic= 1,Ncharge
-      xcharge(i)=xcharge(i)+avpolc(ic,i)*float(charge(ic))*inverse_of_vpolvsol
-   enddo
+   if (Nacids.gt.0) then
+     do ic= 1,Nacids
+       xcharge(i)=xcharge(i)-avpola(ic,i)*fAmin(ic,i)*inverse_of_vpolvsol
+     enddo
+   endif
+
+   if (Nbasics.gt.0) then
+     do ic= 1,Nbasics
+       xcharge(i)=xcharge(i)+avpolb(ic,i)*fBHplus(ic,i)*inverse_of_vpolvsol
+     enddo
+   endif
 
    select case (curvature)
     case (0)
