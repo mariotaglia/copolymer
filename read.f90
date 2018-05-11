@@ -90,7 +90,7 @@ read(8,*)nada
 read(8,*)eps1
 
 read(8,*)nada
-read(8, *)Xulimit
+read(8,*)Xulimit
 
 read(8,*)nada
 read(8,*)lseg

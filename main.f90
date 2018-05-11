@@ -24,7 +24,7 @@ use transgauche
 implicit none
 
 real*8 solvetime1, solvetime2, solveduration
-integer is
+integer is,ic
 integer *4 ier ! Kinsol error flag
 real*8 pi
 real*8 Na               
@@ -85,6 +85,8 @@ character*27 densnegfilename
 character*24 densHplusfilename
 character*24 densOHminfilename
 character*50, allocatable :: denspolfilename(:)
+character*50, allocatable :: fracBHplus(:)
+character*48, allocatable :: fracAmin(:)
 
 integer countfile         ! enumerates the outputfiles 
 integer conf              ! counts number of conformations
@@ -103,6 +105,7 @@ double  precision norma_tosend
 integer in1tmp(long)
 
 allocate(denspolfilename(0:Npoorsv))
+allocate(fracAmin(Nacids),fracBHplus(Nbasics))
 
 error = 1.0d-6
 !seed=435 !+ 3232*rank               ! seed for random number generator
@@ -525,6 +528,18 @@ do while (actionflag.lt.3)
          write(denspolfilename(is),'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitypolymer',is,'.',actionflag,'.',countfile,'.dat'
       enddo
 
+      if (Nacids.ge.1) then
+        do ic=1,Nacids
+          write(fracAmin(ic),'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionAmin',ic,'.',actionflag,'.',countfile,'.dat'
+        enddo
+      endif
+
+      if (Nbasics.ge.1) then
+        do ic=1,Nbasics
+          write(fracBHplus(ic),'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionBHplus',ic,'.',actionflag,'.',countfile,'.dat'
+        enddo
+      endif
+
       write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', actionflag,'.',countfile,'.dat'
       write(densposfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypositive.',actionflag,'.',countfile,'.dat'
       write(densnegfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitynegative.',actionflag,'.',countfile,'.dat'
@@ -544,6 +559,18 @@ do while (actionflag.lt.3)
       do is=0,Npoorsv
          open(unit=1320+is,file=denspolfilename(is))
       enddo
+       
+      if (Nacids.ge.1) then      
+        do ic=1,Nacids
+          open(unit=1050+ic, file=fracAmin(ic))
+        enddo
+      endif
+  
+      if (Nbasics.ge.1) then
+        do ic=1,Nbasics
+          open(unit=1520+ic, file=fracBHplus(ic))
+        enddo
+      endif
 
       open(unit=328,file=totalfilename)
       open(unit=329,file=xtotalfilename)
@@ -568,6 +595,18 @@ do while (actionflag.lt.3)
             avtmp = avtmp + avpol(is,i)
          enddo
 
+         if (Nacids.ge.1) then
+           do ic=1,Nacids
+             write(1050+ic,*)zc(i),fAmin(ic,i)
+           enddo
+         endif
+       
+         if (Nbasics.ge.1) then
+           do ic=1,Nbasics
+             write(1520+ic,*)zc(i),fBHplus(ic,i)
+           enddo
+         endif
+ 
          write(328,*)zc(i),avtmp
          write(329,*)zc(i),xpol(i)
          write(330,*)zc(i),xsol(i)
@@ -610,6 +649,18 @@ do while (actionflag.lt.3)
       do is=0,Npoorsv
          CLOSE(1320+is)
       enddo
+
+      if (Nacids.ge.1) then  
+        do ic=1,Nacids
+          close(1050+ic)
+        enddo
+      endif
+  
+      if (Nbasics.ge.1) then
+        do ic=1,Nbasics
+          close(1520+ic)
+        enddo
+      endif
 
       CLOSE(327)
       CLOSE(328)

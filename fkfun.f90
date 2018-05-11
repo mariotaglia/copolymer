@@ -82,13 +82,13 @@ do j=1,ntot
 
    if (Nacids.gt.0) then
      do is=1,Nacids
-       fAmin(is,j)=1.0/(Ka(is)*xh(j)/avHplus(j)+1.0)
+       fAmin(is,j)=1.0/(avHplus(j)/(Ka(is)*xh(j))+1.0)
      enddo
    endif
 
    if (Nbasics.gt.0) then
      do is=1,Nbasics
-       fBHplus(is,j)=1.0/(Kb(is)*xh(j)/avOHmin(j)+1.0)
+       fBHplus(is,j)=1.0/(avOHmin(j)/(Kb(is)*xh(j))+1.0)
      enddo
    endif
 
