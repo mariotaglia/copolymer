@@ -271,10 +271,10 @@ do iC=1,ntot
   sumrho = sumrho - (-rhosalt*vsol)*jacobian(iC)
   sumrho = sumrho + (-avneg(iC)/vneg)*jacobian(iC)
   sumrho = sumrho - (-rhosalt*vsol)*jacobian(iC)
-  sumrho = sumrho + (-avHplus(iC)/vpol*jacobian(iC)) 
-  sumrho = sumrho - (-xHplusbulk/vpol)*jacobian(iC) 
-  sumrho = sumrho + (-avOHmin(iC)/vpol*jacobian(iC))
-  sumrho = sumrho - (-xOHminbulk/vpol)*jacobian(iC)
+  sumrho = sumrho + (-avHplus(iC)*jacobian(iC))
+  sumrho = sumrho - (-xHplusbulk*jacobian(iC))
+  sumrho = sumrho + (-avOHmin(iC)*jacobian(iC))
+  sumrho = sumrho - (-xOHminbulk*jacobian(iC))
 
 enddo
 
