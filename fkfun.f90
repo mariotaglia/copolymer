@@ -120,13 +120,13 @@ do i = 1, ntot
 
   if (Nacids.gt.0) then
     do ic = 1,Nacids
-      xpot_a(ic,i) = 1.0/(1.0 - fAmin(ic,i))
+      xpot_a(ic,i) = 1.0/fAmin(ic,i)*exp(phi(i))
     enddo
   endif
 
   if (Nbasics.gt.0) then
     do ic = 1,Nbasics
-      xpot_b(ic,i)= 1.0/(1.0 - fBHplus(ic,i))
+      xpot_b(ic,i)= 1.0/fBHplus(ic,i)*exp(-phi(i))
     enddo
   endif
 

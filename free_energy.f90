@@ -158,17 +158,17 @@ F_Eq = 0.0
 do iC=1,ntot
 
   do is=1, Nacids
-    F_Eq = F_Eq + fAmin(is,iC )*dlog(fAmin(is,iC))*avpola(is,iC)*jacobian(iC)*delta/(vpol*vsol)
+    F_Eq = F_Eq + fAmin(is,iC)*dlog(fAmin(is,iC))*avpola(is,iC)*jacobian(iC)*delta/(vpol*vsol)
     F_Eq = F_Eq + (1.0-fAmin(is, iC))*dlog(1.0-fAmin(is, iC))*avpola(is, iC)*jacobian(iC)*delta/(vpol*vsol)                                     
     F_Eq = F_Eq - (1.0-fAmin(is, iC))*dlog(expmuHplus)*avpola(is, iC)*jacobian(iC)*delta/(vpol*vsol)
-    F_Eq = F_Eq - (1.0-fAmin(is, iC))*dlog(Ka(is))*avpola(is, iC)*jacobian(ic)*delta/(vpol*vsol)
+    F_Eq = F_Eq + (1.0-fAmin(is, iC))*dlog(Ka(is))*avpola(is, iC)*jacobian(ic)*delta/(vpol*vsol)
   enddo
   
   do is=1, Nbasics
     F_Eq = F_Eq + fBHplus(is,iC )*dlog(fBHplus(is,iC))*avpolb(is,iC)*jacobian(iC)*delta/(vpol*vsol)
     F_Eq = F_Eq + (1.0-fBHplus(is, iC))*dlog(1.0-fBHplus(is, iC))*avpolb(is, iC)*jacobian(iC)*delta/(vpol*vsol)
     F_Eq = F_Eq - (1.0-fBHplus(is, iC))*dlog(expmuOHmin)*avpolb(is, iC)*jacobian(iC)*delta/(vpol*vsol)
-    F_Eq = F_Eq - (1.0-fBHplus(is, iC))*dlog(Kb(is))*avpolb(is, iC)*jacobian(ic)*delta/(vpol*vsol)
+    F_Eq = F_Eq + (1.0-fBHplus(is, iC))*dlog(Kb(is))*avpolb(is, iC)*jacobian(ic)*delta/(vpol*vsol)
   enddo    
 
 enddo
