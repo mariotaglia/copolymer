@@ -13,6 +13,11 @@ SHELL = /bin/bash
 
 FFLAGS= -O3 #-g -fbacktrace -fbounds-check -ffpe-trap=zero,overflow,underflow # -O3
 
+ifeq ($(HOST),login.tusker.hcc.unl.edu)
+LFLAGS = -lm -L/home/conda/gzaldivar/bin/kinsol/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/home/conda/gzaldivar/bin/kinsol/lib
+endif
+
+
 ifeq ($(HOST),service0)
 LFLAGS = -lm  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial
 endif
