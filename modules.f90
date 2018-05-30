@@ -77,8 +77,8 @@ integer*8 Nacids, Nbasics
 integer*8, allocatable :: acidtype(:), basictype(:)
 real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
 real*8, allocatable :: phi(:), avpos(:), avneg(:), avHplus(:), avOHmin(:), xcharge(:), fAmin(:,:), fBHplus(:,:)
-real*8 Csalt, wperm, rhosalt, expmupos, expmuneg
-real*8 cHplus, cOHmin, pHbulk, pOHbulk, pKw, xHplusbulk, xOHminbulk, expmuHplus, expmuOHmin 
+real*8 Csalt, wperm, rhosalt, expmupos, expmuneg, xposbulk, xnegbulk
+real*8 cHplus, cOHmin, pHbulk, pOHbulk, pKw, xHplusbulk, xOHminbulk, expmuHplus, expmuOHmin
 endmodule
 
 

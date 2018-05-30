@@ -94,7 +94,7 @@ F_Mix_pos = 0.0
 
 do iC=1,ntot
   F_Mix_pos = F_Mix_pos + avpos(iC)*(dlog(avpos(iC)/vpos)-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos) ! mix entropy of cations and N*Mu term
-  F_Mix_pos = F_Mix_pos - rhosalt*(dlog(rhosalt*vsol)-1.0-dlog(expmupos))*jacobian(iC)*delta ! with respect to bulk
+  F_Mix_pos = F_Mix_pos - xposbulk*(dlog(xposbulk/vpos)-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos) ! with respect to bulk
 enddo
 
 Free_energy = Free_Energy + F_Mix_pos
@@ -105,7 +105,7 @@ F_Mix_neg = 0.0
 
 do iC = 1, ntot                                                
   F_Mix_neg = F_Mix_neg + avneg(iC)*(dlog(avneg(iC)/vpos)-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg) ! mix entropy and N*Mu term of anions 
-  F_Mix_neg = F_Mix_neg - rhosalt*(dlog(rhosalt*vsol)-1.0-dlog(expmuneg))*jacobian(iC)*delta ! with respect to bulk
+  F_Mix_neg = F_Mix_neg - xnegbulk*(dlog(xnegbulk/vpos)-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg) ! with respect to bulk
 enddo
 
 Free_Energy = Free_Energy + F_Mix_neg                            
@@ -268,9 +268,9 @@ do iC=1,ntot
   sumrho = sumrho + (-xsol(iC)*jacobian(iC)) ! sum over  rho_i i=+,-,si
   sumrho = sumrho - (-xsolbulk)*jacobian(iC) ! sum over  rho_i i=+,-,si
   sumrho = sumrho + (-avpos(iC)/vpos)*jacobian(iC)
-  sumrho = sumrho - (-rhosalt*vsol)*jacobian(iC)
+  sumrho = sumrho - (-xposbulk/vpos)*jacobian(iC)
   sumrho = sumrho + (-avneg(iC)/vneg)*jacobian(iC)
-  sumrho = sumrho - (-rhosalt*vsol)*jacobian(iC)
+  sumrho = sumrho - (-xnegbulk/vneg)*jacobian(iC)
   sumrho = sumrho + (-avHplus(iC)*jacobian(iC))
   sumrho = sumrho - (-xHplusbulk*jacobian(iC))
   sumrho = sumrho + (-avOHmin(iC)*jacobian(iC))

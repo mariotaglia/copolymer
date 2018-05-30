@@ -129,7 +129,7 @@ conf=0                    ! counter for conformations
 vsol=0.030                ! volume solvent molecule in (nm)^3
 vpol= ((4.0/3.0)*pi*(0.3)**3)/vsol  ! volume polymer segment in units of vsol
 vneg=0.5 !volume of anion in units of vsol
-vpos=0.5 !volume of cation in units of vsol LOKE
+vpos=0.5 !volume of cation in units of vsol 
 
 pKw=14.0
 
@@ -138,27 +138,38 @@ xHplusbulk = (cHplus*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
 pOHbulk= pKw -pHbulk
 cOHmin = 10**(-pOHbulk)   ! concentration OH- in bulk
 xOHminbulk = (cOHmin*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol  
+rhosalt=Csalt*Na/(1.0d24) !salt conc. in unit of nº of particles/nm³
+wperm = 0.114 !water permitivity in units of e^2/kT.nm
+
+if(pHbulk.le.7) then  ! pH<= 7
+  xposbulk= rhosalt*vsol*vpos
+  xnegbulk= rhosalt*vsol*vneg + (xHplusbulk-xOHminbulk)*vneg ! NaCl+ HCl  
+else                  ! pH >7 
+  xposbulk= rhosalt*vsol*vpos + (xOHminbulk-xHplusbulk)*vpos ! NaCl+ NaOH   
+  xnegbulk= rhosalt*vsol*vneg
+endif
+
+
+xsolbulk=1-xposbulk-xnegbulk-xHplusbulk-xOHminbulk ! bulk volume fraction of solvent 
 
 if (Nacids.gt.0) then
   do i=1,Nacids
     Ka(i) = 10**(-pKa(i))
+    Ka(i) = (Ka(i)*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant
   enddo
 endif
 
 if (Nbasics.gt.0) then
   do i=1,Nbasics
     Kb(i) = 10**(-pKb(i))
+    Kb(i) = (Kb(i)*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant
   enddo
 endif
 
-rhosalt=Csalt*Na/(1.0d24) !salt conc. in unit of nº of particles/nm³
-xsolbulk=1-rhosalt*vsol*(vneg+vpos)-xHplusbulk-xOHminbulk ! bulk volume fraction of solvent 
-wperm = 0.114 !water permitivity in units of e^2/kT.nm
-
 !expmupos=rhosalt*vsol*vpos/xsolbulk**vpos
-expmupos=rhosalt*vsol/xsolbulk**vpos  
+expmupos=xposbulk/vpos/xsolbulk**vpos  
 !expmuneg=rhosalt*vsol*vneg/xsolbulk**vneg 
-expmuneg=rhosalt*vsol/xsolbulk**vneg           
+expmuneg=xnegbulk/vneg/xsolbulk**vneg           
 
 expmuHplus=xHplusbulk/xsolbulk ! vHplus=vsol
 expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
