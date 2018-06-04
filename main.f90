@@ -127,7 +127,7 @@ n=ntot                    ! size of lattice
 conf=0                    ! counter for conformations
 
 vsol=0.030                ! volume solvent molecule in (nm)^3
-vpol= ((4.0/3.0)*pi*(0.3)**3)/vsol  ! volume polymer segment in units of vsol
+vpol=0.072/vsol  ! volume polymer segment in units of vsol
 vneg=0.5 !volume of anion in units of vsol
 vpos=0.5 !volume of cation in units of vsol 
 
