@@ -5,11 +5,16 @@ use globals
 use bulk
 use MPI
 use mkai
+use volume
+
 implicit none
 integer i, j
 integer block_cuantas, restcuantas
 
 !     reading in of variables from stdin
+
+read(8,*)nada
+read(8,*)vpol
 
 read(8,*)nada
 read(8,*)curvature
