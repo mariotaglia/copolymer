@@ -87,6 +87,8 @@ character*24 densOHminfilename
 character*50, allocatable :: denspolfilename(:)
 character*50, allocatable :: fracBHplus(:)
 character*48, allocatable :: fracAmin(:)
+character*47, allocatable :: densAcidfilename(:)
+character*48, allocatable :: densBasicfilename(:)
 
 integer countfile         ! enumerates the outputfiles 
 integer conf              ! counts number of conformations
@@ -106,6 +108,7 @@ integer in1tmp(long)
 
 allocate(denspolfilename(0:Npoorsv))
 allocate(fracAmin(Nacids),fracBHplus(Nbasics))
+allocate(densAcidfilename(Nacids),densBasicfilename(Nbasics))
 
 error = 1.0d-6
 !seed=435 !+ 3232*rank               ! seed for random number generator
@@ -542,12 +545,14 @@ do while (actionflag.lt.3)
       if (Nacids.ge.1) then
         do ic=1,Nacids
           write(fracAmin(ic),'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionAmin',ic,'.',actionflag,'.',countfile,'.dat'
+          write(densAcidfilename(ic),'(A11,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densityacid',ic,'.',actionflag,'.',countfile,'.dat'
         enddo
       endif
 
       if (Nbasics.ge.1) then
         do ic=1,Nbasics
           write(fracBHplus(ic),'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionBHplus',ic,'.',actionflag,'.',countfile,'.dat'
+          write(densBasicfilename(ic),'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitybasic',ic,'.',actionflag,'.',countfile,'.dat'
         enddo
       endif
 
@@ -574,12 +579,14 @@ do while (actionflag.lt.3)
       if (Nacids.ge.1) then      
         do ic=1,Nacids
           open(unit=1050+ic, file=fracAmin(ic))
+          open(unit=1780+ic, file=densAcidfilename(ic))
         enddo
       endif
   
       if (Nbasics.ge.1) then
         do ic=1,Nbasics
           open(unit=1520+ic, file=fracBHplus(ic))
+          open(unit=1680+ic, file=densBasicfilename(ic))
         enddo
       endif
 
@@ -609,12 +616,14 @@ do while (actionflag.lt.3)
          if (Nacids.ge.1) then
            do ic=1,Nacids
              write(1050+ic,*)zc(i),fAmin(ic,i)
+             write(1780+ic,*)zc(i),avpola(ic,i)
            enddo
          endif
        
          if (Nbasics.ge.1) then
            do ic=1,Nbasics
              write(1520+ic,*)zc(i),fBHplus(ic,i)
+             write(1680+ic,*)zc(i),avpolb(ic,i)
            enddo
          endif
  
@@ -664,12 +673,14 @@ do while (actionflag.lt.3)
       if (Nacids.ge.1) then  
         do ic=1,Nacids
           close(1050+ic)
+          close(1780+ic)
         enddo
       endif
   
       if (Nbasics.ge.1) then
         do ic=1,Nbasics
           close(1520+ic)
+          close(1680+ic)
         enddo
       endif
 
