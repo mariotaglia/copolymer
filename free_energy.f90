@@ -18,7 +18,7 @@ real*8 Free_energy, F_Mix_s, F_Mix_pos, F_mix_p
 real*8 F_Mix_neg, F_Mix_Hplus                 
 real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol, mupol
 real*8 F_Mix_OHmin, F_Conf, F_Uchain     
-real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW(Npoorsv,Npoorsv), F_eps, F_electro                            
+real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW(Npoorsv,Npoorsv), F_electro                            
 !real*8 F_mup
 integer counter, counter2                                    
 
@@ -46,7 +46,6 @@ write(F_vdWfilename(is,js),'(A6,BZ,I3.3,A1,I3.3,A4)')'F_vdW.',is,'.',js,'.dat'
 open(unit=10000*is+js, file=F_vdWfilename(is,js) )                           
 enddo
 enddo
-!open(unit=310, file='F_eps.dat')                           
 open(unit=311, file='F_electro.dat')                       
 open(unit=312, file='F_tot2.dat')                          
 open(unit=313, file='F_mixp.dat')                          
@@ -326,7 +325,6 @@ if(rank.eq.0) then
        write(10000*is+js,*) npol, F_vdW(is,js)/npol                             
     enddo
   enddo
-! write(310,*)counter, counter2, F_eps                          
   write(311,*) npol, F_electro/npol                         
   write(312,*) npol, Free_energy2/npol                      
   write(313,*) npol, F_Mix_p/npol                          

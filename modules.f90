@@ -47,10 +47,6 @@ integer*2, allocatable :: inn_a(:,:,:,:),inn_b(:,:,:,:), inn(:,:,:,:)
 integer, allocatable ::  maxpos(:,:)
 integer, allocatable ::  minpos(:,:)
 
-
-real*8, allocatable :: eps(:)
-real*8 eps1
-
 integer iter              ! counts number of iterations
 
 integer, parameter :: ncha_max = 700

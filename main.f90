@@ -1,6 +1,7 @@
 
 call initmpi
-call read
+!call read
+call parser
 call allocation
 call kai
 call solve
@@ -179,13 +180,6 @@ expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
 
 
 print*, "I am rank", rank, "and I generate and calculate", cuantas, "conformation out of", totalcuantas
-
-! eps
-eps(1)=eps1
-
-do i=2,ntot
-   eps(i)=0
-enddo
 
 !!!!
 ! solver
