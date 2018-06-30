@@ -321,7 +321,7 @@ do i=1,12
   call rota(xendcom,xendr,long,test)   ! rotate chain conformation ncha time
   ncha=ncha+1
 
-  call print_ent2(xendr)
+!  call print_ent2(xendr)
 
   do j=1,long
     chains(1,j,ncha)=xendr(1,j)       ! output 
