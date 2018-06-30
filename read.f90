@@ -113,6 +113,18 @@ read(8,*)Csalt
 read(8,*)nada
 read(8,*)pHbulk
 
+read(8,*)nada
+read(8,*)nbranches ! number of branches
+
+allocate (branch_pos(nbranches))
+allocate (branch_long(nbranches))
+long_branches = 0
+
+do j = 1, nbranches
+read(8,*) branch_pos(j), branch_long(j)
+long_branches = long_branches + branch_long(j)
+enddo
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Read chain structure from structure.in
 
