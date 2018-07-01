@@ -35,7 +35,7 @@ maxntotcounter_ini = ndi
 maxntot = ndi
 totalcuantas = ndi
 long = ndi
-Npoorsv = 0 ! zero by default
+Npoorsv = ndi ! zero by default
 Nacids = 0
 Nbasics = 0
 infile = ndi
@@ -83,6 +83,11 @@ select case (label)
  case ('vpol')
    read(buffer, *, iostat=ios) vpol
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+ case ('lseg')
+   read(buffer, *, iostat=ios) lseg
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
 
  case ('curvature')
    read(buffer, *, iostat=ios) curvature
@@ -134,7 +139,6 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    allocate(Ka(Nacids), pKa(Nacids))
    if (Nacids.gt.0) then
-     read(fh,*)nada
      do i=1,Nacids
        read(fh,*)pKa(i) ! acid constants of each acid segment
      enddo
@@ -145,7 +149,6 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    allocate(Kb(Nbasics), pKb(Nbasics))
    if (Nbasics.gt.0) then
-     read(fh,*)nada
      do i=1,Nbasics
        read(fh,*)pKb(i) ! acid constants of each acid segment
      enddo
@@ -190,7 +193,7 @@ select case (label)
    long_branches = 0
 
    do j = 1, nbranches
-   read(8,*) branch_pos(j), branch_long(j)
+   read(fh,*) branch_pos(j), branch_long(j)
    long_branches = long_branches + branch_long(j)
    enddo
 endselect
