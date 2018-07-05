@@ -131,8 +131,8 @@ conf=0                    ! counter for conformations
 
 vsol=0.030                ! volume solvent molecule in (nm)^3
 vpol=vpol/vsol  ! volume polymer segment in units of vsol
-vneg=0.5 !volume of anion in units of vsol
-vpos=0.5 !volume of cation in units of vsol 
+vneg=4/3*pi*0.2**3/vsol !volume of anion in units of vsol
+vpos=4/3*pi*0.2**3/vsol !volume of cation in units of vsol 
 
 pKw=14.0
 
