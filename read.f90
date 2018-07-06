@@ -49,7 +49,7 @@ read(8,*)Npoorsv !number of types of poor sv segments
 !enddo
 
 read(8,*)nada
-allocate(dimf(0:Npoorsv,0:Npoorsv))
+allocate(dimfkais(0:Npoorsv,0:Npoorsv),dimf(0:Npoorsv,0:Npoorsv))
 dimf(0,0)=0
 do i = 1, Npoorsv
 dimf(0,i)=0.
