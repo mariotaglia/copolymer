@@ -241,12 +241,9 @@ F_electro = 0.0
 
  
   do iC  = 1, ntot                                               
-    F_electro = F_electro + (xcharge(ic)*phi(ic)-wperm/2*(ic-0.5)*((phi(iC)-phi(iC-1))/delta)**2)*jacobian(iC)*delta
+!    F_electro = F_electro + (xcharge(ic)*phi(ic)-wperm/2.0*epsfcn(iC)*((phi(iC+1)-phi(iC))/delta)**2)*jacobian(iC)*delta
+    F_electro = F_electro + xcharge(ic)*phi(ic)*jacobian(iC)*delta/2.0
   enddo
-
-
-!&               *(dfloat(indexa(iC,1))-0.5)*2*pi                  
-!enddo                                                            
 
 Free_Energy = Free_Energy + F_electro                            
 
