@@ -398,12 +398,12 @@ do i = 1,ntot
      +wperm*(epsfcn(i+1)-epsfcn(i))*(phi(i+1)-phi(i))*delta**(-2)
 
     case(1)
-     f(i+n*(Npoorsv+1))=xcharge(i) + wperm*epsfcn(i)*(phi(i+1)-phi(i))*delta**(-2)/(float(i)+0.5) &
+     f(i+n*(Npoorsv+1))=xcharge(i) + wperm*epsfcn(i)*(phi(i+1)-phi(i))*delta**(-2)/(float(i)-0.5) &
      +wperm*epsfcn(i)*(phi(i+1)-2.0*phi(i)+phi(i-1))*delta**(-2) &
      +wperm*(epsfcn(i+1)-epsfcn(i))*(phi(i+1)-phi(i))*delta**(-2)  
 
     case(2)
-     f(i+n*(Npoorsv+1))=xcharge(i) + 2*(phi(i+1)-phi(i))*delta**(-2)/(float(i)+0.5) &
+     f(i+n*(Npoorsv+1))=xcharge(i) + 2.0*wperm*epsfcn(i)*(phi(i+1)-phi(i))*delta**(-2)/(float(i)-0.5) &
      +wperm*epsfcn(i)*(phi(i+1)-2.0*phi(i)+phi(i-1))*delta**(-2) &
      +wperm*(epsfcn(i+1)-epsfcn(i))*(phi(i+1)-phi(i))*delta**(-2)
 
