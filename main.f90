@@ -214,7 +214,7 @@ if (infile.ge.1) then
      do is=1,npoorsv 
 
        read(100+is,*)trash,xfile(i+n*is)   ! poorsolvent desde 1 a npoorsv 
-       if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
+!       if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
        x1(i+n*is)=xfile(i+n*is)
        xg1(i+n*is)=xfile(i+n*is)
 
@@ -416,11 +416,11 @@ do while (actionflag.lt.3)
       xg1(i)=x1(i)
    enddo
 
-   do i=1,n
-     do is=1,npoorsv+1
-        if(xg1(i+n*is).lt.1.0d-30)xg1(i+n*is)=1.0d-30 ! OJO
-     enddo
-   enddo
+!   do i=1,n
+!     do is=1,npoorsv+1
+!        if(xg1(i+n*is).lt.1.0d-30)xg1(i+n*is)=1.0d-30 ! OJO
+!     enddo
+!   enddo
 
 ! JEFE
    if(rank.eq.0) then ! solo el jefe llama al solver

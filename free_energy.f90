@@ -241,8 +241,7 @@ F_electro = 0.0
 
  
   do iC  = 1, ntot                                               
-!    F_electro = F_electro + (xcharge(ic)*phi(ic)-wperm/2.0*epsfcn(iC)*((phi(iC+1)-phi(iC))/delta)**2)*jacobian(iC)*delta
-    F_electro = F_electro + xcharge(ic)*phi(ic)*jacobian(iC)*delta/2.0
+     F_electro = F_electro + (xcharge(ic)*phi(ic)-wperm*epsfcn(iC)/2.0*((phi(iC+1)-phi(iC))/delta)**2)*jacobian(iC)*delta
   enddo
 
 Free_Energy = Free_Energy + F_electro                            
@@ -284,7 +283,7 @@ enddo
 ! sumel
 
  do iC = 1, ntot
- sumel = sumel - xcharge(iC)*vsol*phi(iC)/2.0
+ sumel = sumel - wperm*epsfcn(iC)/2.0*((phi(iC+1)-phi(iC))/delta)**2*jacobian(iC)*delta
  enddo
 
 ! contribution from dielecrtric
@@ -295,16 +294,12 @@ sumdiel = sumdiel + 0.5*wperm*dielpol(iC)*Depsfcn(iC)*gradphi2*jacobian(iC)*vsol
 enddo
 
 
-Free_Energy2 = (sumpi + sumrho + sumel + sumdiel)/vsol*delta                               
+Free_Energy2 = (sumpi + sumrho + sumdiel)/vsol*delta + sumel                      
 
 do is=1,Npoorsv
   do js=1,Npoorsv
     Free_Energy2 = Free_Energy2 - F_vdW(is,js)
   enddo
-enddo
-
-do iC=1,ntot
-  Free_Energy2 = Free_Energy2 - (wperm/2*(ic-0.5)*((phi(iC)-phi(iC-1))/delta)**2)*jacobian(iC)*delta
 enddo
 
 do iC = 1, maxntotcounter
