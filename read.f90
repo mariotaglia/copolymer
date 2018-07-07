@@ -111,6 +111,9 @@ read(8,*)nada
 read(8,*)pHbulk
 
 read(8,*)nada
+read(8,*)dielP
+
+read(8,*)nada
 read(8,*)nbranches ! number of branches
 
 allocate (branch_pos(nbranches))

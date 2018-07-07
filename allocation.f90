@@ -29,4 +29,8 @@ allocate (Xu(ntot,ntot,Npoorsv, Npoorsv))
 allocate (xsol(ntot))
 allocate (pp((npoorsv+2)*ntot))
 
+ALLOCATE (epsfcn(0:ntot+1))
+ALLOCATE (dielpol(1:ntot))
+ALLOCATE (Depsfcn(0:ntot+1))
+
 end

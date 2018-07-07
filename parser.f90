@@ -28,6 +28,7 @@ ndi = -1e5
 ndr = -1.0d10
 
 ! default values, if ndi or ndr is used, then variable is required
+dielP = 78.54
 vpol = ndr
 curvature = ndi
 ntot = ndi

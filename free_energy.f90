@@ -14,9 +14,10 @@ implicit none
 
 double precision Factorcurv                   
 
+real*8 gradphi2
 real*8 Free_energy, F_Mix_s, F_Mix_pos, F_mix_p        
 real*8 F_Mix_neg, F_Mix_Hplus                 
-real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol, mupol
+real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol, mupol, sumdiel
 real*8 F_Mix_OHmin, F_Conf, F_Uchain     
 real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW(Npoorsv,Npoorsv), F_electro                            
 !real*8 F_mup
@@ -258,6 +259,7 @@ Free_Energy2 = 0.0
 sumpi = 0.0                                                   
 sumrho=0.0                                                    
 sumel=0.0                                                     
+sumdiel=0.0                                                     
 sumpol = 0.0
 
 do iC=1,ntot                                                
@@ -282,14 +284,21 @@ do iC=1,maxntotcounter
 enddo
 
 
-!do iC=1,ntot                                                
-!sumel = sumel - qtot(iC)*psi2(iC)/2.0
-!&               *(dfloat(indexa(iC,1))-0.5)*2*pi
-!sumel = sumel + proteinqC(iC)*psi2(iC)*vsol                   
-!&               *(dfloat(indexa(iC,1))-0.5)*2*pi   
-!enddo                                                            
+! sumel
 
-Free_Energy2 = (sumpi + sumrho + sumel)/vsol*delta                               
+ do iC = 1, ntot
+ sumel = sumel - xcharge(iC)*vsol*phi(iC)/2.0
+ enddo
+
+! contribution from dielecrtric
+
+do iC = 1, ntot
+gradphi2 = ((phi(iC+1)-phi(iC))/delta)**2
+sumdiel = sumdiel + 0.5*wperm*dielpol(iC)*Depsfcn(iC)*gradphi2*jacobian(iC)*vsol
+enddo
+
+
+Free_Energy2 = (sumpi + sumrho + sumel + sumdiel)/vsol*delta                               
 
 do is=1,Npoorsv
   do js=1,Npoorsv
