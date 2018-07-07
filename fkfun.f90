@@ -53,7 +53,7 @@ xh(n+1:2*n)=xsolbulk
 
 phi(1:n)=x(n*(Npoorsv+1)+1:(Npoorsv+2)*n) ! electric potential (phi) is read from the x provided by kinsol
 phi(n+1:2*n)=0.0 ! bulk
-phi(0) = phi(1)
+phi(0) = phi(1) ! reflection at x = 0
 
 ! Recover xtotal from input
 xtotal(:,n+1:2*n)=0.0 ! bulk

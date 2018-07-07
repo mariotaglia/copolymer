@@ -89,6 +89,10 @@ select case (label)
    read(buffer, *, iostat=ios) lseg
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
+ case ('dielP')
+   read(buffer, *, iostat=ios) dielP
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
 
  case ('curvature')
    read(buffer, *, iostat=ios) curvature

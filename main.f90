@@ -1,7 +1,7 @@
 
 call initmpi
-!call read
-call parser
+call read
+!call parser
 call allocation
 call kai
 call solve
