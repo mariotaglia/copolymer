@@ -147,6 +147,13 @@ if (flagkai.eq.0) then
 
 endif
 
+if (flagkai.eq.1) then
+
+  write(is*110+js,*)'#curvature dimz Xulimit dimf#'
+  write(is*110+js,*)curvature,ntot,Xulimit,dimf(is,js)
+
+endif
+
   do ii=1,ntot
   do j=1,ntot
 
