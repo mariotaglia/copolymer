@@ -1,6 +1,7 @@
 
 call initmpi
 call read
+!call parser
 call allocation
 call kai
 call solve
@@ -81,6 +82,7 @@ CHARACTER*24 totalfilename
 CHARACTER*24 xtotalfilename
 CHARACTER*18 ntransfilename
 character*27 densposfilename
+character*27 dielfilename
 character*27 densnegfilename
 character*24 densHplusfilename
 character*24 densOHminfilename
@@ -180,13 +182,6 @@ expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
 
 print*, "I am rank", rank, "and I generate and calculate", cuantas, "conformation out of", totalcuantas
 
-! eps
-eps(1)=eps1
-
-do i=2,ntot
-   eps(i)=0
-enddo
-
 !!!!
 ! solver
 !!!!
@@ -219,7 +214,7 @@ if (infile.ge.1) then
      do is=1,npoorsv 
 
        read(100+is,*)trash,xfile(i+n*is)   ! poorsolvent desde 1 a npoorsv 
-       if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
+!       if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
        x1(i+n*is)=xfile(i+n*is)
        xg1(i+n*is)=xfile(i+n*is)
 
@@ -421,11 +416,11 @@ do while (actionflag.lt.3)
       xg1(i)=x1(i)
    enddo
 
-   do i=1,n
-     do is=1,npoorsv+1
-        if(xg1(i+n*is).lt.1.0d-30)xg1(i+n*is)=1.0d-30 ! OJO
-     enddo
-   enddo
+!   do i=1,n
+!     do is=1,npoorsv+1
+!        if(xg1(i+n*is).lt.1.0d-30)xg1(i+n*is)=1.0d-30 ! OJO
+!     enddo
+!   enddo
 
 ! JEFE
    if(rank.eq.0) then ! solo el jefe llama al solver
@@ -558,6 +553,7 @@ do while (actionflag.lt.3)
 
       write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', actionflag,'.',countfile,'.dat'
       write(densposfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypositive.',actionflag,'.',countfile,'.dat'
+      write(dielfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'dielectric_cons.',actionflag,'.',countfile,'.dat'
       write(densnegfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitynegative.',actionflag,'.',countfile,'.dat'
       write(densHplusfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densityHplus.',actionflag,'.',countfile,'.dat'
       write(densOHminfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densityOHmin.',actionflag,'.',countfile,'.dat'
@@ -599,6 +595,7 @@ do while (actionflag.lt.3)
       open(unit=333,file=densHplusfilename)
       open(unit=334,file=densOHminfilename)
       open(unit=324,file=lnqfilename)
+      open(unit=335,file=dielfilename)
 
       do i = 3, long-1
          write(327,*)i, trans(i)
@@ -634,6 +631,7 @@ do while (actionflag.lt.3)
          write(332,*)zc(i),avneg(i)
          write(333,*)zc(i),avHplus(i)
          write(334,*)zc(i),avOHmin(i)
+         write(335,*)zc(i),epsfcn(i)
          write(311,*)zc(i),phi(i)
 
       enddo

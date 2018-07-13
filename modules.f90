@@ -42,15 +42,15 @@ INTEGER totalcuantas, cuantas
 integer curvature
 real*8, allocatable :: Ug(:), Ut(:)
 
+real*8, allocatable :: epsfcn(:)
+real*8, allocatable :: dielpol(:)
+real*8, allocatable :: Depsfcn(:)
+
 integer first, last
 
 integer*2, allocatable :: inn_a(:,:,:,:),inn_b(:,:,:,:), inn(:,:,:,:)
 integer, allocatable ::  maxpos(:,:)
 integer, allocatable ::  minpos(:,:)
-
-
-real*8, allocatable :: eps(:)
-real*8 eps1
 
 integer iter              ! counts number of iterations
 
@@ -73,6 +73,7 @@ real*8 vpol, vsol, vpos, vneg
 endmodule
 
 module mcharge
+real*8 dielP
 integer electroflag
 integer*8 Nacids, Nbasics
 integer*8, allocatable :: acidtype(:), basictype(:)

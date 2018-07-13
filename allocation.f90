@@ -24,10 +24,13 @@ allocate (inn(0:Npoorsv,cuantas,ntot,base))
 allocate (inn_a(0:Nacids,cuantas,ntot,base), inn_b(0:Nbasics,cuantas,ntot,base))
 allocate (maxpos(cuantas,2*ntot))
 allocate (minpos(cuantas,2*ntot))
-allocate (eps(ntot))
 allocate (xtotal(Npoorsv,2*ntot))
 allocate (Xu(ntot,ntot,Npoorsv, Npoorsv))
 allocate (xsol(ntot))
 allocate (pp((npoorsv+2)*ntot))
+
+ALLOCATE (epsfcn(0:ntot+1))
+ALLOCATE (dielpol(1:ntot))
+ALLOCATE (Depsfcn(0:ntot+1))
 
 end

@@ -34,7 +34,8 @@ real*8 q_tosend(ntot)
 real*8 sumprolnpro_tosend(ntot), sumprouchain_tosend(ntot)
 real*8 sumtrans_tosend(ntot,long)
 real*8 sumtrans(ntot,long)
-real*8 inverse_of_vpolvsol, inverse_of_wperm, inverse_of_two
+real*8 inverse_of_vpolvsol, inverse_of_two
+real*8 gradphi2
 
 ! Jefe
 !flagsolver=1
@@ -46,28 +47,20 @@ real*8 inverse_of_vpolvsol, inverse_of_wperm, inverse_of_two
 
 n = ntot
 
-! chain parameters
-
+! Recover xh and phi from input
 xh(1:n)=x(1:n) ! solvent volume fraction (xh) ir read from the x provided by kinsol
 xh(n+1:2*n)=xsolbulk
 
 phi(1:n)=x(n*(Npoorsv+1)+1:(Npoorsv+2)*n) ! electric potential (phi) is read from the x provided by kinsol
 phi(n+1:2*n)=0.0 ! bulk
+phi(0) = phi(1) ! reflection at x = 0
 
+! Recover xtotal from input
 xtotal(:,n+1:2*n)=0.0 ! bulk
-
 do is = 1,Npoorsv
    xtotal(is,1:n) = x(1+n*is:n+n*is) !  segments volume fractions (xtotal) are read from the x provided by kinsol
 enddo
 
-
-!sttemp = st/(vpol*vsol)
-
-do i = 1, ntot
-!   protemp = dlog(xh(i)**(vpol)) !DANGER, vpol in units of vsol (dimensionless)
-!   xpot(0,i) = dexp(protemp)
-   xpot(0,i) = xh(i)**vpol ! exp(-pi(r)v_pol) / units of v_pol: nm^3
-enddo 
 
 inverse_of_vpolvsol=1/(vpol*vsol)
 
@@ -93,6 +86,29 @@ do j=1,ntot
    endif
 
 enddo
+
+
+
+! Caculation of dielectric function
+! Everything that it is not water or ions has dielectric dielP
+
+do j = 1, ntot
+dielpol(j) = 1.0 - xh(j) - avpos(j) - avneg(j) - avHplus(j) - avOHmin(j)
+enddo 
+call dielectfcn(dielpol,epsfcn,Depsfcn)
+
+
+
+! Calculation of xpot
+do i = 1, ntot
+! osmotic pressure
+   xpot(0,i) = xh(i)**vpol ! exp(-pi(r)v_pol) / units of v_pol: nm^3
+! dielectrics
+   gradphi2 = ((phi(i+1)-phi(i))/delta)**2
+   xpot(0,i) = xpot(0,i)*exp(Depsfcn(i)*gradphi2*vpol*vsol*wperm/2.0)
+enddo 
+
+
 
 do i = 1, ntot
   do is = 1, Npoorsv
@@ -356,7 +372,6 @@ enddo
 
 xcharge(:) = avpos(:)/(vpos*vsol)-avneg(:)/(vneg*vsol)+avHplus(:)/vsol-avOHmin(:)/vsol ! xcharge is avg charge density
 
-inverse_of_wperm=1/wperm
 inverse_of_two=1/2.0
 
 do i = 1,ntot
@@ -375,15 +390,23 @@ do i = 1,ntot
 
    select case (curvature)
     case (0)
-     f(i+n*(Npoorsv+1))=xcharge(i)*inverse_of_wperm+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)  
-!     f(i+n*(Npoorsv+1))=xcharge(i)/wperm+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)  
+
+!     f(i+n*(Npoorsv+1))=xcharge(i)*inverse_of_wperm+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)  
+
+
+     f(i+n*(Npoorsv+1))=xcharge(i) + wperm*epsfcn(i)*(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2) &
+     +wperm*(epsfcn(i+1)-epsfcn(i))*(phi(i+1)-phi(i))*delta**(-2)
+
     case(1)
-     f(i+n*(Npoorsv+1))=xcharge(i)*inverse_of_wperm+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)  
-!     f(i+n*(Npoorsv+1))=xcharge(i)/wperm+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)  
+     f(i+n*(Npoorsv+1))=xcharge(i) + wperm*epsfcn(i)*(phi(i+1)-phi(i))*delta**(-2)/(float(i)-0.5) &
+     +wperm*epsfcn(i)*(phi(i+1)-2.0*phi(i)+phi(i-1))*delta**(-2) &
+     +wperm*(epsfcn(i+1)-epsfcn(i))*(phi(i+1)-phi(i))*delta**(-2)  
+
     case(2)
-     f(i+n*(Npoorsv+1))=xcharge(i)*inverse_of_wperm + 2*(phi(i+1)-phi(i))*delta**(-2)/(float(i)+0.5)
-     f(i+n*(Npoorsv+1))=f(i+n*(Npoorsv+1))+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)
-!     f(i+n*(Npoorsv+1))=xcharge(i)/wperm+2*(phi(i+1)-phi(i))*delta**(-2)/(i+1/2)+(phi(i+1)-2*phi(i)+phi(i-1))*delta**(-2)
+     f(i+n*(Npoorsv+1))=xcharge(i) + 2.0*wperm*epsfcn(i)*(phi(i+1)-phi(i))*delta**(-2)/(float(i)-0.5) &
+     +wperm*epsfcn(i)*(phi(i+1)-2.0*phi(i)+phi(i-1))*delta**(-2) &
+     +wperm*(epsfcn(i+1)-epsfcn(i))*(phi(i+1)-phi(i))*delta**(-2)
+
     end select
 
    f(i+n*(Npoorsv+1))=-f(i+n*(Npoorsv+1))*inverse_of_two
@@ -421,3 +444,31 @@ ier2 = 0
 
 return
 end
+
+! OJO 
+! NOTAS MARIO SOBRE EQUIVALENCIA ENTRE WPERM Y CONSTQ
+!
+! 
+!segun xpot:
+
+!1/constq*vpol = wperm*vpol*vsol/delta**2
+![wperm] = e^2/(kBT.nm) 
+!psi en unidades de kBT/(e)
+!constq = delta**2 / vsol / wperm
+
+!segun fs:
+
+!xcharge*vsol = qtot
+!xcharge/wperm * delta^2 = qtot*constq
+!1/wperm = vol*constq/delta^2
+
+!segun input:
+
+!constq = delta^2 * 4 pi / vsol * lb 
+!constq = delta^2 * / vsol / wperm 
+
+!segun free-energy
+
+!1/constq = wperm/delta**2 * vsol
+!constq = delta**2 / vsol / wperm
+

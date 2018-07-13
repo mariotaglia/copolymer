@@ -92,9 +92,6 @@ READ(8,*)nada
 READ(8,*)npolini, npolfirst, npollast, npolstep
 
 read(8,*)nada
-read(8,*)eps1
-
-read(8,*)nada
 read(8,*)Xulimit
 
 read(8,*)nada
@@ -112,6 +109,9 @@ read(8,*)Csalt
 
 read(8,*)nada
 read(8,*)pHbulk
+
+read(8,*)nada
+read(8,*)dielP
 
 read(8,*)nada
 read(8,*)nbranches ! number of branches
