@@ -34,7 +34,7 @@ read(8,*)long !number of segments
 READ(8,*)nada
 read(8,*)Npoorsv !number of types of poor sv segments
 
-allocate(vpol(Npoorsv))
+allocate(vpol(0:Npoorsv))
 
 read(8,*)nada
 do i=0, Npoorsv
@@ -71,6 +71,8 @@ allocate(vpol_a(Nacids), vpol_b(Nbasics),Ka(Nacids), Kb(Nbasics), pKa(Nacids), p
 
 pKa=0.0
 pKb=0.0
+vpol_a=0.0
+vpol_b=0.0
 
 read(8,*)nada
 do i=1,Nacids
