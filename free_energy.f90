@@ -158,17 +158,17 @@ F_Eq = 0.0
 do iC=1,ntot
 
   do is=1, Nacids
-    F_Eq = F_Eq + fAmin(is,iC)*dlog(fAmin(is,iC))*avpola(is,iC)*jacobian(iC)*delta/(vpol*vsol)
-    F_Eq = F_Eq + (1.0-fAmin(is, iC))*dlog(1.0-fAmin(is, iC))*avpola(is, iC)*jacobian(iC)*delta/(vpol*vsol)                                     
-    F_Eq = F_Eq - (1.0-fAmin(is, iC))*dlog(expmuHplus)*avpola(is, iC)*jacobian(iC)*delta/(vpol*vsol)
-    F_Eq = F_Eq + (1.0-fAmin(is, iC))*dlog(Ka(is))*avpola(is, iC)*jacobian(ic)*delta/(vpol*vsol)
+    F_Eq = F_Eq + fAmin(is,iC)*dlog(fAmin(is,iC))*avpola(is,iC)*jacobian(iC)*delta/(vpol_a(is)*vsol)
+    F_Eq = F_Eq + (1.0-fAmin(is, iC))*dlog(1.0-fAmin(is, iC))*avpola(is, iC)*jacobian(iC)*delta/(vpol_a(is)*vsol)                                     
+    F_Eq = F_Eq - (1.0-fAmin(is, iC))*dlog(expmuHplus)*avpola(is, iC)*jacobian(iC)*delta/(vpol_a(is)*vsol)
+    F_Eq = F_Eq + (1.0-fAmin(is, iC))*dlog(Ka(is))*avpola(is, iC)*jacobian(ic)*delta/(vpol_a(is)*vsol)
   enddo
   
   do is=1, Nbasics
-    F_Eq = F_Eq + fBHplus(is,iC )*dlog(fBHplus(is,iC))*avpolb(is,iC)*jacobian(iC)*delta/(vpol*vsol)
-    F_Eq = F_Eq + (1.0-fBHplus(is, iC))*dlog(1.0-fBHplus(is, iC))*avpolb(is, iC)*jacobian(iC)*delta/(vpol*vsol)
-    F_Eq = F_Eq - (1.0-fBHplus(is, iC))*dlog(expmuOHmin)*avpolb(is, iC)*jacobian(iC)*delta/(vpol*vsol)
-    F_Eq = F_Eq + (1.0-fBHplus(is, iC))*dlog(Kb(is))*avpolb(is, iC)*jacobian(ic)*delta/(vpol*vsol)
+    F_Eq = F_Eq + fBHplus(is,iC )*dlog(fBHplus(is,iC))*avpolb(is,iC)*jacobian(iC)*delta/(vpol_b(is)*vsol)
+    F_Eq = F_Eq + (1.0-fBHplus(is, iC))*dlog(1.0-fBHplus(is, iC))*avpolb(is, iC)*jacobian(iC)*delta/(vpol_b(is)*vsol)
+    F_Eq = F_Eq - (1.0-fBHplus(is, iC))*dlog(expmuOHmin)*avpolb(is, iC)*jacobian(iC)*delta/(vpol_b(is)*vsol)
+    F_Eq = F_Eq + (1.0-fBHplus(is, iC))*dlog(Kb(is))*avpolb(is, iC)*jacobian(ic)*delta/(vpol_b(is)*vsol)
   enddo    
 
 enddo
@@ -215,8 +215,11 @@ do iC = 1, ntot
     do is = 1, Npoorsv
       do js = 1, Npoorsv
 
-        F_vdW (is,js) = F_vdW(is,js) - 0.5*Xu(iC,jC,is,js)*avpol(is,iC)*avpol(js,jC)*st(is,js)/((vpol*vsol)**2)*jacobian(iC)*delta
-
+        F_vdW (is,js) = F_vdW(is,js) - 0.5*Xu(iC,jC,is,js) &
+                                      *avpol(is,iC)*avpol(js,jC) &
+                                      *st(is,js)/(vpol(is)*vpol(js)*vsol**2) &
+                                      *jacobian(iC)*delta 
+  
 !       F_vdW = F_vdW - 0.5000*delta**3*xtotal2(ii,iC)*      
 !       &       xtotal2(iii,Xulist_cell(iC, iiC))*                    
 !       &       Xulist_value(iC,iiC)*st_matrix(ii, iii)*st

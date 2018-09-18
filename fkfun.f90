@@ -62,7 +62,7 @@ do is = 1,Npoorsv
 enddo
 
 
-inverse_of_vpolvsol=1/(vpol*vsol)
+!inverse_of_vpolvsol=1/(vpol*vsol)
 
 avpos=0.0
 avneg=0.0
@@ -102,10 +102,10 @@ call dielectfcn(dielpol,epsfcn,Depsfcn)
 ! Calculation of xpot
 do i = 1, ntot
 ! osmotic pressure
-   xpot(0,i) = xh(i)**vpol ! exp(-pi(r)v_pol) / units of v_pol: nm^3
+   xpot(0,i) = xh(i)**vpol(0) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
 ! dielectrics
    gradphi2 = ((phi(i+1)-phi(i))/delta)**2
-   xpot(0,i) = xpot(0,i)*exp(Depsfcn(i)*gradphi2*vpol*vsol*wperm/2.0)
+   xpot(0,i) = xpot(0,i)*exp(Depsfcn(i)*gradphi2*vpol(0)*vsol*wperm/2.0)
 enddo 
 
 
@@ -119,13 +119,15 @@ do i = 1, ntot
     
       do js = 1, Npoorsv 
          do j = 1, ntot
-            protemp = protemp+st(is,js)*inverse_of_vpolvsol*Xu(i,j,is,js)*xtotal(js,j) ! vpol*vsol in units of nm^3
+            protemp = protemp+st(is,js)*Xu(i,j,is,js)*xtotal(js,j)/(vpol(js)*vsol) ! vpol*vsol in units of nm^3
 !           protemp = protemp+st(is,js)/(vpol*vsol)*Xu(i,j,is,js)*xtotal(js,j) ! vpol*vsol in units of nm^3
          enddo
       enddo
 
-
-    xpot(is,i) = xpot(0,i)*dexp(protemp) 
+    xpot(is,i) = xpot(is,i)*xh(i)**vpol(is) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
+! dielectrics
+    xpot(is,i) = xpot(is,i)*exp(Depsfcn(i)*gradphi2*vpol(is)*vsol*wperm/2.0)
+    xpot(is,i) = xpot(is,i)*dexp(protemp) 
 
   enddo
 
@@ -322,8 +324,13 @@ do i = 1, ntot
    enddo
 enddo
 
+vchain=0.0
 
-sumpol = sumpol/(vpol*vsol)/long 
+do i=1,long
+   vchain=vchain+vpol(segpoorsv(i))
+enddo
+
+sumpol = sumpol/(vchain*vsol) 
 avpol = avpol/sumpol*npol ! integral of avpol is fixed
 avpola = avpola/sumpol*npol
 avpolb = avpolb/sumpol*npol

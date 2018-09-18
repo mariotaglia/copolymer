@@ -69,7 +69,8 @@ real*8, parameter :: delta = 0.2
 endmodule
 
 module volume
-real*8 vpol, vsol, vpos, vneg
+real*8 vchain, vsol, vpos, vneg
+real*8, allocatable :: vpol(:), vpol_a(:), vpol_b(:)
 endmodule
 
 module mcharge

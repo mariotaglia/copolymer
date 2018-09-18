@@ -29,7 +29,7 @@ ndr = -1.0d10
 
 ! default values, if ndi or ndr is used, then variable is required
 dielP = 78.54
-vpol = ndr
+vpol(0) = ndr
 curvature = ndi
 ntot = ndi
 maxntotcounter_ini = ndi
@@ -82,7 +82,7 @@ do while (ios == 0)
 select case (label)
 
  case ('vpol')
-   read(buffer, *, iostat=ios) vpol
+   read(buffer, *, iostat=ios) vpol(0)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
  case ('lseg')
@@ -211,7 +211,7 @@ enddo
 ! Check validity of input
 ! 
 
-if(vpol.eq.ndr)call stopundef('vpol')
+if(vpol(0).eq.ndr)call stopundef('vpol')
 if(curvature.eq.ndr)call stopundef('curvature')
 if(ntot.eq.ndi)call stopundef('ntot')
 if(maxntotcounter.eq.ndi)call stopundef('maxntot_counter')

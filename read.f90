@@ -13,8 +13,6 @@ integer block_cuantas, restcuantas
 
 !     reading in of variables from stdin
 
-read(8,*)nada
-read(8,*)vpol
 
 read(8,*)nada
 read(8,*)curvature
@@ -36,6 +34,12 @@ read(8,*)long !number of segments
 READ(8,*)nada
 read(8,*)Npoorsv !number of types of poor sv segments
 
+allocate(vpol(Npoorsv))
+
+read(8,*)nada
+do i=0, Npoorsv
+  read(8,*)vpol(i)
+enddo
 !read(8,*)nada
 !allocate(st(0:Npoorsv,0:Npoorsv))
 !st(0,0)=0.
@@ -63,10 +67,20 @@ enddo
 read(8,*)nada
 read(8,*)Nacids, Nbasics ! number of types of acid segments and basic segments
 
-allocate(Ka(Nacids), Kb(Nbasics), pKa(Nacids), pKb(Nbasics))
+allocate(vpol_a(Nacids), vpol_b(Nbasics),Ka(Nacids), Kb(Nbasics), pKa(Nacids), pKb(Nbasics))
 
 pKa=0.0
 pKb=0.0
+
+read(8,*)nada
+do i=1,Nacids
+  read(8,*)vpol_a(i)
+enddo
+
+read(8,*)nada
+do i=1,Nbasics
+  read(8,*)vpol_b(i)
+enddo
 
 if (Nacids.gt.0) then
   read(8,*)nada
