@@ -124,8 +124,9 @@ do i = 1, ntot
          enddo
       enddo
 
-    xpot(is,i) = xpot(is,i)*xh(i)**vpol(is) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
+    xpot(is,i) = xh(i)**vpol(is) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
 ! dielectrics
+    gradphi2 = ((phi(i+1)-phi(i))/delta)**2
     xpot(is,i) = xpot(is,i)*exp(Depsfcn(i)*gradphi2*vpol(is)*vsol*wperm/2.0)
     xpot(is,i) = xpot(is,i)*dexp(protemp) 
 
@@ -324,11 +325,6 @@ do i = 1, ntot
    enddo
 enddo
 
-vchain=0.0
-
-do i=1,long
-   vchain=vchain+vpol(segpoorsv(i))
-enddo
 
 sumpol = sumpol/(vchain*vsol) 
 avpol = avpol/sumpol*npol ! integral of avpol is fixed
@@ -385,13 +381,13 @@ do i = 1,ntot
 
    if (Nacids.gt.0) then
      do ic= 1,Nacids
-       xcharge(i)=xcharge(i)-avpola(ic,i)*fAmin(ic,i)*inverse_of_vpolvsol
+       xcharge(i)=xcharge(i)-avpola(ic,i)*fAmin(ic,i)/(vpol_a(ic)*vsol)
      enddo
    endif
 
    if (Nbasics.gt.0) then
      do ic= 1,Nbasics
-       xcharge(i)=xcharge(i)+avpolb(ic,i)*fBHplus(ic,i)*inverse_of_vpolvsol
+       xcharge(i)=xcharge(i)+avpolb(ic,i)*fBHplus(ic,i)/(vpol_b(ic)*vsol)
      enddo
    endif
 
