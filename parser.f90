@@ -29,7 +29,6 @@ ndr = -1.0d10
 
 ! default values, if ndi or ndr is used, then variable is required
 dielP = 78.54
-vpol(0) = ndr
 curvature = ndi
 ntot = ndi
 maxntotcounter_ini = ndi
@@ -81,20 +80,39 @@ do while (ios == 0)
 
 select case (label)
 
- case ('vpol')
-   read(buffer, *, iostat=ios) vpol(0)
+  case ('vpol')
+   read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   allocate(vpol(0:Npoorsv))
+   do i=0,npoorsv
+     read(fh, *) vpol(i)
+   enddo
 
- case ('lseg')
+  case('vpol_a')
+   read(buffer, *, iostat=ios) Nacids
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   allocate(vpol_a(Nacids))
+   do i=1,Nacids
+     read(fh,*) vpol_a(i)
+   enddo
+
+  case('vpol_b')
+   read(buffer, *, iostat=ios) Nbasics
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   allocate(vpol_b(Nbasics))
+   do i=1,Nbasics
+     read(fh,*) vpol_b(i)
+   enddo
+
+  case ('lseg')
    read(buffer, *, iostat=ios) lseg
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
- case ('dielP')
+  case ('dielP')
    read(buffer, *, iostat=ios) dielP
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
-
- case ('curvature')
+  case ('curvature')
    read(buffer, *, iostat=ios) curvature
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
@@ -118,17 +136,11 @@ select case (label)
   case ('npoorsv')
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   allocate(dimf(0:Npoorsv,0:Npoorsv))
-   dimf=6
-   allocate(Ut(0:Npoorsv))
-   allocate(Ug(0:Npoorsv))
-   Ut = 0.0
-   Ug = 0.0
 
- case ('dimf')
+  case ('dimf')
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-  
+   allocate(dimfkais(0:Npoorsv,0:Npoorsv),dimf(0:Npoorsv,0:Npoorsv))
    dimf(0,0)=0
    do i = 1, Npoorsv
    dimf(0,i)=0.
@@ -139,25 +151,21 @@ select case (label)
      enddo
    enddo
 
-  case ('nacids')
+  case ('Nacids')
    read(buffer, *, iostat=ios) Nacids
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   allocate(Ka(Nacids), pKa(Nacids))
-   if (Nacids.gt.0) then
-     do i=1,Nacids
-       read(fh,*)pKa(i) ! acid constants of each acid segment
-     enddo
-   endif
+   allocate(pKa(Nacids),Ka(Nacids))
+   do i=1,Nacids
+     read(fh,*)pKa(i) ! acid constants of each acid segment
+   enddo
 
-  case ('nbasics')
+  case ('Nbasics')
    read(buffer, *, iostat=ios) Nbasics
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   allocate(Kb(Nbasics), pKb(Nbasics))
-   if (Nbasics.gt.0) then
-     do i=1,Nbasics
-       read(fh,*)pKb(i) ! acid constants of each acid segment
-     enddo
-   endif
+   allocate(Kb(Nbasics),pKb(Nbasics))
+   do i=1,Nbasics
+     read(fh,*)pKb(i) ! acid constants of each acid segment
+   enddo
 
   case ('infile')
    read(buffer, *, iostat=ios) infile
@@ -177,6 +185,9 @@ select case (label)
   case ('Utg')
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   allocate(Ut(0:npoorsv),Ug(0:Npoorsv))
+   Ut=0.0
+   Ug=0.0
    do i = 0, Npoorsv
      read(fh,*), Ut(i), Ug(i)
    enddo
@@ -211,7 +222,6 @@ enddo
 ! Check validity of input
 ! 
 
-if(vpol(0).eq.ndr)call stopundef('vpol')
 if(curvature.eq.ndr)call stopundef('curvature')
 if(ntot.eq.ndi)call stopundef('ntot')
 if(maxntotcounter.eq.ndi)call stopundef('maxntot_counter')
@@ -226,6 +236,15 @@ if(npolstep.eq.ndi)call stopundef('npolstep')
 if(Xulimit.eq.ndi)call stopundef('Xulimit')
 if(lseg.eq.ndr)call stopundef('lseg')
 if(pHbulk.eq.ndi)call stopundef('pHbulk')
+
+if (rank.eq.0) then
+ print*, 'pKa = ', pka
+ print*, 'pKb = ', pKb
+ print*, 'vpol = ', vpol
+ print*, 'vpol_a = ', vpol_a
+ print*, 'vpol_b = ', vpol_b
+ print*, 'dimf = ', dimf
+endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Read chain structure from structure.in
