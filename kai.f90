@@ -123,6 +123,36 @@ write(kaisfilename,'(A5,BZ,I3.3,A1,I3.3,A4)')'kais.',is,'.',js,'.dat'
 open(unit=200,file='suma.dat')
 open(unit=is*110+js, file=kaisfilename)
 
+if (flagkai.eq.0) then
+
+  read(is*110+js,*)nada
+  read(is*110+js,*)curvkais,ntotkais,Xulimitkais,dimfkais(is,js)
+  
+  if (curvkais.ne.curvature) then
+     print*,"curvature of kais non equal curvature of fort.8"
+     stop
+  endif
+  if (ntotkais.ne.ntot) then
+     print*,"box size of kais non equal box size of fort.8"
+     stop
+  endif
+  if (Xulimitkais.ne.Xulimit) then
+     print*,"Xulimit of kais non equal Xulimit of fort.8"
+     stop
+  endif
+  if (dimfkais(is,js).ne.dimf(is,js)) then
+     print*,"dimf of kais non equal dimf of fort.8"
+     stop
+  endif
+
+endif
+
+if (flagkai.eq.1) then
+
+  write(is*110+js,*)'#curvature dimz Xulimit dimf#'
+  write(is*110+js,*)curvature,ntot,Xulimit,dimf(is,js)
+
+endif
 
   do ii=1,ntot
   do j=1,ntot

@@ -14,17 +14,16 @@ implicit none
 
 double precision Factorcurv                   
 
+real*8 gradphi2
 real*8 Free_energy, F_Mix_s, F_Mix_pos, F_mix_p        
 real*8 F_Mix_neg, F_Mix_Hplus                 
-real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol, mupol
+real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol, mupol, sumdiel
 real*8 F_Mix_OHmin, F_Conf, F_Uchain     
-real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW(Npoorsv,Npoorsv), F_eps, F_electro                            
+real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW(Npoorsv,Npoorsv), F_electro                            
 !real*8 F_mup
 integer counter, counter2                                    
 
 integer i, iC, jC, is, js                                  
-
-integer Fchargeflag
 
 real*8, external :: jacobian
 
@@ -37,10 +36,10 @@ open(unit=301, file='F_tot.dat')
 open(unit=302, file='F_mixs.dat')                          
 open(unit=303, file='F_mixpos.dat')                        
 open(unit=304, file='F_mixneg.dat')                        
-!open(unit=305, file='F_mixH.dat')                          
-!open(unit=306, file='F_mixOH.dat')                         
+open(unit=305, file='F_mixH.dat')                          
+open(unit=306, file='F_mixOH.dat')                         
 open(unit=307, file='F_conf.dat')                          
-!open(unit=308, file='F_eq.dat')                            
+open(unit=308, file='F_eq.dat')                            
 !open(unit=313 ,file='F_eq_P.dat')                            
 do is=1,Npoorsv
 do js=1,Npoorsv
@@ -48,7 +47,6 @@ write(F_vdWfilename(is,js),'(A6,BZ,I3.3,A1,I3.3,A4)')'F_vdW.',is,'.',js,'.dat'
 open(unit=10000*is+js, file=F_vdWfilename(is,js) )                           
 enddo
 enddo
-!open(unit=310, file='F_eps.dat')                           
 open(unit=311, file='F_electro.dat')                       
 open(unit=312, file='F_tot2.dat')                          
 open(unit=313, file='F_mixp.dat')                          
@@ -69,9 +67,9 @@ mupol = dlog(xpol(1))-dlog(q(1))
 F_Mix_s = 0.0                                                    
 
 do iC = 1, ntot                                                
-   F_Mix_s = F_Mix_s + xsol(iC)*(dlog(xsol(iC))-1.0)*jacobian(iC)*delta/vsol                                      
-   F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*jacobian(iC)*delta/vsol                              
-enddo                                                            
+   F_Mix_s = F_Mix_s + xsol(iC)*(dlog(xsol(iC))-1.0)*jacobian(iC)*delta/vsol ! mix entropy of solvent                                      
+   F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*jacobian(iC)*delta/vsol ! with respect to bulk                             
+enddo                                                             
 
 Free_Energy = Free_Energy + F_Mix_s                              
 
@@ -85,73 +83,54 @@ Free_Energy = Free_Energy + F_Mix_s
 F_Mix_p = 0.0                                                    
 
 do iC = 1, maxntotcounter                                                
-   F_Mix_p = F_Mix_p + xpol(iC)*(dlog(xpol(iC))-1.0)*jacobian(iC)*delta                                      
+  F_Mix_p = F_Mix_p + xpol(iC)*(dlog(xpol(iC))-1.0)*jacobian(iC)*delta ! mix entropy of chains with respect to bulk (xpolbulk=0)                                     
 enddo                                                            
 
 Free_Energy = Free_Energy + F_Mix_p            
 
 ! 2. Pos ion translational entropy
 
-!do i=1,long
-!  Fchargeflag=Fchargeflag+chargetype(i)
-!  print*, "flag", Fchargeflag
-!enddo
-
-
 F_Mix_pos = 0.0                                                  
 
-!if (Fchargeflag.ne.0) then
-
-   do iC=1,ntot
-      F_Mix_pos = F_Mix_pos + avpos(iC)*(dlog(avpos(iC))-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos) 
-      F_Mix_pos = F_Mix_pos - xsalt*vsol*vpos*(dlog(xsalt*vsol*vpos)-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos)
-   enddo
-
-!endif
+do iC=1,ntot
+  F_Mix_pos = F_Mix_pos + avpos(iC)*(dlog(avpos(iC)/vpos)-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos) ! mix entropy of cations and N*Mu term
+  F_Mix_pos = F_Mix_pos - xposbulk*(dlog(xposbulk/vpos)-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos) ! with respect to bulk
+enddo
 
 Free_energy = Free_Energy + F_Mix_pos
-
-!do iC = 1, ntot                                               
-!F_Mix_pos = F_Mix_pos + xpos(iC)*(dlog(xpos(iC)/vsalt)-1.0-dlog(expmupos) + dlog(vsalt))*jacobian(iC)*delta/vsol
-!F_Mix_pos = F_Mix_pos - xposbulk*(dlog(xposbulk/vsalt)-1.0-dlog(expmupos) + dlog(vsalt))*jacobian(iC)*delta/vsol                               
-!enddo                                                            
-!Free_Energy = Free_Energy + F_Mix_pos                            
 
 !3. Neg ion translational entropy
 
 F_Mix_neg = 0.0                                                  
 
-!if (Fchargeflag.ne.0) then
-
-   do iC = 1, ntot                                                
-      F_Mix_neg = F_Mix_neg + avneg(iC)*(dlog(avneg(iC))-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg)
-      F_Mix_neg = F_Mix_neg - xsalt*vsol*vneg*(dlog(xsalt*vsol*vneg)-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg)
-   enddo
-
-!endif
+do iC = 1, ntot                                                
+  F_Mix_neg = F_Mix_neg + avneg(iC)*(dlog(avneg(iC)/vpos)-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg) ! mix entropy and N*Mu term of anions 
+  F_Mix_neg = F_Mix_neg - xnegbulk*(dlog(xnegbulk/vpos)-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg) ! with respect to bulk
+enddo
 
 Free_Energy = Free_Energy + F_Mix_neg                            
 
-
 ! 4. H+ translational entropy
 
-!F_Mix_Hplus = 0.0                                                
+F_Mix_Hplus = 0.0                                                
 
-!do iC = 1, ntot                                      
-!F_Mix_Hplus = F_Mix_Hplus + xHplus(iC)*(dlog(xHplus(iC))-1.0-dlog(expmuHplus))*jacobian(iC)*delta/vsol                                             
-!F_Mix_Hplus = F_Mix_Hplus - xHplusbulk*(dlog(xHplusbulk)-1.0-dlog(expmuHplus))*jacobian(iC)*delta/vsol                                             
-!enddo                                                            
-!Free_Energy = Free_Energy + F_Mix_Hplus                          
+do iC = 1, ntot                                      
+  F_Mix_Hplus = F_Mix_Hplus + avHplus(iC)/vsol*(dlog(avHplus(iC))-1.0-dlog(expmuHplus))*jacobian(iC)*delta ! mix entropy and N*Mu term of Hplus
+  F_Mix_Hplus = F_Mix_Hplus - xHplusbulk/vsol*(dlog(xHplusbulk)-1.0-dlog(expmuHplus))*jacobian(iC)*delta ! with respect to bulk      
+enddo                                                            
+
+Free_Energy = Free_Energy + F_Mix_Hplus                          
 
 ! 5. OH- translational entropy 
 
-!F_Mix_OHmin = 0.0                                                
+F_Mix_OHmin = 0.0                                                
 
-!do iC = 1, ntot                                       
-!F_Mix_OHmin = F_Mix_OHmin + xOHmin(iC)*(dlog(xOHmin(iC))-1.0-dlog(expmuOHmin))*jacobian(iC)*delta/vsol           
-!F_Mix_OHmin = F_Mix_OHmin - xOHminbulk*(dlog(xOHminbulk)-1.0-dlog(expmuOHmin))*jacobian(iC)*delta/vsol                                             
-!enddo                                                            
-!Free_Energy = Free_Energy + F_Mix_OHmin                          
+do iC = 1, ntot                                       
+  F_Mix_OHmin = F_Mix_OHmin + avOHmin(iC)/vsol*(dlog(avOHmin(iC))-1.0-dlog(expmuOHmin))*jacobian(iC)*delta ! mix entropy and N*Mu term of OHmin          
+  F_Mix_OHmin = F_Mix_OHmin - xOHminbulk/vsol*(dlog(xOHminbulk)-1.0-dlog(expmuOHmin))*jacobian(iC)*delta ! with respect to bulk       
+enddo                                                            
+
+Free_Energy = Free_Energy + F_Mix_OHmin                          
 
 ! 6. Polymer conformational entropy                                         
 
@@ -159,7 +138,7 @@ Free_Energy = Free_Energy + F_Mix_neg
 F_conf = 0 
 
 do iC = 1, maxntotcounter 
-   F_Conf = F_conf + (sumprolnpro(iC)/q(iC)-dlog(q(iC)))*jacobian(iC)*delta*xpol(iC)
+  F_Conf = F_conf + (sumprolnpro(iC)/q(iC)-dlog(q(iC)))*jacobian(iC)*delta*xpol(iC)
 enddo 
 
 Free_Energy = Free_Energy + F_Conf
@@ -167,14 +146,35 @@ Free_Energy = Free_Energy + F_Conf
 F_Uchain = 0.0
 
 do iC=1, maxntotcounter
-   F_Uchain = F_Uchain + delta*xpol(iC)*jacobian(iC)*(sumprouchain(iC)/q(iC))
+  F_Uchain = F_Uchain + delta*xpol(iC)*jacobian(iC)*(sumprouchain(iC)/q(iC))
 enddo
 
 Free_Energy = Free_Energy + F_Uchain
 
 ! 7. Chemical Equilibrium                                              
 
-!F_Eq = 0.0                                                       
+F_Eq = 0.0                                                       
+
+do iC=1,ntot
+
+  do is=1, Nacids
+    F_Eq = F_Eq + fAmin(is,iC)*dlog(fAmin(is,iC))*avpola(is,iC)*jacobian(iC)*delta/(vpol_a(is)*vsol)
+    F_Eq = F_Eq + (1.0-fAmin(is, iC))*dlog(1.0-fAmin(is, iC))*avpola(is, iC)*jacobian(iC)*delta/(vpol_a(is)*vsol)                                     
+    F_Eq = F_Eq - (1.0-fAmin(is, iC))*dlog(expmuHplus)*avpola(is, iC)*jacobian(iC)*delta/(vpol_a(is)*vsol)
+    F_Eq = F_Eq + (1.0-fAmin(is, iC))*dlog(Ka(is))*avpola(is, iC)*jacobian(ic)*delta/(vpol_a(is)*vsol)
+  enddo
+  
+  do is=1, Nbasics
+    F_Eq = F_Eq + fBHplus(is,iC )*dlog(fBHplus(is,iC))*avpolb(is,iC)*jacobian(iC)*delta/(vpol_b(is)*vsol)
+    F_Eq = F_Eq + (1.0-fBHplus(is, iC))*dlog(1.0-fBHplus(is, iC))*avpolb(is, iC)*jacobian(iC)*delta/(vpol_b(is)*vsol)
+    F_Eq = F_Eq - (1.0-fBHplus(is, iC))*dlog(expmuOHmin)*avpolb(is, iC)*jacobian(iC)*delta/(vpol_b(is)*vsol)
+    F_Eq = F_Eq + (1.0-fBHplus(is, iC))*dlog(Kb(is))*avpolb(is, iC)*jacobian(ic)*delta/(vpol_b(is)*vsol)
+  enddo    
+
+enddo
+
+Free_Energy = Free_Energy + F_Eq     
+
 !do im = 1, N_monomer                                                                       
 !do iC  = 1, ncells                                               
 !if(zpol(im).ne.0) then
@@ -184,9 +184,11 @@ Free_Energy = Free_Energy + F_Uchain
 !F_Eq = F_Eq + (1.0-fdis(im, iC))                                     
 !& *dlog(1.0-fdis(im, iC))*avpol_monom(im, iC)/vpol                      
 !& *(dfloat(indexa(iC,1))-0.5)                                     
+
 !F_Eq = F_Eq + (1.0-fdis(im, iC))*
 !& dlog(K0(im))*avpol_monom(im, iC)/vpol     
 !& *(dfloat(indexa(iC,1))-0.5)                                     
+
 !select case (zpol(im))
 !case (-1) ! acid
 !F_Eq = F_Eq + (1.0-fdis(im, iC))                                     
@@ -213,8 +215,11 @@ do iC = 1, ntot
     do is = 1, Npoorsv
       do js = 1, Npoorsv
 
-        F_vdW (is,js) = F_vdW(is,js) - 0.5*Xu(iC,jC,is,js)*avpol(is,iC)*avpol(js,jC)*st(is,js)/((vpol*vsol)**2)*jacobian(iC)*delta
-
+        F_vdW (is,js) = F_vdW(is,js) - 0.5*Xu(iC,jC,is,js) &
+                                      *avpol(is,iC)*avpol(js,jC) &
+                                      *st(is,js)/(vpol(is)*vpol(js)*vsol**2) &
+                                      *jacobian(iC)*delta 
+  
 !       F_vdW = F_vdW - 0.5000*delta**3*xtotal2(ii,iC)*      
 !       &       xtotal2(iii,Xulist_cell(iC, iiC))*                    
 !       &       Xulist_value(iC,iiC)*st_matrix(ii, iii)*st
@@ -237,16 +242,10 @@ enddo
 
 F_electro = 0.0                                                  
 
-!if (Fchargeflag.ne.0) then
  
   do iC  = 1, ntot                                               
-    F_electro = F_electro + (xcharge(ic)*phi(ic)-wperm/2*(ic-0.5)*((phi(iC)-phi(iC-1))/delta)**2)*jacobian(iC)*delta
+     F_electro = F_electro + (xcharge(ic)*phi(ic)-wperm*epsfcn(iC)/2.0*((phi(iC+1)-phi(iC))/delta)**2)*jacobian(iC)*delta
   enddo
-
-!endif
-
-!&               *(dfloat(indexa(iC,1))-0.5)*2*pi                  
-!enddo                                                            
 
 Free_Energy = Free_Energy + F_electro                            
 
@@ -259,6 +258,7 @@ Free_Energy2 = 0.0
 sumpi = 0.0                                                   
 sumrho=0.0                                                    
 sumel=0.0                                                     
+sumdiel=0.0                                                     
 sumpol = 0.0
 
 do iC=1,ntot                                                
@@ -268,25 +268,36 @@ do iC=1,ntot
   sumrho = sumrho + (-xsol(iC)*jacobian(iC)) ! sum over  rho_i i=+,-,si
   sumrho = sumrho - (-xsolbulk)*jacobian(iC) ! sum over  rho_i i=+,-,si
   sumrho = sumrho + (-avpos(iC)/vpos)*jacobian(iC)
-  sumrho = sumrho - (-xsalt*vsol)*jacobian(iC)
+  sumrho = sumrho - (-xposbulk/vpos)*jacobian(iC)
   sumrho = sumrho + (-avneg(iC)/vneg)*jacobian(iC)
-  sumrho = sumrho - (-xsalt*vsol)*jacobian(iC)
-enddo
+  sumrho = sumrho - (-xnegbulk/vneg)*jacobian(iC)
+  sumrho = sumrho + (-avHplus(iC)*jacobian(iC))
+  sumrho = sumrho - (-xHplusbulk*jacobian(iC))
+  sumrho = sumrho + (-avOHmin(iC)*jacobian(iC))
+  sumrho = sumrho - (-xOHminbulk*jacobian(iC))
 
+enddo
 
 do iC=1,maxntotcounter                                                
   sumrho = sumrho + (-xpol(iC)*vsol*jacobian(iC)) ! sum over  rho_i i=+,-,si
 enddo
 
 
-!do iC=1,ntot                                                
-!sumel = sumel - qtot(iC)*psi2(iC)/2.0
-!&               *(dfloat(indexa(iC,1))-0.5)*2*pi
-!sumel = sumel + proteinqC(iC)*psi2(iC)*vsol                   
-!&               *(dfloat(indexa(iC,1))-0.5)*2*pi   
-!enddo                                                            
+! sumel
 
-Free_Energy2 = (sumpi + sumrho + sumel)/vsol*delta                               
+ do iC = 1, ntot
+ sumel = sumel - wperm*epsfcn(iC)/2.0*((phi(iC+1)-phi(iC))/delta)**2*jacobian(iC)*delta
+ enddo
+
+! contribution from dielecrtric
+
+do iC = 1, ntot
+gradphi2 = ((phi(iC+1)-phi(iC))/delta)**2
+sumdiel = sumdiel + 0.5*wperm*dielpol(iC)*Depsfcn(iC)*gradphi2*jacobian(iC)*vsol
+enddo
+
+
+Free_Energy2 = (sumpi + sumrho + sumdiel)/vsol*delta + sumel                      
 
 do is=1,Npoorsv
   do js=1,Npoorsv
@@ -294,12 +305,8 @@ do is=1,Npoorsv
   enddo
 enddo
 
-do iC=1,ntot
-  Free_Energy2 = Free_Energy2 - (wperm/2*(ic-0.5)*((phi(iC)-phi(iC-1))/delta)**2)*jacobian(iC)*delta
-enddo
-
 do iC = 1, maxntotcounter
-  sumpol = sumpol + xpol(iC)*mupol*jacobian(iC)*delta !LOKE
+  sumpol = sumpol + xpol(iC)*mupol*jacobian(iC)*delta 
 enddo
 
 Free_Energy2 = Free_Energy2 + sumpol 
@@ -312,17 +319,16 @@ if(rank.eq.0) then
   write(302,*) npol, F_Mix_s/npol                           
   write(303,*) npol, F_Mix_pos/npol                       
   write(304,*) npol, F_Mix_neg/npol                         
-! write(305,*)counter, counter2, F_Mix_Hplus                       
-! write(306,*)counter, counter2, F_Mix_OHmin                       
+  write(305,*) npol, F_Mix_Hplus/npol                       
+  write(306,*) npol, F_Mix_OHmin/npol                       
   write(307,*) npol, F_Conf/npol                            
-! write(308,*)ounter, counter2, F_Eq                              
+  write(308,*) npol, F_Eq/npol                            
 ! write(313,*)counter, counter2, F_Eq_P                              
   do is=1,Npoorsv
     do js=1,Npoorsv
        write(10000*is+js,*) npol, F_vdW(is,js)/npol                             
     enddo
   enddo
-! write(310,*)counter, counter2, F_eps                          
   write(311,*) npol, F_electro/npol                         
   write(312,*) npol, Free_energy2/npol                      
   write(313,*) npol, F_Mix_p/npol                          

@@ -162,11 +162,11 @@ do i = 1, ntot  !constraint vector
 enddo
 
 do i = ntot+1, (Npoorsv+1)*ntot
-   constr(i) = 2.0 ! xtotal >= 0
+   constr(i) = 1.0 ! xtotal > 0
 enddo
 
-do i = 1,ntot
-    constr(i+ntot*(npoorsv+1))=0.0
+do i = (Npoorsv+1)*ntot+1,ntot*(Npoorsv+2)
+    constr(i)=0.0
 enddo
 
 call fkinsetvin('CONSTR_VEC', constr, ier) ! constraint vector

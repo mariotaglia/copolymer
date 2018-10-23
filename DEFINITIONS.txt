@@ -1,0 +1,54 @@
+curvature 0
+
+! Ntot maxntot_counter maxntot 
+ntot 140 18 18
+cuantas 100000
+long 16
+
+Npoorsv 2
+
+! After vpol and dimf, indicate again npoorsv
+vpol 2
+0.096
+0.096
+0.096
+dimf 2
+6
+6	6
+
+! Below nacids and basics indicate pKa and pKb
+Nacids 1
+0
+Nbasics 1
+7
+
+! After vpol_a and vpol_b indicate nacids and nbasics
+vpol_a 1
+0.096
+vpol_b 1
+0.096
+
+infile 1
+flagkai 0
+
+! Npolini, Npolfirst, Npollast, Npolstep
+npol 0.4 0.1 1.4 0.01
+
+Xulimit 5
+lseg 0.5
+
+! After Utg indicate again npoorsv
+Utg 2
+0.0 0.0
+0.0 0.0
+0.0 0.0
+
+csalt 1
+pHbulk 7
+dielP 3.0
+
+! number of branches and then position and length of each branch
+nbranches 3
+5 1
+6 1
+9 2

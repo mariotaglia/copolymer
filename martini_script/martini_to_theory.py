@@ -1,9 +1,9 @@
 import numpy
 
-beadslist=["Qda","Qd","Qa","Q0","P5","P4","P3","P2","P1","Nda","Nd","Na","N0","C5","C4","C3","C2","C1"]
+beadslist=["Qda","Qd","Qa","Q0","P5","P4","P3","P2","P1","Nda","Nd","Na","N0","C5","C4","C3","C2","C1","SC1","SP0"]
 
 print("------------------------------------------------------------------------------------------------")
-print("Possible types of martini beads: Qda  Qd  Qa  Q0  P5  P4  P3  P2  P1  Nda  Nd  Na  N0  C5  C4  C3  C2  C1")
+print("Possible types of martini beads: Qda  Qd  Qa  Q0  P5  P4  P3  P2  P1  Nda  Nd  Na  N0  C5  C4  C3  C2  C1 SC1 SP0")
 print("Please use exactly the same spelling, including lower and upper cases.")
 print("------------------------------------------------------------------------------------------------")
 print("")
@@ -26,10 +26,9 @@ for i in range(0,n):
    bead_type_index[i]=beadslist.index(type_tmp)
    name= name+str(i)+": "+name_tmp+"	"
 
-data=numpy.loadtxt("table_martini.dat", skiprows=1, usecols=(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18))
-epslist=data[:][18]
-sigmalist=data[:][19]
-
+data=numpy.loadtxt("table_martini.dat", skiprows=1, usecols=(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20))
+epslist=data[:][20]
+sigmalist=data[:][21]
 epsilon=numpy.zeros((n,n))
 epsilon_th=numpy.zeros((n,n))
 interaction_index=numpy.zeros((n,n),dtype=numpy.int8)
@@ -54,6 +53,12 @@ for i in range(0,n):
 #epsilon=epsilon/epsilon[n-1][n-1]*3.0
 
 print epsilon_th
+
+factor = input("Enter factor of normalization:")
+
+for i in range(0,n):
+  for j in range(0,n):
+     epsilon_th[i][j]=epsilon_th[i][j]*factor
 
 f = open("epsilon.in","w")
 

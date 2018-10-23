@@ -134,14 +134,16 @@ implicit none
 integer i,state,ii,j,k1,k2,ncha, kk, is
 real*8 rn,dista
 real*8 rands,angle
-real*8 m(3,3), mm(3,3)
-real*8 x(3),xend(3,long+5),xendr(3,long+5), xendcom(3,long+5)
+real*8 m(3,3), mm(3,3), m_branch(3,3,50)
+real*8 x(3),xend(3,long+5),xendr(3,long+5), xendcom(3,long+5), xend_branch(3,50)
 REAL*8 chains(3,long,ncha_max), chainsw(ncha_max), Uconf
 character*1 test
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
 integer*1 Ntconf(long), seglength(0:Npoorsv)
 real*8 Ugyr, Rgyr(0:Npoorsv+1)
 real*8 distance(long,long)
+integer state_branch(50)
+real*8 xendt(3)
 
 tolerancia = 1.0e-5
 
@@ -179,9 +181,10 @@ xend(1,2)=xend(1,1)+x(1)  ! second postion
 xend(2,2)=xend(2,1)+x(2)
 xend(3,2)=xend(3,1)+x(3)
 
-do i=3,long          ! loop over remaining positions!
 
-123     rn=rands(seed)
+do i=3,long-long_branches          ! loop over remaining positions!
+
+rn=rands(seed)
 state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
 
   if (state.eq.3) then 
@@ -191,13 +194,6 @@ state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
   if (state.eq.0) then
 !*********************************** TRANS     
     call mrrrr(m,tt,mm)
-
-    do ii=1,3
-       do j=1,3
-          m(ii,j)=mm(ii,j)
-       enddo
-    enddo
-
     if(i.gt.3)Uconf=Uconf+Ut(segpoorsv(i-1)) ! first segment to have a dihedral angle is i = 4
                                            ! OJO : the order of chain grown changes the assigment of diehdral angles
     if(i.gt.3)Ntconf(i-1) = 1   
@@ -206,26 +202,24 @@ state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
 
 !********************************** GAUCHE +
     call mrrrr(m,tp,mm)
-    do ii=1,3
-      do j=1,3
-         m(ii,j)=mm(ii,j)
-      enddo
-    enddo
-
     if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1))
 
   elseif (state.eq.2) then
 !********************************** GAUCHE -
     call mrrrr(m,tm,mm)
-    do ii=1,3
-      do j=1,3
-         m(ii,j)=mm(ii,j)
-      enddo
-    enddo
-
     if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1))
 
   endif
+
+do j = 1, nbranches ! loop over branches
+ if(branch_pos(j).eq.i-1) then ! last segment was a branching point
+   m_branch(:,:,j) = m(:,:) ! save rotation matrix
+   xend_branch(:,j) = xend(:,i-1) ! save last position
+   state_branch(j) = state
+ endif
+enddo
+
+m = mm ! update rotation matrix
 
 x(1)=m(1,1)*lseg
 x(2)=m(2,1)*lseg
@@ -236,6 +230,51 @@ xend(2,i)=xend(2,i-1)+x(2)
 xend(3,i)=xend(3,i-1)+x(3)
 
 enddo
+
+!!! Add branches
+
+i = long-long_branches
+
+do j = 1, nbranches 
+
+m(:,:) = m_branch(:,:,j)
+xendt(:) = xend_branch(:,j)
+
+do k1=1, branch_long(j)       
+ 
+state = state_branch(j)
+do while (state.eq.state_branch(j)) ! choose a state different to that of the backbone
+rn=rands(seed)
+state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
+if (state.eq.3) then 
+  state=2
+endif
+enddo
+
+  if (state.eq.0) then
+    call mrrrr(m,tt,mm)
+  elseif (state.eq.1) then
+    call mrrrr(m,tp,mm)
+  elseif (state.eq.2) then
+    call mrrrr(m,tm,mm)
+  endif
+
+m = mm ! update rotation matrix
+
+x(1)=m(1,1)*lseg
+x(2)=m(2,1)*lseg
+x(3)=m(3,1)*lseg
+
+i = i + 1
+
+xend(1,i)=xendt(1)+x(1)   ! ith postion chain
+xend(2,i)=xendt(2)+x(2)
+xend(3,i)=xendt(3)+x(3)
+
+xendt(:) = xend(:,i)
+
+enddo ! k1
+enddo ! j
 
 dista=0.0                       ! check self avoiding constraint (segmentos)
 
@@ -281,6 +320,8 @@ do i=1,12
   call com(xend,xendcom,long)       ! substracts center of mass
   call rota(xendcom,xendr,long,test)   ! rotate chain conformation ncha time
   ncha=ncha+1
+
+!  call print_ent2(xendr)
 
   do j=1,long
     chains(1,j,ncha)=xendr(1,j)       ! output 

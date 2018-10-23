@@ -14,10 +14,11 @@ module mkai
 integer Npoorsv ! number of different types of poor solvent
 REAL*8, allocatable ::  xtotal(:,:)
 real*8, allocatable :: st(:,:)
-real*8, allocatable :: dimf(:,:)
+real*8, allocatable :: dimf(:,:), dimfkais(:,:)
 real*8, allocatable :: Xu(:,:,:,:)
-integer Xulimit
-integer flagkai
+integer Xulimit, Xulimitkais
+integer flagkai, curvkais
+real*8 ntotkais
 endmodule
 
 module globals
@@ -33,23 +34,23 @@ CHARACTER nada
 real*8 norma
 INTEGER adsmax
 integer ntot, maxntot, maxntotcounter_ini, maxntotcounter ! lattice sites
-real*8, allocatable :: avpol(:,:) ! volume fraction polymers 
-real*8, allocatable :: avpolc(:,:) ! volume fraction of charged segments 
+real*8, allocatable :: avpol(:,:) ! volume fraction of chains 
+real*8, allocatable :: avpola(:,:), avpolb(:,:) ! volume fraction of acid and basic segments 
 real*8, allocatable :: xpol(:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xsol(:)
 INTEGER totalcuantas, cuantas
 integer curvature
 real*8, allocatable :: Ug(:), Ut(:)
 
+real*8, allocatable :: epsfcn(:)
+real*8, allocatable :: dielpol(:)
+real*8, allocatable :: Depsfcn(:)
+
 integer first, last
 
-integer*2, allocatable :: innc(:,:,:,:),inn(:,:,:,:)
+integer*2, allocatable :: inn_a(:,:,:,:),inn_b(:,:,:,:), inn(:,:,:,:)
 integer, allocatable ::  maxpos(:,:)
 integer, allocatable ::  minpos(:,:)
-
-
-real*8, allocatable :: eps(:)
-real*8 eps1
 
 integer iter              ! counts number of iterations
 
@@ -68,16 +69,21 @@ real*8, parameter :: delta = 0.2
 endmodule
 
 module volume
-real*8 vpol, vsol, vpos, vneg
+real*8 vchain, vsol, vpos, vneg
+real*8, allocatable :: vpol(:), vpol_a(:), vpol_b(:)
 endmodule
 
 module mcharge
+real*8 dielP
 integer electroflag
-integer*8 Ncharge
-integer*8, allocatable :: charge(:), chargetype(:)
-real*8, allocatable :: phi(:), avpos(:), avneg(:), xcharge(:)
-real*8 Csalt, wperm, xsalt, expmupos, expmuneg
+integer*8 Nacids, Nbasics
+integer*8, allocatable :: acidtype(:), basictype(:)
+real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
+real*8, allocatable :: phi(:), avpos(:), avneg(:), avHplus(:), avOHmin(:), xcharge(:), fAmin(:,:), fBHplus(:,:)
+real*8 Csalt, wperm, rhosalt, expmupos, expmuneg, xposbulk, xnegbulk
+real*8 cHplus, cOHmin, pHbulk, pOHbulk, pKw, xHplusbulk, xOHminbulk, expmuHplus, expmuOHmin
 endmodule
+
 
 module bulk
 REAL*8 expmupol
@@ -92,6 +98,9 @@ endmodule
 module longs
 integer long            ! length of polymer
 integer, allocatable :: segpoorsv(:)
+integer nbranches
+integer long_branches
+integer, allocatable :: branch_pos(:), branch_long(:) ! position and lenght of branches read from input
 endmodule
 
 module pis

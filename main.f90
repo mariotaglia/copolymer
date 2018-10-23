@@ -1,6 +1,7 @@
 
 call initmpi
-call read
+!call read
+call parser
 call allocation
 call kai
 call solve
@@ -24,7 +25,7 @@ use transgauche
 implicit none
 
 real*8 solvetime1, solvetime2, solveduration
-integer is
+integer is,ic
 integer *4 ier ! Kinsol error flag
 real*8 pi
 real*8 Na               
@@ -81,8 +82,15 @@ CHARACTER*24 totalfilename
 CHARACTER*24 xtotalfilename
 CHARACTER*18 ntransfilename
 character*27 densposfilename
+character*27 dielfilename
 character*27 densnegfilename
+character*24 densHplusfilename
+character*24 densOHminfilename
 character*50, allocatable :: denspolfilename(:)
+character*50, allocatable :: fracBHplus(:)
+character*48, allocatable :: fracAmin(:)
+character*47, allocatable :: densAcidfilename(:)
+character*48, allocatable :: densBasicfilename(:)
 
 integer countfile         ! enumerates the outputfiles 
 integer conf              ! counts number of conformations
@@ -100,9 +108,9 @@ double  precision norma_tosend
 
 integer in1tmp(long)
 
-!if (rank.eq.0)solvetime1=MPI_WTIME()
-
 allocate(denspolfilename(0:Npoorsv))
+allocate(fracAmin(Nacids),fracBHplus(Nbasics))
+allocate(densAcidfilename(Nacids),densBasicfilename(Nbasics))
 
 error = 1.0d-6
 !seed=435 !+ 3232*rank               ! seed for random number generator
@@ -124,23 +132,63 @@ n=ntot                    ! size of lattice
 conf=0                    ! counter for conformations
 
 vsol=0.030                ! volume solvent molecule in (nm)^3
-vpol= ((4.0/3.0)*pi*(0.3)**3)/vsol  ! volume polymer segment in units of vsol
-vneg=0.5 !volume of anion in units of vsol
-vpos=0.5 !volume of cation in units of vsol LOKE
+vpol(:)=vpol(:)/vsol  ! volume polymer segment in units of vsol
+vpol_a(:)=vpol_a(:)/vsol
+vpol_b(:)=vpol_b(:)/vsol
 
-xsalt=Csalt*6.02e23*1e-24 !salt conc. in unit of nº of particles/nm³
-xsolbulk=1-xsalt*vsol*(vneg+vpos) ! bulk volume fraction of solvent 
+vchain=0.0
+do i=1,long
+  vchain=vchain+vpol(segpoorsv(i))
+enddo
+
+vneg=4/3*pi*0.2**3/vsol !volume of anion in units of vsol
+vpos=4/3*pi*0.2**3/vsol !volume of cation in units of vsol 
+
+pKw=14.0
+
+cHplus = 10**(-pHbulk)    ! concentration H+ in bulk
+xHplusbulk = (cHplus*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol
+pOHbulk= pKw -pHbulk
+cOHmin = 10**(-pOHbulk)   ! concentration OH- in bulk
+xOHminbulk = (cOHmin*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol  
+rhosalt=Csalt*Na/(1.0d24) !salt conc. in unit of nº of particles/nm³
 wperm = 0.114 !water permitivity in units of e^2/kT.nm
 
-!print*, "I am rank", rank, "and I calculate", iter_per_rank, "conformations out of", cuantas
+if(pHbulk.le.7) then  ! pH<= 7
+  xposbulk= rhosalt*vsol*vpos
+  xnegbulk= rhosalt*vsol*vneg + (xHplusbulk-xOHminbulk)*vneg ! NaCl+ HCl  
+else                  ! pH >7 
+  xposbulk= rhosalt*vsol*vpos + (xOHminbulk-xHplusbulk)*vpos ! NaCl+ NaOH   
+  xnegbulk= rhosalt*vsol*vneg
+endif
+
+
+xsolbulk=1-xposbulk-xnegbulk-xHplusbulk-xOHminbulk ! bulk volume fraction of solvent 
+
+if (Nacids.gt.0) then
+  do i=1,Nacids
+    Ka(i) = 10**(-pKa(i))
+    Ka(i) = (Ka(i)*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant
+  enddo
+endif
+
+if (Nbasics.gt.0) then
+  do i=1,Nbasics
+    Kb(i) = 10**(-pKb(i))
+    Kb(i) = (Kb(i)*vsol/xsolbulk)*(Na/1.0d24)! intrinstic equilibruim constant
+  enddo
+endif
+
+!expmupos=rhosalt*vsol*vpos/xsolbulk**vpos
+expmupos=xposbulk/vpos/xsolbulk**vpos  
+!expmuneg=rhosalt*vsol*vneg/xsolbulk**vneg 
+expmuneg=xnegbulk/vneg/xsolbulk**vneg           
+
+expmuHplus=xHplusbulk/xsolbulk ! vHplus=vsol
+expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
+
+
 print*, "I am rank", rank, "and I generate and calculate", cuantas, "conformation out of", totalcuantas
-
-! eps
-eps(1)=eps1
-
-do i=2,ntot
-   eps(i)=0
-enddo
 
 !!!!
 ! solver
@@ -174,7 +222,7 @@ if (infile.ge.1) then
      do is=1,npoorsv 
 
        read(100+is,*)trash,xfile(i+n*is)   ! poorsolvent desde 1 a npoorsv 
-       if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
+!       if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
        x1(i+n*is)=xfile(i+n*is)
        xg1(i+n*is)=xfile(i+n*is)
 
@@ -203,7 +251,8 @@ if (rank.gt.0) then
 endif
 
 inn = 0
-innc = 0
+inn_a = 0
+inn_b = 0 
 sumRgyr(:)=0.
 sumUgyr=0.
 Rgyrprom(:)=0.
@@ -271,7 +320,8 @@ do while (conf.lt.cuantas)
             do k = 1, long
               temp = in1tmp(k)-minpos(conf,ii)+1 
               inn(segpoorsv(k),conf,ii,temp) = inn(segpoorsv(k),conf,ii,temp) + 1      
-              innc(chargetype(k),conf,ii,temp) = innc(chargetype(k),conf,ii,temp) + 1
+              inn_a(acidtype(k),conf,ii,temp) = inn_a(acidtype(k),conf,ii,temp) + 1
+              inn_b(basictype(k),conf,ii,temp) = inn_b(basictype(k),conf,ii,temp) + 1
             enddo
        
          enddo ! ii
@@ -374,11 +424,11 @@ do while (actionflag.lt.3)
       xg1(i)=x1(i)
    enddo
 
-   do i=1,n
-     do is=1,npoorsv+1
-        if(xg1(i+n*is).lt.1.0d-30)xg1(i+n*is)=1.0d-30 ! OJO
-     enddo
-   enddo
+!   do i=1,n
+!     do is=1,npoorsv+1
+!        if(xg1(i+n*is).lt.1.0d-30)xg1(i+n*is)=1.0d-30 ! OJO
+!     enddo
+!   enddo
 
 ! JEFE
    if(rank.eq.0) then ! solo el jefe llama al solver
@@ -495,9 +545,26 @@ do while (actionflag.lt.3)
          write(denspolfilename(is),'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitypolymer',is,'.',actionflag,'.',countfile,'.dat'
       enddo
 
+      if (Nacids.ge.1) then
+        do ic=1,Nacids
+          write(fracAmin(ic),'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionAmin',ic,'.',actionflag,'.',countfile,'.dat'
+          write(densAcidfilename(ic),'(A11,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densityacid',ic,'.',actionflag,'.',countfile,'.dat'
+        enddo
+      endif
+
+      if (Nbasics.ge.1) then
+        do ic=1,Nbasics
+          write(fracBHplus(ic),'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionBHplus',ic,'.',actionflag,'.',countfile,'.dat'
+          write(densBasicfilename(ic),'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitybasic',ic,'.',actionflag,'.',countfile,'.dat'
+        enddo
+      endif
+
       write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', actionflag,'.',countfile,'.dat'
       write(densposfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypositive.',actionflag,'.',countfile,'.dat'
+      write(dielfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'dielectric_cons.',actionflag,'.',countfile,'.dat'
       write(densnegfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitynegative.',actionflag,'.',countfile,'.dat'
+      write(densHplusfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densityHplus.',actionflag,'.',countfile,'.dat'
+      write(densOHminfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densityOHmin.',actionflag,'.',countfile,'.dat'
 
       write(totalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densitytotal.',actionflag,'.',countfile,'.dat'
 
@@ -512,6 +579,20 @@ do while (actionflag.lt.3)
       do is=0,Npoorsv
          open(unit=1320+is,file=denspolfilename(is))
       enddo
+       
+      if (Nacids.ge.1) then      
+        do ic=1,Nacids
+          open(unit=1050+ic, file=fracAmin(ic))
+          open(unit=1780+ic, file=densAcidfilename(ic))
+        enddo
+      endif
+  
+      if (Nbasics.ge.1) then
+        do ic=1,Nbasics
+          open(unit=1520+ic, file=fracBHplus(ic))
+          open(unit=1680+ic, file=densBasicfilename(ic))
+        enddo
+      endif
 
       open(unit=328,file=totalfilename)
       open(unit=329,file=xtotalfilename)
@@ -519,7 +600,10 @@ do while (actionflag.lt.3)
       open(unit=330,file=denssolfilename)
       open(unit=331,file=densposfilename)
       open(unit=332,file=densnegfilename)
+      open(unit=333,file=densHplusfilename)
+      open(unit=334,file=densOHminfilename)
       open(unit=324,file=lnqfilename)
+      open(unit=335,file=dielfilename)
 
       do i = 3, long-1
          write(327,*)i, trans(i)
@@ -534,11 +618,28 @@ do while (actionflag.lt.3)
             avtmp = avtmp + avpol(is,i)
          enddo
 
+         if (Nacids.ge.1) then
+           do ic=1,Nacids
+             write(1050+ic,*)zc(i),fAmin(ic,i)
+             write(1780+ic,*)zc(i),avpola(ic,i)
+           enddo
+         endif
+       
+         if (Nbasics.ge.1) then
+           do ic=1,Nbasics
+             write(1520+ic,*)zc(i),fBHplus(ic,i)
+             write(1680+ic,*)zc(i),avpolb(ic,i)
+           enddo
+         endif
+ 
          write(328,*)zc(i),avtmp
          write(329,*)zc(i),xpol(i)
          write(330,*)zc(i),xsol(i)
          write(331,*)zc(i),avpos(i)
          write(332,*)zc(i),avneg(i)
+         write(333,*)zc(i),avHplus(i)
+         write(334,*)zc(i),avOHmin(i)
+         write(335,*)zc(i),epsfcn(i)
          write(311,*)zc(i),phi(i)
 
       enddo
@@ -575,12 +676,28 @@ do while (actionflag.lt.3)
          CLOSE(1320+is)
       enddo
 
+      if (Nacids.ge.1) then  
+        do ic=1,Nacids
+          close(1050+ic)
+          close(1780+ic)
+        enddo
+      endif
+  
+      if (Nbasics.ge.1) then
+        do ic=1,Nbasics
+          close(1520+ic)
+          close(1680+ic)
+        enddo
+      endif
+
       CLOSE(327)
       CLOSE(328)
       CLOSE(329)
       close(330)
       close(331)
       close(332)
+      close(333)
+      close(334)
       close(311)
 
       print*, rank, " escribe"
