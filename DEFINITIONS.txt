@@ -1,7 +1,7 @@
 curvature 0
 
-! Ntot maxntot_counter maxntot 
-ntot 140 18 18
+! DimR DimZ maxdimR maxdimZ 
+dimensions 140 1 18 18
 cuantas 100000
 long 16
 

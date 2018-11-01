@@ -14,20 +14,20 @@ use volume
 use MPI
 use mkai
 implicit none
-integer seed
 real*8 xmin,xmax,ymin,ymax,zmin,zmax
 integer MCsteps ! numero de steps de MC
 
 
 real*8 R,theta,z
 real*8 rn
-integer i, ii, is, js, a, b
+integer i, ii, is, js, a, b, c
+integer dimR, dimZ
 real*8 rands
 real*8 pi
 real*8 x1,x2,y1, y2, z1, z2, vect
 integer iR, ix,iy,iz, itheta
-integer j
-real*8 radio
+integer jR, jZ
+
 real*8 cutoff
 real*8, allocatable :: sumaXu(:,:)
 character*16 kaisfilename
@@ -36,20 +36,21 @@ if(rank.eq.0)print*,'Kai calculation'
 
 allocate(sumaXu(Npoorsv,Npoorsv))
 
+dimR=40
+dimZ=1
+
 cutoff = (float(Xulimit)+0.5)*delta
 
 pi=dacos(-1.0d0)          ! pi = arccos(-1) 
-radio = float(ntot)*delta
 
 Xu = 0.0 ! vector Xu
 
-seed = 1010
 MCsteps = 60*Xulimit
 sumaXu(:,:)=0.0
 
 if (flagkai.eq.1) then
 
-do ii = 1, ntot ! loop sobre cada posicion del segmento
+do ii = 1, dimR ! loop sobre cada posicion del segmento
 
       ymax = cutoff
       ymin = -cutoff
@@ -77,23 +78,28 @@ do ii = 1, ntot ! loop sobre cada posicion del segmento
          select case (abs(curvature))
          case (0)
          R = abs(x2)
+         Z = z2
          case (1)
          R = sqrt(x2**2 + y2**2)
+         Z = z2
          case (2)
          R = sqrt(x2**2 + y2**2 + z2**2)
+         if(dimZ.ne.1)stop
+         Z = 0.0
          end select
 
          vect = sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2) ! vector diferencia
-         j = int(R/delta)+1 ! j tiene la celda donde cae el punto a integrar
+         jR = int(R/delta)+1 ! jR tiene la celda donde cae el punto a integrar
+         jZ = int(anint(Z/delta)) ! OJO
 
-         if(j.le.ntot) then
+         if(jR.le.dimR) then
 
 
          if(vect.le.(cutoff)) then ! esta dentro de la esfera del cut-off   
          if(vect.ge.lseg) then ! esta dentro de la esfera del segmento
            do is=1,Npoorsv
            do js=1,Npoorsv
-              Xu(ii, j, is, js) = Xu(ii, j, is, js) + ((lseg/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
+              Xu(ii, jR, jZ, is, js) = Xu(ii, jR, jZ, is, js) + ((lseg/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
            enddo
            enddo
          endif
@@ -105,12 +111,14 @@ do ii = 1, ntot ! loop sobre cada posicion del segmento
       enddo!iy
       enddo!ix
       
-      do j = 1, ntot
+      do jR = 1, dimR
+      do jZ = -Xulimit, Xulimit
          do is=1,Npoorsv
          do js=1,Npoorsv
-         Xu(ii, j,is,js) = Xu(ii, j, is, js)/(MCsteps**3)*(2.0*cutoff)**3
+           Xu(ii, jR, jZ, is, js) = Xu(ii, jR, jZ, is, js)/(MCsteps**3)*(2.0*cutoff)**3
          enddo
          enddo
+      enddo
       enddo
 end do ! ii
 
@@ -119,77 +127,91 @@ endif
 do is=1,Npoorsv
 do js=1,Npoorsv
 
-write(kaisfilename,'(A5,BZ,I3.3,A1,I3.3,A4)')'kais.',is,'.',js,'.dat'
-open(unit=200,file='suma.dat')
-open(unit=is*110+js, file=kaisfilename)
+  write(kaisfilename,'(A5,BZ,I3.3,A1,I3.3,A4)')'kais.',is,'.',js,'.dat'
+  open(unit=200,file='suma.dat')
+  open(unit=is*110+js, file=kaisfilename)
 
-if (flagkai.eq.0) then
+  if (flagkai.eq.0) then
 
-  read(is*110+js,*)nada
-  read(is*110+js,*)curvkais,ntotkais,Xulimitkais,dimfkais(is,js)
+    read(is*110+js,*)nada
+    read(is*110+js,*)curvkais,dimRkais,Xulimitkais,dimfkais(is,js)
   
-  if (curvkais.ne.curvature) then
-     print*,"curvature of kais non equal curvature of fort.8"
-     stop
+    if (curvkais.ne.curvature) then
+      print*,"curvature of kais non equal curvature of fort.8"
+      stop
+    endif
+
+    if (dimRkais.ne.dimR) then
+      print*,"box size of kais non equal box size of fort.8"
+      stop
+    endif
+
+    if (Xulimitkais.ne.Xulimit) then
+      print*,"Xulimit of kais non equal Xulimit of fort.8"
+      stop
+    endif
+
+    if (dimfkais(is,js).ne.dimf(is,js)) then
+      print*,"dimf of kais non equal dimf of fort.8"
+      stop
+    endif
+
   endif
-  if (ntotkais.ne.ntot) then
-     print*,"box size of kais non equal box size of fort.8"
-     stop
-  endif
-  if (Xulimitkais.ne.Xulimit) then
-     print*,"Xulimit of kais non equal Xulimit of fort.8"
-     stop
-  endif
-  if (dimfkais(is,js).ne.dimf(is,js)) then
-     print*,"dimf of kais non equal dimf of fort.8"
-     stop
+
+  if (flagkai.eq.1) then
+
+    write(is*110+js,*)'#curvature dimR Xulimit dimf#'
+    write(is*110+js,*)curvature,dimR,Xulimit,dimf(is,js)
+
   endif
 
-endif
-
-if (flagkai.eq.1) then
-
-  write(is*110+js,*)'#curvature dimz Xulimit dimf#'
-  write(is*110+js,*)curvature,ntot,Xulimit,dimf(is,js)
-
-endif
-
-  do ii=1,ntot
-  do j=1,ntot
+  do ii=1, dimR
+  do jR=1, dimR
+  do jZ=-Xulimit,Xulimit
 
      if (flagkai.eq.1) then
-     write(is*110+js,*)ii,j,Xu(ii,j,is,js) ! residual size of iteration vector
+       write(is*110+js,*)ii,jR,jZ,Xu(ii,jR,jZ,is,js) ! residual size of iteration vector
      endif
 
      if (flagkai.eq.0) then
-     read(is*110+js,*)a,b,Xu(ii,j,is,js)
-
-      if (a.ne.ii) then
-      print*,'a non equal ii'
-      stop
-      endif
+  
+       read(is*110+js,*)a,b,c,Xu(ii,jR,jZ,is,js)
+  
+       if (a.ne.ii) then
+         print*,'a non equal ii'
+         stop
+       endif
  
-      if (b.ne.j) then
-      print*,'b non equal j'
-      stop
-      endif
+       if (b.ne.jR) then
+         print*,'b non equal jR'
+         stop
+       endif
 
+       if (c.ne.jZ) then
+         print*, 'c non equal jZ'
+         stop
+       endif
+       
      endif
 
   enddo
   enddo
+  enddo
 
-do i = 20-Xulimit, 20+Xulimit
-sumaXu(is,js) = sumaXu(is,js) + Xu(20,i,is,js)
-enddo
+  do jR = dimR/2-Xulimit, dimR/2+Xulimit
+  do jZ = -Xulimit,Xulimit
+    sumaXu(is,js) = sumaXu(is,js) + Xu(dimR/2,jR,jZ,is,js)
+  enddo
+  enddo
 
-write(200,*)is,js,sumaXu(is,js)
+  write(200,*)is,js,sumaXu(is,js)
 
-close(is*110+js)
+  close(is*110+js)
 
 enddo !js
 enddo !is
 
 close(200)
+stop
 end
 

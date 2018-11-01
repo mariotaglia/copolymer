@@ -15,10 +15,10 @@ integer Npoorsv ! number of different types of poor solvent
 REAL*8, allocatable ::  xtotal(:,:)
 real*8, allocatable :: st(:,:)
 real*8, allocatable :: dimf(:,:), dimfkais(:,:)
-real*8, allocatable :: Xu(:,:,:,:)
+real*8, allocatable :: Xu(:,:,:,:,:)
 integer Xulimit, Xulimitkais
 integer flagkai, curvkais
-real*8 ntotkais
+real*8 dimRkais
 endmodule
 
 module globals

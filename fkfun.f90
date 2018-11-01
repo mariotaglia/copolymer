@@ -16,11 +16,11 @@ real*8 all_tosend(4*ntot), all_toreceive(4*ntot)
 integer*4 ier2
 real*8 protemp, sttemp
 real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
-real*8 xh(2*ntot) 
-real*8 xpot(0:Npoorsv,2*ntot), xpot_a(Nacids,2*ntot), xpot_b(Nbasics,2*ntot)
+real*8 xh(dimR,dimZ) 
+real*8 xpot(0:Npoorsv,iR,iZ), xpot_a(Nacids,iR,iZ), xpot_b(Nbasics,iR,iZ)
 real*8 pro(cuantas)
 real*8 time1, time2, duration, looptime1, looptime2, loopduration
-integer k,i,j,k1,k2,ii, jj,iz,ic       ! dummy indices
+integer iR,iZ,kZ,kkZ,k,i,j,k1,k2,ii, jj,ic,       ! dummy indices
 integer is, js
 integer err
 integer n
@@ -45,128 +45,137 @@ real*8 gradphi2
 !   CALL MPI_BCAST(x, (Npoorsv+1)*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
 !endif
 
-n = ntot
+n = ntot 
 
 ! Recover xh and phi from input
-xh(1:n)=x(1:n) ! solvent volume fraction (xh) ir read from the x provided by kinsol
-xh(n+1:2*n)=xsolbulk
 
-phi(1:n)=x(n*(Npoorsv+1)+1:(Npoorsv+2)*n) ! electric potential (phi) is read from the x provided by kinsol
-phi(n+1:2*n)=0.0 ! bulk
-phi(0) = phi(1) ! reflection at x = 0
+do iR=1,dimR
+do iZ=1,dimZ
+  xh(iR,iZ)=x(dimR*(iZ-1)+iR) ! solvent volume fraction (xh) ir read from the x provided by kinsol
+enddo
+enddo !OJO boundary conditions?
 
-! Recover xtotal from input
-xtotal(:,n+1:2*n)=0.0 ! bulk
-do is = 1,Npoorsv
-   xtotal(is,1:n) = x(1+n*is:n+n*is) !  segments volume fractions (xtotal) are read from the x provided by kinsol
+do iR=1,dimR
+do iZ=1,dimZ
+  phi(iR,iZ)=x(n*(Npoorsv+1)+dimR*(iZ-1)+iR)
+!  phi(n+1:2*n)=0.0 ! bulk
+!  phi(0) = phi(1) ! reflection at x = 0
+enddo
 enddo
 
-
-!inverse_of_vpolvsol=1/(vpol*vsol)
+! Recover xtotal from input
+do is = 1,Npoorsv
+  do iR=1,dimR
+  do iZ=1,dimZ
+    xtotal(is,iR,iZ) = x(n*is+dimR*(iZ-1)+iR) !  segments volume fractions (xtotal) are read from the x provided by kinsol
+  enddo
+  enddo
+enddo
 
 avpos=0.0
 avneg=0.0
 
-do j=1,ntot
-   avpos(j)=vpos*expmupos*xh(j)**vpos*dexp(-phi(j)) ! volume fraction of cations
-   avneg(j)=vneg*expmuneg*xh(j)**vneg*dexp(phi(j)) ! volume fraction of anions
-   avHplus(j)=expmuHplus*xh(j)*dexp(-phi(j)) ! volume fraction of H+
-   avOHmin(j)=expmuOHmin*xh(j)*dexp(phi(j)) ! volume fraction of OH-
+do iR=1,dimR
+do iZ=1,dimZ
 
-   if (Nacids.gt.0) then
-     do is=1,Nacids
-       fAmin(is,j)=1.0/(avHplus(j)/(Ka(is)*xh(j))+1.0)
-     enddo
-   endif
+   avpos(iR,iZ)=vpos*expmupos*xh(iR,iZ)**vpos*dexp(-phi(iR,iZ)) ! volume fraction of cations
+   avneg(iR,iZ)=vneg*expmuneg*xh(iR,iZ)**vneg*dexp(phi(iR,iZ)) ! volume fraction of anions
+   avHplus(iR,iZ)=expmuHplus*xh(iR,iZ)*dexp(-phi(iR,iZ)) ! volume fraction of H+
+   avOHmin(iR,iZ)=expmuOHmin*xh(iR,iZ)*dexp(phi(iR,iZ)) ! volume fraction of OH-
 
-   if (Nbasics.gt.0) then
-     do is=1,Nbasics
-       fBHplus(is,j)=1.0/(avOHmin(j)/(Kb(is)*xh(j))+1.0)
-     enddo
-   endif
+   do is=1,Nacids
+     fAmin(is,iR,iZ)=1.0/(avHplus(iR,iZ)/(Ka(is)*xh(iR,iZ))+1.0)
+   enddo
+
+   do is=1,Nbasics
+     fBHplus(is,iR,iZ)=1.0/(avOHmin(iR,iZ)/(Kb(is)*xh(iR,iZ))+1.0)
+   enddo
 
 enddo
-
+enddo
 
 
 ! Caculation of dielectric function
 ! Everything that it is not water or ions has dielectric dielP
 
-do j = 1, ntot
-dielpol(j) = 1.0 - xh(j) - avpos(j) - avneg(j) - avHplus(j) - avOHmin(j)
-enddo 
+do iR = 1, dimR
+do iZ = 1, dimZ
+  dielpol(iR,iZ) = 1.0 - xh(iR,iZ) - avpos(iR,iZ) - avneg(iR,iZ) - avHplus(iR,iZ) - avOHmin(iR,iZ)
+enddo
+enddo
 call dielectfcn(dielpol,epsfcn,Depsfcn)
 
 
 
 ! Calculation of xpot
-do i = 1, ntot
+
+do iZ = 1, dimZ
+do iR = 1, dimR
 ! osmotic pressure
-   xpot(0,i) = xh(i)**vpol(0) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
+   xpot(0,iR,iZ) = xh(iR,iZ)**vpol(0) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
+enddo   
+enddo
+
 ! dielectrics
-   gradphi2 = ((phi(i+1)-phi(i))/delta)**2
-   xpot(0,i) = xpot(0,i)*exp(Depsfcn(i)*gradphi2*vpol(0)*vsol*wperm/2.0)
+do jZ = 1,dimZ
+do iR = 1,dimR-1
+   iZ=PBCSYN(jZ,dimZ) !OJO
+   gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/delta)**2+((phi(iR,iZ+1)-phi(iR,iZ))/delta)**2
+   xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
 enddo 
 
+gradphi2 = ((0.0-phi(dimR,iZ))/delta)**2+((phi(dimR,iZ+1)-phi(dimR,iZ))/delta)**2
+xpot(0,dimR,iZ) = xpot(0,dimR,iZ)*exp(Depsfcn(dimR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
 
+enddo
 
-do i = 1, ntot
+do iZ = 1, dimZ
+do iR = 1, dimR
+
   do is = 1, Npoorsv
-
 !   calculate xpot(i, is)
 
     protemp = 0.0
     
       do js = 1, Npoorsv 
-         do j = 1, ntot
-            protemp = protemp+st(is,js)*Xu(i,j,is,js)*xtotal(js,j)/(vpol(js)*vsol) ! vpol*vsol in units of nm^3
-!           protemp = protemp+st(is,js)/(vpol*vsol)*Xu(i,j,is,js)*xtotal(js,j) ! vpol*vsol in units of nm^3
+         do jR = 1, dimR
+         do jZ = -Xulimit, Xulimit
+            kZ=jZ+iZ
+            kkZ=PBCSYN(kZ,dimZ) !OJO
+            protemp = protemp+st(is,js)*Xu(iR,jR,jZ,is,js)*xtotal(js,jR,kkZ)/(vpol(js)*vsol) ! vpol*vsol in units of nm^3
+         enddo
          enddo
       enddo
 
-    xpot(is,i) = xh(i)**vpol(is) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
-! dielectrics
-    gradphi2 = ((phi(i+1)-phi(i))/delta)**2
-    xpot(is,i) = xpot(is,i)*exp(Depsfcn(i)*gradphi2*vpol(is)*vsol*wperm/2.0)
-    xpot(is,i) = xpot(is,i)*dexp(protemp) 
+    xpot(is,iR,iZ) = xh(iR,iZ)**vpol(is) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
+    xpot(is,iR,iZ) = xpot(is,iR,iZ)*dexp(protemp) 
 
   enddo
 
-!  do ic = 1,Ncharge
-!    protemp=-phi(i)*float(charge(ic))
-!    xpotc(ic,i)=dexp(protemp)
-!  enddo
-
-  if (Nacids.gt.0) then
-    do ic = 1,Nacids
-      xpot_a(ic,i) = 1.0/fAmin(ic,i)*exp(phi(i))
-    enddo
-  endif
-
-  if (Nbasics.gt.0) then
-    do ic = 1,Nbasics
-      xpot_b(ic,i)= 1.0/fBHplus(ic,i)*exp(-phi(i))
-    enddo
-  endif
-
+enddo
 enddo
 
-
-do is = 0,Npoorsv
-   xpot(is,n+1:2*n)=xpot(is,n)
+do is= 1, Npoorsv
+  do iZ= 1, dimZ
+  do iR= 1, dimR-1
+    gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/delta)**2+((phi(iR,iZ+1)-phi(iR,iZ))/delta)**2
+    xpot(is,iR,iZ) = xpot(is,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(is)*vsol*wperm/2.0)
+  enddo
+  gradphi2 = ((0.0-phi(dimR,iZ))/delta)**2+((phi(dimR,iZ+1)-phi(dimR,iZ))/delta)**2
+  xpot(is,dimR,iZ) = xpot(is,dimR,iZ)*exp(Depsfcn(dimR,iZ)*gradphi2*vpol(is)*vsol*wperm/2.0)
+  enddo
 enddo
 
-if (Nacids.gt.0) then
+do iR = 1, dimR
+do iZ = 1, dimZ
   do ic = 1,Nacids
-    xpot_a(ic,n+1:2*n)=xpot_a(ic,n)
+    xpot_a(ic,iR,iZ) = 1.0/fAmin(ic,iR,iZ)*exp(phi(iR,iZ))
   enddo
-endif
-
-if (Nbasics.gt.0) then
   do ic = 1,Nbasics
-    xpot_b(ic,n+1:2*n)=xpot_b(ic,n)
+    xpot_b(ic,iR,iZ)= 1.0/fBHplus(ic,iR,iZ)*exp(-phi(iR,iZ))
   enddo
-endif
+enddo
+enddo
 
 !    probability distribution
 
@@ -193,8 +202,8 @@ all_tosend = 0.0
 all_toreceive = 0.0
 
 
-do ii=1,maxntotcounter ! position of center of mass 
-
+do iiR=1, maxntotcounterR ! position of center of mass 
+do iiZ=1, maxntotcounterZ
    do i=1, cuantas ! loop over conformations
  
       pro(i) = exp(-Uchain(i))

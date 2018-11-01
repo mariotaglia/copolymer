@@ -215,7 +215,7 @@ do iC = 1, ntot
     do is = 1, Npoorsv
       do js = 1, Npoorsv
 
-        F_vdW (is,js) = F_vdW(is,js) - 0.5*Xu(iC,jC,is,js) &
+        F_vdW (is,js) = F_vdW(is,js) - 0.5*Xu(iC,jC,1,is,js) &
                                       *avpol(is,iC)*avpol(js,jC) &
                                       *st(is,js)/(vpol(is)*vpol(js)*vsol**2) &
                                       *jacobian(iC)*delta 

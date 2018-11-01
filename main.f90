@@ -197,42 +197,48 @@ print*, "I am rank", rank, "and I generate and calculate", cuantas, "conformatio
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !     init guess all 1.0 
 
-do i=1,n
-   xg1(i)=1.0
-   x1(i)=1.0
+do iR=1,dimR
+do iZ=1,dimZ
 
-   do is=1,npoorsv+1
-      xg1(i+n*is)=0.0001
-      x1(i+n*is)=0.0001
+   xg1(dimR*(iZ-1)+iR)=1.0
+   x1(dimR*(iZ-1)+iR)=1.0
+
+   do is=1,Npoorsv+1
+      xg1(n*is+dimR*(iZ-1)+iR)=0.0001
+      x1(n*is+dimR*(iZ-1)+iR)=0.0001
    enddo
 
-   zc(i)= (i-0.5) * delta
+!   zc(iZ)= (iZ-0.5) * delta !OJO
+enddo
+   zc(iR)= (iR-0.5) * delta
 enddo
 
 !     init guess from files fort.100 (solvent) and fort.200 (potential)                      
 
 if (infile.ge.1) then
 
-   do i=1,n
+   do iR=1,dimR
+   do iZ=1,dimZ
 
-     read(100,*)trash,xfile(i)   ! solvent
-     x1(i)=xfile(i)
-     xg1(i)=xfile(i)
+     read(100,*)trash,trash,xfile(dimR*(iZ-1)+iR)   ! solvent
+     x1(dimR*(iZ-1)+iR)=xfile(dimR*(iZ-1)+iR)
+     xg1(dimR*(iZ-1)+iR)=xfile(dimR*(iZ-1)+iR)
 
      do is=1,npoorsv 
 
-       read(100+is,*)trash,xfile(i+n*is)   ! poorsolvent desde 1 a npoorsv 
+       read(100+is,*)trash,trash,xfile(n*is+dimR*(iZ-1)+iR)   ! poorsolvent desde 1 a npoorsv 
 !       if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
-       x1(i+n*is)=xfile(i+n*is)
-       xg1(i+n*is)=xfile(i+n*is)
+       x1(n*is+dimR*(iZ-1)+iR)=xfile(n*is+dimR*(iZ-1)+iR)
+       xg1(n*is+dimR*(iZ-1)+iR)=xfile(n*is+dimR*(iZ-1)+iR)
 
      enddo !is
 
-     read(200,*)trash,xfile(i+n*(Npoorsv+1))
-     x1(i+n*(npoorsv+1))=xfile(i+n*(npoorsv+1))
-     xg1(i+n*(npoorsv+1))=xfile(i+n*(npoorsv+1))
+     read(200,*)trash,trash,xfile(n*(Npoorsv+1)+dimR*(iZ-1)+iR)
+     x1(n*(npoorsv+1)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+1)+dimR*(iZ-1)+iR)
+     xg1(n*(npoorsv+1)dimR*(iZ-1)+iR)=xfile(n*(npoorsv+1)+dimR*(iZ-1)+iR)
 
-   enddo !i 
+   enddo !iR
+   enddo !iZ
 
 endif
 
@@ -277,9 +283,9 @@ do while (conf.lt.cuantas)
          Uchain(conf)=Uconf
          Ntrans(:,conf) = Ntconf(:)
 
-         do ii = 1, maxntot ! position of first segment (or Center of mass?) LOKE
+         do ii = 1, maxntotR ! position of first segment (or Center of mass?) LOKE
 
-            minpos(conf,ii) = ntot
+            minpos(conf,ii) = dimR
             maxpos(conf,ii) = 0 
             in1tmp = 0
   
@@ -408,13 +414,14 @@ actionflag = 0 ! Actionflag controls the current action of loop
                ! = 2 decreases npol from npolini to npolfirst
                ! = 3 finalize
 
-maxntotcounter = maxntotcounter_ini !maxntot inicial
-
+! maxntotcounter = maxntotcounter_ini !maxntot inicial
+maxntotcounterR = maxntotR
+maxntotcounterZ = maxntotZ
 npol = npolini
 
 do while (actionflag.lt.3)
 
-   123 if(rank.eq.0)print*, ' npol:', npol, 'maxntot:', maxntotcounter
+   123 if(rank.eq.0)print*, ' npol:', npol, 'maxntotR:', maxntotcounterR, 'maxntotZ:', maxntotcounterZ
 
 
 ! xh bulk
@@ -489,10 +496,11 @@ do while (actionflag.lt.3)
 !   endif
 
 
-   do i=1,n
-      xsol(i)=x1(i)
+   do iR=1,dimR
+   do iZ=1,dimZ
+     xsol(iR,iZ)=x1(dimR*(iZ-1)+iR)
    enddo
-
+   enddo
 
    if((norma.gt.error).or.(ier.lt.0).or.(isnan(norma))) then
       if(actionflag.gt.0) then
@@ -534,7 +542,7 @@ do while (actionflag.lt.3)
 
    if(rank.eq.0) then
 
-      write(533,*) npol, dlog(xpol(1))-dlog(q(1))
+      write(533,*) npol, dlog(xpol(1,1))-dlog(q(1,1))
       flush(533)
 
       write(sysfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'system.', actionflag,'.',countfile,'.dat'
@@ -580,19 +588,15 @@ do while (actionflag.lt.3)
          open(unit=1320+is,file=denspolfilename(is))
       enddo
        
-      if (Nacids.ge.1) then      
-        do ic=1,Nacids
-          open(unit=1050+ic, file=fracAmin(ic))
-          open(unit=1780+ic, file=densAcidfilename(ic))
-        enddo
-      endif
+      do ic=1,Nacids
+        open(unit=1050+ic, file=fracAmin(ic))
+        open(unit=1780+ic, file=densAcidfilename(ic))
+      enddo
   
-      if (Nbasics.ge.1) then
-        do ic=1,Nbasics
-          open(unit=1520+ic, file=fracBHplus(ic))
-          open(unit=1680+ic, file=densBasicfilename(ic))
-        enddo
-      endif
+      do ic=1,Nbasics
+        open(unit=1520+ic, file=fracBHplus(ic))
+        open(unit=1680+ic, file=densBasicfilename(ic))
+      enddo
 
       open(unit=328,file=totalfilename)
       open(unit=329,file=xtotalfilename)
@@ -611,43 +615,45 @@ do while (actionflag.lt.3)
 
       avtmp=0
 
-      do i=1,n
+      do iR=1,dimR
+      do iZ=1,dimZ
 
          do is=0,Npoorsv
-            write(1320+is,*)zc(i),avpol(is,i)
-            avtmp = avtmp + avpol(is,i)
+            write(1320+is,*)zc(iR),iZ,avpol(is,iR,iZ)
+            avtmp = avtmp + avpol(is,iR,iZ)
          enddo
 
          if (Nacids.ge.1) then
            do ic=1,Nacids
-             write(1050+ic,*)zc(i),fAmin(ic,i)
-             write(1780+ic,*)zc(i),avpola(ic,i)
+             write(1050+ic,*)zc(iR),iZ,fAmin(ic,iR,iZ)
+             write(1780+ic,*)zc(iR),iz,avpola(ic,iR,iZ)
            enddo
          endif
        
          if (Nbasics.ge.1) then
            do ic=1,Nbasics
-             write(1520+ic,*)zc(i),fBHplus(ic,i)
-             write(1680+ic,*)zc(i),avpolb(ic,i)
+             write(1520+ic,*)zc(iR),iZ,fBHplus(ic,iR,iZ)
+             write(1680+ic,*)zc(iR),iZ,avpolb(ic,iR,iZ)
            enddo
          endif
  
-         write(328,*)zc(i),avtmp
-         write(329,*)zc(i),xpol(i)
-         write(330,*)zc(i),xsol(i)
-         write(331,*)zc(i),avpos(i)
-         write(332,*)zc(i),avneg(i)
-         write(333,*)zc(i),avHplus(i)
-         write(334,*)zc(i),avOHmin(i)
-         write(335,*)zc(i),epsfcn(i)
-         write(311,*)zc(i),phi(i)
+         write(328,*)zc(iR),iZ,avtmp
+         write(329,*)zc(iR),iZ,xpol(iR,iZ)
+         write(330,*)zc(iR),iZ,xsol(iR,iZ)
+         write(331,*)zc(iR),iZ,avpos(iR,iZ)
+         write(332,*)zc(iR),iZ,avneg(iR,iZ)
+         write(333,*)zc(iR),iZ,avHplus(iR,iZ)
+         write(334,*)zc(iR),iZ,avOHmin(iR,iZ)
+         write(335,*)zc(iR),iZ,epsfcn(iR,iZ)
+         write(311,*)zc(iR),iZ,phi(iR,iZ)
 
       enddo
 
-      do i = 1, maxntot
-          write(324,*)zc(i),dlog(xpol(i))-dlog(q(i))
+      do iR = 1, maxntotR
+      do iZ = 1, maxntotZ
+          write(324,*)zc(i),iR,dlog(xpol(i))-dlog(q(i))
       enddo
-
+      enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !     additional system information
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -712,13 +718,13 @@ do while (actionflag.lt.3)
      case(0) ! maxntot loop
 
 !     countfile = 1
-      if (maxntotcounter.lt.maxntot) then
+      if (maxntotcounterR.lt.maxntotR) then
 !       write(1000+maxntotcounter,*), maxntotcounter
-        maxntotcounter=maxntotcounter+1
+        maxntotcounterR=maxntotcounterR+1
 !       xg1 = x1
       endif
 
-      if(maxntotcounter.eq.maxntot) then
+      if(maxntotcounterR.eq.maxntotR) then
         actionflag=1 
         countfile = 1
       endif
