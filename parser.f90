@@ -6,6 +6,7 @@ use bulk
 use MPI
 use mkai
 use volume
+use layer
 
 implicit none
 integer block_cuantas, restcuantas
@@ -31,7 +32,7 @@ ndr = -1.0d10
 dielP = 78.54
 curvature = ndi
 ntot = ndi
-maxntotcounter_ini = ndi
+! maxntotcounter_ini = ndi
 maxntotR = ndi
 maxntotZ = ndi
 dimR = ndi
@@ -232,8 +233,8 @@ enddo
 
 if(curvature.eq.ndr)call stopundef('curvature')
 if(ntot.eq.ndi)call stopundef('ntot')
-if(maxntotcounter.eq.ndi)call stopundef('maxntot_counter')
-if(maxntot.eq.ndi)call stopundef('maxntot')
+if(maxntotR.eq.ndi)call stopundef('maxntotR')
+if(maxntotZ.eq.ndi)call stopundef('maxntotZ')
 if(totalcuantas.eq.ndi)call stopundef('cuantas')
 if(long.eq.ndi)call stopundef('long')
 if(infile.eq.ndi)call stopundef('infile')

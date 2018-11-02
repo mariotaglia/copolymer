@@ -22,10 +22,9 @@ real*8 F_Mix_OHmin, F_Conf, F_Uchain
 real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW(Npoorsv,Npoorsv), F_electro                            
 !real*8 F_mup
 integer counter, counter2                                    
-real*8 gradphi2
 integer i, iC, jC, is, js, iR, iZ, jR, jZ, kZ, kkZ, jZp, jZm, iZp, iZm
 integer, external :: PBCSYMI
-real*8, external :: jacobian
+double precision, external :: jacobian
 
 character*17 F_vdWfilename(Npoorsv,Npoorsv)
 
@@ -61,7 +60,7 @@ endif
 Free_Energy = 0.0                                                
 Free_Energy2 = 0.0                                               
 
-mupol = dlog(xpol(1))-dlog(q(1))
+mupol = dlog(xpol(1,1))-dlog(q(1,1))
 
 ! 1. Solvent translational entropy
 F_Mix_s = 0.0                                                    
@@ -137,7 +136,7 @@ F_Mix_OHmin = 0.0
 
 do iR = 1, dimR
 do iZ = 1, dimZ
-  F_Mix_OHmin = F_Mix_OHmin + avOHmin(iC)/vsol*(dlog(avOHmin(iR,iZ))-1.0-dlog(expmuOHmin))*jacobian(iR)*deltaR*deltaZ ! mix entropy and N*Mu term of OHmin          
+  F_Mix_OHmin = F_Mix_OHmin + avOHmin(iR,iZ)/vsol*(dlog(avOHmin(iR,iZ))-1.0-dlog(expmuOHmin))*jacobian(iR)*deltaR*deltaZ ! mix entropy and N*Mu term of OHmin          
   F_Mix_OHmin = F_Mix_OHmin - xOHminbulk/vsol*(dlog(xOHminbulk)-1.0-dlog(expmuOHmin))*jacobian(iR)*deltaR*deltaZ ! with respect to bulk       
 enddo                                                            
 enddo
@@ -234,13 +233,11 @@ do iZ = 1, dimZ
   do js = 1, Npoorsv
     do jR= 1, dimR
     do jZ= -Xulimit, Xulimit    
-      kZ = jZ + iZ
-      kkZ = PBCSYMI (kZ,dimZ)
-      F_dW (is,js) = F_vdW(is,js) - 0.5*Xu(iR,jR,jZ,is,js) &
-                                      *avpol(is,iR,iZ)*avpol(js,jR,kkZ) &
-                                      *st(is,js)/(vpol(is)*vpol(js)*vsol**2) &
-                                      *jacobian(iR)*delta 
-  
+kZ = jZ + iZ
+kkZ = PBCSYMI (kZ,dimZ)
+F_vdW (is,js) = F_vdW(is,js) &
+        - 0.5*Xu(iR,jR,jZ,is,js)*avpol(is,iR,iZ)*avpol(js,jR,kkZ)*st(is,js)/(vpol(is)*vpol(js)*vsol**2)*jacobian(iR)*deltaR*deltaZ
+
 !       F_vdW = F_vdW - 0.5000*delta**3*xtotal2(ii,iC)*      
 !       &       xtotal2(iii,Xulist_cell(iC, iiC))*                    
 !       &       Xulist_value(iC,iiC)*st_matrix(ii, iii)*st
@@ -271,7 +268,7 @@ do iZ = 1, dimZ
   jZp= iZ+1
   iZp= PBCSYMI(jZp,dimZ)
   gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
-  F_electro = F_electro + (xcharge(iR,iZ)*phi(iR,iZ) - wperm*epsfcn(iR,iZ)/2.0*gradphi2*jacobian(iR)*deltaR*deltaZ
+  F_electro = F_electro + (xcharge(iR,iZ)*phi(iR,iZ) - wperm*epsfcn(iR,iZ)/2.0*gradphi2)*jacobian(iR)*deltaR*deltaZ
 enddo
 enddo
 
@@ -336,7 +333,7 @@ do iZ = 1, dimZ
 enddo
 enddo
 
-Free_Energy2 = (sumpi + sumrho + sumdiel)/vsol*delta + sumel                      
+Free_Energy2 = (sumpi + sumrho + sumdiel)/vsol*deltaR*deltaZ + sumel                      
 
 do is=1,Npoorsv
   do js=1,Npoorsv

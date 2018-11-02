@@ -21,7 +21,6 @@ integer MCsteps ! numero de steps de MC
 real*8 R,theta,z
 real*8 rn
 integer i, ii, is, js, a, b, c
-integer dimR, dimZ
 real*8 rands
 real*8 pi
 real*8 x1,x2,y1, y2, z1, z2, vect

@@ -44,10 +44,10 @@ integer itmax             ! maximum number of iteration allowed for
 real*8 fnorm              ! L2 norm of residual vector function fcn
 
 external fcnelect         ! function containing the SCMFT eqs for solver
-integer i,j,k,m,ii,flag,c, jj ! dummy indice0s
+integer i,j,k,m,ii,flag,c, jj, iR,iZ ! dummy indice0s
 
-INTEGER temp
-real*8 tempr
+INTEGER temp_R, temp_Z
+real*8 tempr_R, tempr_Z
 real*8 tmp
 
 real*8 min1               ! variable to determine minimal position of chain
@@ -234,7 +234,7 @@ if (infile.ge.1) then
 
      read(200,*)trash,trash,xfile(n*(Npoorsv+1)+dimR*(iZ-1)+iR)
      x1(n*(npoorsv+1)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+1)+dimR*(iZ-1)+iR)
-     xg1(n*(npoorsv+1)dimR*(iZ-1)+iR)=xfile(n*(npoorsv+1)+dimR*(iZ-1)+iR)
+     xg1(n*(npoorsv+1)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+1)+dimR*(iZ-1)+iR)
 
    enddo !iR
    enddo !iZ
@@ -281,22 +281,19 @@ do while (conf.lt.cuantas)
          Uchain(conf)=Uconf
          Ntrans(:,conf) = Ntconf(:)
 
-         do ii = 1, maxntotR ! position of first segment (or Center of mass?) LOKE
-
-  
          do k=1,long
-            do ii = 1,maxntotR
+            do ii = 1,maxntotR ! position of first segment (or Center of mass?)
 
                select case (abs(curvature))
                  case (2)
                   tempr_R=((chains(1,k,j)+(float(ii)-0.5)*deltaR)**2 + chains(2,k,j)**2 + chains(3,k,j)**2 )**(0.5)
-                  temp_R=int(tempr/deltaR)+1  ! put them into the correct layer
+                  temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                  case (1)
                   tempr_R=((chains(1,k,j)+(float(ii)-0.5)*deltaR)**2+chains(2,k,j)**2)**(0.5)
-                  temp_R=int(tempr/deltaR)+1  ! put them into the correct layer
+                  temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                  case (0) 
                   tempr_R=abs(chains(1,k,j)+(float(ii)-0.5)*deltaR)
-                  temp_R=int(tempr/deltaR)+1  ! put them into the correct layer
+                  temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                endselect
              
                if(temp_R.gt.dimR) then
@@ -630,10 +627,11 @@ do while (actionflag.lt.3)
          write(311,*)zc(iR),iZ,phi(iR,iZ)
 
       enddo
+      enddo
 
       do iR = 1, maxntotR
       do iZ = 1, maxntotZ
-          write(324,*)zc(i),iR,dlog(xpol(i))-dlog(q(i))
+          write(324,*)zc(i),iR,dlog(xpol(iR,iZ))-dlog(q(iR,iZ))
       enddo
       enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

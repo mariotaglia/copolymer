@@ -12,7 +12,7 @@ endmodule
 
 module mkai
 integer Npoorsv ! number of different types of poor solvent
-REAL*8, allocatable ::  xtotal(:,:)
+REAL*8, allocatable ::  xtotal(:,:,:)
 real*8, allocatable :: st(:,:)
 real*8, allocatable :: dimf(:,:), dimfkais(:,:)
 real*8, allocatable :: Xu(:,:,:,:,:)
@@ -48,7 +48,7 @@ real*8, allocatable :: Depsfcn(:,:)
 
 integer first, last
 
-integer*2, allocatable :: inn(:,:,:,:)
+integer*2, allocatable :: innR(:,:,:), innZ(:,:)
 
 integer iter              ! counts number of iterations
 

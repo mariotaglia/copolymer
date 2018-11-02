@@ -17,11 +17,11 @@ integer*4 ier2
 real*8 protemp, sttemp
 real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
 real*8 xh(dimR+1,dimZ) 
-real*8 xpot(0:Npoorsv,iR,iZ), xpot_a(Nacids,iR,iZ), xpot_b(Nbasics,iR,iZ)
+real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(Nacids,dimR,dimZ), xpot_b(Nbasics,dimR,dimZ)
 real*8 pro(cuantas)
 real*8 time1, time2, duration, looptime1, looptime2, loopduration
-integer iR,iZ,kZ,kkZ,k,i,j,k1,k2,ii,jj,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
-integer is, js,ia,ib
+integer iR,iZ,kZ,kkZ,k,i,j,k1,k2,ii,jj,ic,aR,aZ,iZm,iZp,jZp,jZm,as,bs        ! dummy indices
+integer is, js,ia,ib,iiR,iiZ,jR,jZ
 integer err
 integer n
 real*8 avpol_tmp(0:Npoorsv,dimR,dimZ), avpola_tmp(Nacids,dimR,dimZ), avpolb_tmp(Nbasics,dimR,dimZ)
@@ -30,7 +30,7 @@ real*8 xpol_tosend(dimR,dimZ)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
 real*8 sumpol
-real*8 q_tosend(dimR,dimZ
+real*8 q_tosend(dimR,dimZ)
 real*8 sumprolnpro_tosend(dimR,dimZ), sumprouchain_tosend(dimR,dimZ)
 real*8 sumtrans_tosend(dimR,dimZ,long)
 real*8 sumtrans(dimR,dimZ,long)
@@ -161,7 +161,7 @@ do is= 1, Npoorsv
   jZp=iZ+1
   iZp=PBCSYMI(jZp,dimZ)
     do iR= 1, dimR
-      gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/delta)**2+((phi(iR,iZp)-phi(iR,iZ))/delta)**2
+      gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
       xpot(is,iR,iZ) = xpot(is,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(is)*vsol*wperm/2.0)
     enddo
   enddo
@@ -254,7 +254,7 @@ enddo ! iiR
 enddo ! iiZ
 
 avpol_tosend(:, 1:dimR, 1:dimZ)=avpol_tmp(:, 1:dimR, 1:dimZ) 
-avpola_tosend(:, 1:dimR; 1:dimZ)=avpola_tmp(:, 1:dimR, 1:dimZ)
+avpola_tosend(:, 1:dimR, 1:dimZ)=avpola_tmp(:, 1:dimR, 1:dimZ)
 avpolb_tosend(:, 1:dimR, 1:dimZ)=avpolb_tmp(:, 1:dimR, 1:dimZ)
 
 !------------------ MPI -----------------`-----------------------------
@@ -377,7 +377,7 @@ do iZ = 1, dimZ
 enddo
 enddo
 
-xcharge(:) = avpos(:)/(vpos*vsol)-avneg(:)/(vneg*vsol)+avHplus(:)/vsol-avOHmin(:)/vsol ! xcharge is avg charge density
+xcharge(:,:) = avpos(:,:)/(vpos*vsol)-avneg(:,:)/(vneg*vsol)+avHplus(:,:)/vsol-avOHmin(:,:)/vsol ! xcharge is avg charge density
 
 
 do iR = 1, dimR
@@ -412,7 +412,8 @@ do iZ = 1, dimZ
      +wperm*(epsfcn(iR,jZp)-epsfcn(iR,iZ))*(phi(iR,jZp)-phi(iR,iZ))*deltaZ**(-2)
 
     case(2)
-     f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) + 2.0*wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)/(float(iR)-0.5) &
+     f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) &
+     + 2.0*wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)/(float(iR)-0.5) &
      +wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-2.0*phi(iR,iZ)+phi(iR-1,iZ))*deltaR**(-2) &
      +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR,iZ))*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)
 
@@ -420,6 +421,7 @@ do iZ = 1, dimZ
 
    f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)/(-2.0)
 
+enddo
 enddo
 
 do is=1,Npoorsv

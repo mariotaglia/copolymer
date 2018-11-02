@@ -3,7 +3,7 @@ subroutine dielectfcn(pol,epsfcn,Depsfcn)
 ! determines the dielectric function using an average mixing rule
 
 use mcharge
-use globals, only : ntot
+use globals, only : dimR,dimZ
 
 implicit none
 integer iR,iZ
@@ -20,7 +20,8 @@ dielPr = dielP/dielW
 do iR = 1, dimR
 do iZ = 1, dimZ
 epsfcn(iR,iZ) = pol(iR,iZ)*dielPr + (1.0-pol(iR,iZ)) 
-Depsfcn(iR) = dielPr - 1.0
+Depsfcn(iR,iZ) = dielPr - 1.0
+enddo
 enddo
 
 !epsfcn(0) = epsfcn(1) 
