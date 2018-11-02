@@ -32,7 +32,10 @@ dielP = 78.54
 curvature = ndi
 ntot = ndi
 maxntotcounter_ini = ndi
-maxntot = ndi
+maxntotR = ndi
+maxntotZ = ndi
+dimR = ndi
+dimZ = ndi
 totalcuantas = ndi
 long = ndi
 Npoorsv = ndi ! zero by default
@@ -116,9 +119,14 @@ select case (label)
    read(buffer, *, iostat=ios) curvature
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
-  case ('ntot')
-   read(buffer, *, iostat=ios) ntot, maxntotcounter_ini, maxntot
+  case ('dimensions')
+   read(buffer, *, iostat=ios) dimR, dimZ, maxntotR, maxntotZ
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   ntot=dimR*dimZ
+  
+  case ('layersize')
+   read(buffer, *, iostat=ios) deltaR, deltaZ
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),'= ',trim(buffer)
 
   case ('cuantas')
    read(buffer, *, iostat=ios) totalcuantas
@@ -136,7 +144,7 @@ select case (label)
   case ('npoorsv')
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
+  
   case ('dimf')
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)

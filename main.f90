@@ -58,7 +58,6 @@ integer il,inda,ncha
 REAL*8 xfile((npoorsv+2)*ntot)                        
 real*8 algo, algo2                  
 
-integer*1 in1(long)
 real*8 chains(3,long,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
 real*8 zp(long)
 real*8 Uconf
@@ -106,7 +105,7 @@ integer err
 integer ier_tosend
 double  precision norma_tosend
 
-integer in1tmp(long)
+integer in1tmp(long,2)
 
 allocate(denspolfilename(0:Npoorsv))
 allocate(fracAmin(Nacids),fracBHplus(Nbasics))
@@ -210,7 +209,7 @@ do iZ=1,dimZ
 
 !   zc(iZ)= (iZ-0.5) * delta !OJO
 enddo
-   zc(iR)= (iR-0.5) * delta
+   zc(iR)= (iR-0.5) * deltaR
 enddo
 
 !     init guess from files fort.100 (solvent) and fort.200 (potential)                      
@@ -256,9 +255,8 @@ if (rank.gt.0) then
    print*, "rank", rank, "received from rank", rank-1,"seed =", seed
 endif
 
-inn = 0
-inn_a = 0
-inn_b = 0 
+innR = 0
+innZ = 0
 sumRgyr(:)=0.
 sumUgyr=0.
 Rgyrprom(:)=0.
@@ -285,56 +283,40 @@ do while (conf.lt.cuantas)
 
          do ii = 1, maxntotR ! position of first segment (or Center of mass?) LOKE
 
-            minpos(conf,ii) = dimR
-            maxpos(conf,ii) = 0 
-            in1tmp = 0
   
-            do k=1,long
- 
+         do k=1,long
+            do ii = 1,maxntotR
+
                select case (abs(curvature))
                  case (2)
-                  tempr=((chains(1,k,j)+(float(ii)-0.5)*delta)**2 + chains(2,k,j)**2 +chains(3,k,j)**2 )**(0.5)
-                  temp=int(tempr/delta)+1  ! put them into the correct layer
+                  tempr_R=((chains(1,k,j)+(float(ii)-0.5)*deltaR)**2 + chains(2,k,j)**2 + chains(3,k,j)**2 )**(0.5)
+                  temp_R=int(tempr/deltaR)+1  ! put them into the correct layer
                  case (1)
-                  tempr=((chains(1,k,j)+(float(ii)-0.5)*delta)**2+chains(2,k,j)**2)**(0.5)
-                  temp=int(tempr/delta)+1  ! put them into the correct layer
+                  tempr_R=((chains(1,k,j)+(float(ii)-0.5)*deltaR)**2+chains(2,k,j)**2)**(0.5)
+                  temp_R=int(tempr/deltaR)+1  ! put them into the correct layer
                  case (0) 
-                  tempr=abs(chains(1,k,j)+(float(ii)-0.5)*delta)
-                  temp=int(tempr/delta)+1  ! put them into the correct layer
+                  tempr_R=abs(chains(1,k,j)+(float(ii)-0.5)*deltaR)
+                  temp_R=int(tempr/deltaR)+1  ! put them into the correct layer
                endselect
-        
-               if(temp.gt.ntot) then
-                  if(rank.eq.0)print*, 'Increase ntot'
+             
+               if(temp_R.gt.dimR) then
+                  if(rank.eq.0)print*, 'main.f90: increase dimR'
                   stop
                endif
 
-               in1tmp(k) = temp
-  
-               if(temp.lt.minpos(conf,ii))minpos(conf,ii)=temp
-               if(temp.gt.maxpos(conf,ii))maxpos(conf,ii)=temp
+              innR(k,conf,ii)=temp_R ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
+         
+            enddo ! ii
+         
+         tempr_Z=chains(3,k,j)
+         innZ(k,conf)=int(anint(tempr_Z/deltaZ))
 
-            enddo ! k
-
-            if((maxpos(conf,ii)-minpos(conf,ii)).ge.base) then
-
-                print*,'Rank', rank, 'Increase base'
-                call MPI_FINALIZE(ierr) ! finaliza MPI
-                stop
-
-            endif
-
-            do k = 1, long
-              temp = in1tmp(k)-minpos(conf,ii)+1 
-              inn(segpoorsv(k),conf,ii,temp) = inn(segpoorsv(k),conf,ii,temp) + 1      
-              inn_a(acidtype(k),conf,ii,temp) = inn_a(acidtype(k),conf,ii,temp) + 1
-              inn_b(basictype(k),conf,ii,temp) = inn_b(basictype(k),conf,ii,temp) + 1
-            enddo
-       
-         enddo ! ii
+         enddo ! k
 
       endif
 
    enddo ! j
+
 enddo ! while
 
 if (rank.lt.size-1) then
@@ -664,7 +646,8 @@ do while (actionflag.lt.3)
       write(310,*)'error       = ',error
       write(310,*)'q           = ',q
       write(310,*)'length seg  = ',0.50 ! value see subroutine cadenas
-      write(310,*)'delta       = ',delta
+      write(310,*)'deltaR      = ',deltaR
+      write(310,*)'deltaZ      = ',deltaZ
       write(310,*)'vsol        = ',vsol
       write(310,*)'vpol        = ',vpol*vsol
 

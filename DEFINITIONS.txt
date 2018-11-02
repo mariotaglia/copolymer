@@ -1,7 +1,8 @@
 curvature 0
 
-! DimR DimZ maxdimR maxdimZ 
-dimensions 140 1 18 18
+! DimR DimZ maxntotR maxntotZ 
+dimensions 140 1 18 1
+layersize 0.2 1
 cuantas 100000
 long 16
 

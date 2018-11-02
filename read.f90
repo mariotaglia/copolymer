@@ -18,7 +18,9 @@ read(8,*)nada
 read(8,*)curvature
 
 read(8,*)nada
-read(8,*)ntot, maxntotcounter_ini, maxntot
+read(8,*)dimR, dimZ, maxntotR, maxntotZ
+
+ntot=dimR*dimZ
 
 read(8,*)nada
 read(8,*)totalcuantas
