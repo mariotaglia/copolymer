@@ -125,7 +125,7 @@ do iZ = 1,dimZ
    jZp=iZ+1
    iZp=PBCSYMI(jZ,dimZ)
 do iR = 1,dimR
-   gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/delta)**2+((phi(iR,iZp)-phi(iR,iZ))/delta)**2
+   gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
    xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
 enddo 
 enddo
@@ -414,7 +414,7 @@ do iZ = 1, dimZ
     case(2)
      f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) + 2.0*wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)/(float(iR)-0.5) &
      +wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-2.0*phi(iR,iZ)+phi(iR-1,iZ))*deltaR**(-2) &
-     +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR,iZ))*(phi(iR+1,iZ)-phi(iR,iZ))*delta**(-2)
+     +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR,iZ))*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)
 
     end select
 

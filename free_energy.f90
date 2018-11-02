@@ -22,9 +22,9 @@ real*8 F_Mix_OHmin, F_Conf, F_Uchain
 real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW(Npoorsv,Npoorsv), F_electro                            
 !real*8 F_mup
 integer counter, counter2                                    
-
-integer i, iC, jC, is, js                                  
-
+real*8 gradphi2
+integer i, iC, jC, is, js, iR, iZ, jR, jZ, kZ, kkZ, jZp, jZm, iZp, iZm
+integer, external :: PBCSYMI
 real*8, external :: jacobian
 
 character*17 F_vdWfilename(Npoorsv,Npoorsv)
@@ -66,10 +66,12 @@ mupol = dlog(xpol(1))-dlog(q(1))
 ! 1. Solvent translational entropy
 F_Mix_s = 0.0                                                    
 
-do iC = 1, ntot                                                
-   F_Mix_s = F_Mix_s + xsol(iC)*(dlog(xsol(iC))-1.0)*jacobian(iC)*delta/vsol ! mix entropy of solvent                                      
-   F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*jacobian(iC)*delta/vsol ! with respect to bulk                             
+do iR = 1, dimR
+do iZ = 1, dimZ
+   F_Mix_s = F_Mix_s + xsol(iR,iZ)*(dlog(xsol(iR,iZ))-1.0)*jacobian(iR)*deltaR*deltaZ/vsol ! mix entropy of solvent                                      
+   F_Mix_s = F_Mix_s - xsolbulk*(dlog(xsolbulk)-1.0)*jacobian(iR)*deltaR*deltaZ/vsol ! with respect to bulk                             
 enddo                                                             
+enddo
 
 Free_Energy = Free_Energy + F_Mix_s                              
 
@@ -82,9 +84,11 @@ Free_Energy = Free_Energy + F_Mix_s
 ! 1. Polymer translational entropy
 F_Mix_p = 0.0                                                    
 
-do iC = 1, maxntotcounter                                                
-  F_Mix_p = F_Mix_p + xpol(iC)*(dlog(xpol(iC))-1.0)*jacobian(iC)*delta ! mix entropy of chains with respect to bulk (xpolbulk=0)                                     
+do iR = 1, maxntotcounterR                                                
+do iZ = 1, maxntotcounterZ
+   F_Mix_p = F_Mix_p + xpol(iR,iZ)*(dlog(xpol(iR,iZ))-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0)                                     
 enddo                                                            
+enddo
 
 Free_Energy = Free_Energy + F_Mix_p            
 
@@ -92,10 +96,12 @@ Free_Energy = Free_Energy + F_Mix_p
 
 F_Mix_pos = 0.0                                                  
 
-do iC=1,ntot
-  F_Mix_pos = F_Mix_pos + avpos(iC)*(dlog(avpos(iC)/vpos)-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos) ! mix entropy of cations and N*Mu term
-  F_Mix_pos = F_Mix_pos - xposbulk*(dlog(xposbulk/vpos)-1.0-dlog(expmupos))*jacobian(iC)*delta/(vsol*vpos) ! with respect to bulk
+do iR=1,dimR
+do iZ=1,dimZ
+  F_Mix_pos = F_Mix_pos + avpos(iR,iZ)*(dlog(avpos(iR,iZ)/vpos)-1.0-dlog(expmupos))*jacobian(iR)*deltaR*deltaZ/(vsol*vpos) ! mix entropy of cations and N*Mu term
+  F_Mix_pos = F_Mix_pos - xposbulk*(dlog(xposbulk/vpos)-1.0-dlog(expmupos))*jacobian(iR)*deltaR*deltaZ/(vsol*vpos) ! with respect to bulk
 enddo
+enddo 
 
 Free_energy = Free_Energy + F_Mix_pos
 
@@ -103,9 +109,11 @@ Free_energy = Free_Energy + F_Mix_pos
 
 F_Mix_neg = 0.0                                                  
 
-do iC = 1, ntot                                                
-  F_Mix_neg = F_Mix_neg + avneg(iC)*(dlog(avneg(iC)/vpos)-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg) ! mix entropy and N*Mu term of anions 
-  F_Mix_neg = F_Mix_neg - xnegbulk*(dlog(xnegbulk/vpos)-1.0-dlog(expmuneg))*jacobian(iC)*delta/(vsol*vneg) ! with respect to bulk
+do iR = 1, dimR
+do iZ = 1, dimZ
+  F_Mix_neg = F_Mix_neg + avneg(iR,iZ)*(dlog(avneg(iR,iZ)/vpos)-1.0-dlog(expmuneg))*jacobian(iR)*deltaR*deltaZ/(vsol*vneg) ! mix entropy and N*Mu term of anions 
+  F_Mix_neg = F_Mix_neg - xnegbulk*(dlog(xnegbulk/vpos)-1.0-dlog(expmuneg))*jacobian(iR)*deltaR*deltaZ/(vsol*vneg) ! with respect to bulk
+enddo
 enddo
 
 Free_Energy = Free_Energy + F_Mix_neg                            
@@ -114,10 +122,12 @@ Free_Energy = Free_Energy + F_Mix_neg
 
 F_Mix_Hplus = 0.0                                                
 
-do iC = 1, ntot                                      
-  F_Mix_Hplus = F_Mix_Hplus + avHplus(iC)/vsol*(dlog(avHplus(iC))-1.0-dlog(expmuHplus))*jacobian(iC)*delta ! mix entropy and N*Mu term of Hplus
-  F_Mix_Hplus = F_Mix_Hplus - xHplusbulk/vsol*(dlog(xHplusbulk)-1.0-dlog(expmuHplus))*jacobian(iC)*delta ! with respect to bulk      
+do iR = 1, dimR
+do iZ = 1, dimZ
+  F_Mix_Hplus = F_Mix_Hplus + avHplus(iR,iZ)/vsol*(dlog(avHplus(iR,iZ))-1.0-dlog(expmuHplus))*jacobian(iR)*deltaR*deltaZ ! mix entropy and N*Mu term of Hplus
+  F_Mix_Hplus = F_Mix_Hplus - xHplusbulk/vsol*(dlog(xHplusbulk)-1.0-dlog(expmuHplus))*jacobian(iR)*deltaR*deltaZ ! with respect to bulk      
 enddo                                                            
+enddo
 
 Free_Energy = Free_Energy + F_Mix_Hplus                          
 
@@ -125,10 +135,12 @@ Free_Energy = Free_Energy + F_Mix_Hplus
 
 F_Mix_OHmin = 0.0                                                
 
-do iC = 1, ntot                                       
-  F_Mix_OHmin = F_Mix_OHmin + avOHmin(iC)/vsol*(dlog(avOHmin(iC))-1.0-dlog(expmuOHmin))*jacobian(iC)*delta ! mix entropy and N*Mu term of OHmin          
-  F_Mix_OHmin = F_Mix_OHmin - xOHminbulk/vsol*(dlog(xOHminbulk)-1.0-dlog(expmuOHmin))*jacobian(iC)*delta ! with respect to bulk       
+do iR = 1, dimR
+do iZ = 1, dimZ
+  F_Mix_OHmin = F_Mix_OHmin + avOHmin(iC)/vsol*(dlog(avOHmin(iR,iZ))-1.0-dlog(expmuOHmin))*jacobian(iR)*deltaR*deltaZ ! mix entropy and N*Mu term of OHmin          
+  F_Mix_OHmin = F_Mix_OHmin - xOHminbulk/vsol*(dlog(xOHminbulk)-1.0-dlog(expmuOHmin))*jacobian(iR)*deltaR*deltaZ ! with respect to bulk       
 enddo                                                            
+enddo
 
 Free_Energy = Free_Energy + F_Mix_OHmin                          
 
@@ -137,16 +149,20 @@ Free_Energy = Free_Energy + F_Mix_OHmin
 
 F_conf = 0 
 
-do iC = 1, maxntotcounter 
-  F_Conf = F_conf + (sumprolnpro(iC)/q(iC)-dlog(q(iC)))*jacobian(iC)*delta*xpol(iC)
+do iR = 1, maxntotcounterR
+do iZ = 1, maxntotcounterZ
+  F_Conf = F_conf + (sumprolnpro(iR,iZ)/q(iR,iZ)-dlog(q(iR,iZ)))*jacobian(iR)*deltaR*deltaZ*xpol(iR,iZ)
 enddo 
+enddo
 
 Free_Energy = Free_Energy + F_Conf
 
 F_Uchain = 0.0
 
-do iC=1, maxntotcounter
-  F_Uchain = F_Uchain + delta*xpol(iC)*jacobian(iC)*(sumprouchain(iC)/q(iC))
+do iR=1, maxntotcounterR
+do iZ=1, maxntotcounterZ
+  F_Uchain = F_Uchain + deltaR*deltaZ*xpol(iR,iZ)*jacobian(iR)*(sumprouchain(iR,iZ)/q(iR,iZ))
+enddo
 enddo
 
 Free_Energy = Free_Energy + F_Uchain
@@ -155,22 +171,24 @@ Free_Energy = Free_Energy + F_Uchain
 
 F_Eq = 0.0                                                       
 
-do iC=1,ntot
+do iR=1,dimR
+do iZ=1,dimZ
 
   do is=1, Nacids
-    F_Eq = F_Eq + fAmin(is,iC)*dlog(fAmin(is,iC))*avpola(is,iC)*jacobian(iC)*delta/(vpol_a(is)*vsol)
-    F_Eq = F_Eq + (1.0-fAmin(is, iC))*dlog(1.0-fAmin(is, iC))*avpola(is, iC)*jacobian(iC)*delta/(vpol_a(is)*vsol)                                     
-    F_Eq = F_Eq - (1.0-fAmin(is, iC))*dlog(expmuHplus)*avpola(is, iC)*jacobian(iC)*delta/(vpol_a(is)*vsol)
-    F_Eq = F_Eq + (1.0-fAmin(is, iC))*dlog(Ka(is))*avpola(is, iC)*jacobian(ic)*delta/(vpol_a(is)*vsol)
+    F_Eq = F_Eq + fAmin(is,iR,iZ)*dlog(fAmin(is,iR,iZ))*avpola(is,iR,iZ)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
+    F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(1.0-fAmin(is,iR,iZ))*avpola(is,iR,iZ)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)                                     
+    F_Eq = F_Eq - (1.0-fAmin(is,iR,iZ))*dlog(expmuHplus)*avpola(is,iR,iZ)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
+    F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(Ka(is))*avpola(is,iR,iZ)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
   enddo
   
   do is=1, Nbasics
-    F_Eq = F_Eq + fBHplus(is,iC )*dlog(fBHplus(is,iC))*avpolb(is,iC)*jacobian(iC)*delta/(vpol_b(is)*vsol)
-    F_Eq = F_Eq + (1.0-fBHplus(is, iC))*dlog(1.0-fBHplus(is, iC))*avpolb(is, iC)*jacobian(iC)*delta/(vpol_b(is)*vsol)
-    F_Eq = F_Eq - (1.0-fBHplus(is, iC))*dlog(expmuOHmin)*avpolb(is, iC)*jacobian(iC)*delta/(vpol_b(is)*vsol)
-    F_Eq = F_Eq + (1.0-fBHplus(is, iC))*dlog(Kb(is))*avpolb(is, iC)*jacobian(ic)*delta/(vpol_b(is)*vsol)
+    F_Eq = F_Eq + fBHplus(is,iR,iZ)*dlog(fBHplus(is,iR,iZ))*avpolb(is,iR,iZ)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
+    F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(1.0-fBHplus(is,iR,iZ))*avpolb(is,iR,iZ)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
+    F_Eq = F_Eq - (1.0-fBHplus(is,iR,iZ))*dlog(expmuOHmin)*avpolb(is,iR,iZ)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
+    F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(Kb(is))*avpolb(is,iR,iZ)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
   enddo    
 
+enddo
 enddo
 
 Free_Energy = Free_Energy + F_Eq     
@@ -210,15 +228,18 @@ Free_Energy = Free_Energy + F_Eq
 F_VdW = 0.0                                                      
 
 
-do iC = 1, ntot
-  do jC = 1, ntot                                         
-    do is = 1, Npoorsv
-      do js = 1, Npoorsv
-
-        F_vdW (is,js) = F_vdW(is,js) - 0.5*Xu(iC,jC,1,is,js) &
-                                      *avpol(is,iC)*avpol(js,jC) &
+do iR = 1, dimR
+do iZ = 1, dimZ
+  do is = 1, Npoorsv
+  do js = 1, Npoorsv
+    do jR= 1, dimR
+    do jZ= -Xulimit, Xulimit    
+      kZ = jZ + iZ
+      kkZ = PBCSYMI (kZ,dimZ)
+      F_dW (is,js) = F_vdW(is,js) - 0.5*Xu(iR,jR,jZ,is,js) &
+                                      *avpol(is,iR,iZ)*avpol(js,jR,kkZ) &
                                       *st(is,js)/(vpol(is)*vpol(js)*vsol**2) &
-                                      *jacobian(iC)*delta 
+                                      *jacobian(iR)*delta 
   
 !       F_vdW = F_vdW - 0.5000*delta**3*xtotal2(ii,iC)*      
 !       &       xtotal2(iii,Xulist_cell(iC, iiC))*                    
@@ -226,10 +247,12 @@ do iC = 1, ntot
 !       &       /((vpol*vsol)**2)                   
 !       &       *(dfloat(indexa(iC,1))-0.5)*2*pi               
 
-      enddo ! js
-    enddo ! is
-  enddo ! iC          
-enddo ! jC                                             
+    enddo ! jZ
+    enddo ! jR
+  enddo ! js
+  enddo ! is
+enddo ! iZ          
+enddo ! iR                                             
 
 do is=1,Npoorsv
   do js=1,Npoorsv
@@ -243,9 +266,14 @@ enddo
 F_electro = 0.0                                                  
 
  
-  do iC  = 1, ntot                                               
-     F_electro = F_electro + (xcharge(ic)*phi(ic)-wperm*epsfcn(iC)/2.0*((phi(iC+1)-phi(iC))/delta)**2)*jacobian(iC)*delta
-  enddo
+do iR = 1, dimR
+do iZ = 1, dimZ
+  jZp= iZ+1
+  iZp= PBCSYMI(jZp,dimZ)
+  gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
+  F_electro = F_electro + (xcharge(iR,iZ)*phi(iR,iZ) - wperm*epsfcn(iR,iZ)/2.0*gradphi2*jacobian(iR)*deltaR*deltaZ
+enddo
+enddo
 
 Free_Energy = Free_Energy + F_electro                            
 
@@ -261,41 +289,52 @@ sumel=0.0
 sumdiel=0.0                                                     
 sumpol = 0.0
 
-do iC=1,ntot                                                
-  sumpi = sumpi+dlog(xsol(iC))*jacobian(iC)                      
-  sumpi = sumpi-dlog(xsolbulk)*jacobian(iC)
+do iR= 1, dimR                                                
+do iZ= 1, dimZ
+  sumpi = sumpi+dlog(xsol(iR,iZ))*jacobian(iR)                      
+  sumpi = sumpi-dlog(xsolbulk)*jacobian(iR)
 
-  sumrho = sumrho + (-xsol(iC)*jacobian(iC)) ! sum over  rho_i i=+,-,si
-  sumrho = sumrho - (-xsolbulk)*jacobian(iC) ! sum over  rho_i i=+,-,si
-  sumrho = sumrho + (-avpos(iC)/vpos)*jacobian(iC)
-  sumrho = sumrho - (-xposbulk/vpos)*jacobian(iC)
-  sumrho = sumrho + (-avneg(iC)/vneg)*jacobian(iC)
-  sumrho = sumrho - (-xnegbulk/vneg)*jacobian(iC)
-  sumrho = sumrho + (-avHplus(iC)*jacobian(iC))
-  sumrho = sumrho - (-xHplusbulk*jacobian(iC))
-  sumrho = sumrho + (-avOHmin(iC)*jacobian(iC))
-  sumrho = sumrho - (-xOHminbulk*jacobian(iC))
+  sumrho = sumrho + (-xsol(iR,iZ)*jacobian(iR)) ! sum over  rho_i i=+,-,si
+  sumrho = sumrho - (-xsolbulk)*jacobian(iR) ! sum over  rho_i i=+,-,si
+  sumrho = sumrho + (-avpos(iR,iZ)/vpos)*jacobian(iR)
+  sumrho = sumrho - (-xposbulk/vpos)*jacobian(iR)
+  sumrho = sumrho + (-avneg(iR,iZ)/vneg)*jacobian(iR)
+  sumrho = sumrho - (-xnegbulk/vneg)*jacobian(iR)
+  sumrho = sumrho + (-avHplus(iR,iZ)*jacobian(iR))
+  sumrho = sumrho - (-xHplusbulk*jacobian(iR))
+  sumrho = sumrho + (-avOHmin(iR,iZ)*jacobian(iR))
+  sumrho = sumrho - (-xOHminbulk*jacobian(iR))
 
 enddo
-
-do iC=1,maxntotcounter                                                
-  sumrho = sumrho + (-xpol(iC)*vsol*jacobian(iC)) ! sum over  rho_i i=+,-,si
 enddo
 
+do iR=1,maxntotcounterR
+do iZ=1,maxntotcounterZ
+  sumrho = sumrho + (-xpol(iR,iZ)*vsol*jacobian(iR)) ! sum over  rho_i i=+,-,si
+enddo
+enddo
 
 ! sumel
 
- do iC = 1, ntot
- sumel = sumel - wperm*epsfcn(iC)/2.0*((phi(iC+1)-phi(iC))/delta)**2*jacobian(iC)*delta
- enddo
+do iR = 1, dimR
+do iZ = 1, dimZ
+  jZp = iZ + 1
+  iZp = PBCSYMI(jZp,dimZ)
+  gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
+  sumel = sumel - wperm*epsfcn(iR,iZ)/2.0*gradphi2*jacobian(iR)*deltaR*deltaZ
+enddo
+enddo
 
 ! contribution from dielecrtric
 
-do iC = 1, ntot
-gradphi2 = ((phi(iC+1)-phi(iC))/delta)**2
-sumdiel = sumdiel + 0.5*wperm*dielpol(iC)*Depsfcn(iC)*gradphi2*jacobian(iC)*vsol
+do iR = 1, dimR
+do iZ = 1, dimZ
+  jZp = iZ + 1
+  iZp = PBCSYMI(jZp,dimZ)
+  gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR + (phi(iR,iZp)-phi(iR,iZ)/deltaZ))**2
+  sumdiel = sumdiel + 0.5*wperm*dielpol(iR,iZ)*Depsfcn(iR,iZ)*gradphi2*jacobian(iR)*vsol
 enddo
-
+enddo
 
 Free_Energy2 = (sumpi + sumrho + sumdiel)/vsol*delta + sumel                      
 
@@ -305,8 +344,10 @@ do is=1,Npoorsv
   enddo
 enddo
 
-do iC = 1, maxntotcounter
-  sumpol = sumpol + xpol(iC)*mupol*jacobian(iC)*delta 
+do iR = 1, maxntotcounterR
+do iZ = 1, maxntotcounterZ
+  sumpol = sumpol + xpol(iR,iZ)*mupol*jacobian(iR)*deltaR*deltaZ
+enddo
 enddo
 
 Free_Energy2 = Free_Energy2 + sumpol 

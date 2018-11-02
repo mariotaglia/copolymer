@@ -39,7 +39,7 @@ allocate(sumaXu(Npoorsv,Npoorsv))
 dimR=40
 dimZ=1
 
-cutoff = (float(Xulimit)+0.5)*delta
+cutoff = (float(Xulimit)+0.5)*deltaR
 
 pi=dacos(-1.0d0)          ! pi = arccos(-1) 
 
@@ -58,8 +58,8 @@ do ii = 1, dimR ! loop sobre cada posicion del segmento
       zmax = cutoff
       zmin = -cutoff
 
-      xmax = cutoff + (dfloat(ii) - 0.5)*delta
-      xmin = -cutoff + (dfloat(ii) - 0.5)*delta
+      xmax = cutoff + (dfloat(ii) - 0.5)*deltaR
+      xmin = -cutoff + (dfloat(ii) - 0.5)*deltaR
       
       do ix = 1, MCsteps
       do iy = 1, MCsteps
@@ -67,7 +67,7 @@ do ii = 1, dimR ! loop sobre cada posicion del segmento
 
 ! coordenadas del segmento (x1,y1,z1) y del punto a integrar (x2,y2,z2)
 
-         x1 = (dfloat(ii) - 0.5)*delta ! asume theta segmento = 0, z segmento = 0 y segmento en el centro de la layer
+         x1 = (dfloat(ii) - 0.5)*deltaR ! asume theta segmento = 0, z segmento = 0 y segmento en el centro de la layer
          y1 = 0.0
          z1 = 0.0
 
@@ -89,8 +89,8 @@ do ii = 1, dimR ! loop sobre cada posicion del segmento
          end select
 
          vect = sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2) ! vector diferencia
-         jR = int(R/delta)+1 ! jR tiene la celda donde cae el punto a integrar
-         jZ = int(anint(Z/delta)) ! OJO
+         jR = int(R/deltaR)+1 ! jR tiene la celda donde cae el punto a integrar
+         jZ = int(anint(Z/deltaZ)) ! OJO
 
          if(jR.le.dimR) then
 
