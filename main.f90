@@ -33,7 +33,7 @@ parameter (Na=6.02d23)
 integer av1(ntot), av2(ntot)
 real*8 avtmp
 real*8 x1((npoorsv+2)*ntot),xg1((npoorsv+2)*ntot),x1ini((npoorsv+2)*ntot)   ! density solvent iteration vector
-real*8 zc(ntot)           ! z-coordinate layer 
+real*8 zc(dimR)           ! z-coordinate layer 
 
 REAL*8 sumrhoz, meanz     ! Espesor medio pesado
 real*8 pro                ! probability distribution function 

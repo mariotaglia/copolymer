@@ -211,6 +211,5 @@ enddo !js
 enddo !is
 
 close(200)
-stop
 end
 

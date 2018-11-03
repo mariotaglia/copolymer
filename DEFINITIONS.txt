@@ -30,7 +30,7 @@ vpol_b 1
 0.096
 
 infile 1
-flagkai 0
+flagkai 1
 
 ! Npolini, Npolfirst, Npollast, Npolstep
 npol 0.4 0.1 1.4 0.01
