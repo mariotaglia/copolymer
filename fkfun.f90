@@ -17,15 +17,15 @@ integer*4 ier2
 real*8 protemp, sttemp
 real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
 real*8 xh(dimR+1,dimZ) 
-real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(Nacids,dimR,dimZ), xpot_b(Nbasics,dimR,dimZ)
+real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
 real*8 pro(cuantas)
 real*8 time1, time2, duration, looptime1, looptime2, loopduration
 integer iR,iZ,kZ,kkZ,k,i,j,k1,k2,ii,jj,ic,aR,aZ,iZm,iZp,jZp,jZm,as,bs        ! dummy indices
 integer is, js,ia,ib,iiR,iiZ,jR,jZ
 integer err
 integer n
-real*8 avpol_tmp(0:Npoorsv,dimR,dimZ), avpola_tmp(Nacids,dimR,dimZ), avpolb_tmp(Nbasics,dimR,dimZ)
-real*8 avpol_tosend(0:Npoorsv,dimR,dimZ), avpola_tosend(Nacids,dimR,dimZ), avpolb_tosend(Nbasics,dimR,dimZ)
+real*8 avpol_tmp(0:Npoorsv,dimR,dimZ), avpola_tmp(0:Nacids,dimR,dimZ), avpolb_tmp(0:Nbasics,dimR,dimZ)
+real*8 avpol_tosend(0:Npoorsv,dimR,dimZ), avpola_tosend(0:Nacids,dimR,dimZ), avpolb_tosend(0:Nbasics,dimR,dimZ)
 real*8 xpol_tosend(dimR,dimZ)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
@@ -54,7 +54,7 @@ do iZ=1,dimZ
 enddo
 enddo !OJO boundary conditions?
 
-xh(iR+1,iZ)=1.0
+xh(dimR+1,:)=1.0
 
 
 do iR=1,dimR
@@ -78,6 +78,7 @@ enddo
 
 avpos=0.0
 avneg=0.0
+
 
 do iR=1,dimR
 do iZ=1,dimZ
@@ -107,9 +108,8 @@ do iZ = 1, dimZ
   dielpol(iR,iZ) = 1.0 - xh(iR,iZ) - avpos(iR,iZ) - avneg(iR,iZ) - avHplus(iR,iZ) - avOHmin(iR,iZ)
 enddo
 enddo
+
 call dielectfcn(dielpol,epsfcn,Depsfcn)
-
-
 
 ! Calculation of xpot
 
@@ -201,6 +201,8 @@ sumtrans_tosend = 0.0
 sumtrans = 0.0
 all_tosend = 0.0
 all_toreceive = 0.0
+xpot_a(0,:,:)=1.0
+xpot_b(0,:,:)=1.0
 
 
 do iiR=1, maxntotcounterR ! position of center of mass 
@@ -209,49 +211,46 @@ do iiZ=1, maxntotcounterZ
  
       pro(i) = exp(-Uchain(i))
 
-       do k=1,long
-         
+      do k=1,long
          iZ = innZ(k,i)+iiZ
          aZ = PBCSYMI(iZ,dimZ)
          aR = innR(k,i,iiR)
          is = segpoorsv(k)
          ia = acidtype(k)
          ib = basictype(k) 
-
+         
          pro(i)= pro(i) * xpot(is,aR,aZ)
 
-         pro(i)= pro(i) * xpot_a(ic,aR,aZ) 
+         pro(i)= pro(i) * xpot_a(ia,aR,aZ) 
      
-         pro(i)= pro(i) * xpot_b(ic,aR,aZ)
- 
-      enddo !k
+         pro(i)= pro(i) * xpot_b(ib,aR,aZ)
 
-      q_tosend(iiR,iiZ)=q_tosend(iiR,iiZ)+pro(i) ! all_tosend(ii) = all_tosend(ii) + pro(i) 
+     enddo !k
+
+      q_tosend(iiR,iiZ) = q_tosend(iiR,iiZ) + pro(i) ! all_tosend(ii) = all_tosend(ii) + pro(i) 
       sumprolnpro_tosend(iiR,iiZ) = sumprolnpro_tosend(iiR,iiZ) + pro(i)*dlog(pro(i)) ! all_tosend(ntot+ii) = all_tosend(ntot+ii) + pro(i)*dlog(pro(i))
       sumprouchain_tosend(iiR,iiZ) = sumprouchain_tosend(iiR,iiZ) + pro(i)*Uchain(i) !all_tosend(ntot*2+ii) = all_tosend(ntot*2+ii) + pro(i)*Uchain(i) 
       xpol_tosend(iiR,iiZ) = xpol_tosend(iiR,iiZ)+pro(i) ! all_tosend(ntot*3+ii) = all_tosend(ntot*3+ii) + pro(i)
-
-
       do j = 1, long ! loop over number of segments
 
-         iZ = innZ(k,i)+iiZ
+         iZ = innZ(j,i)+iiZ
          aZ = PBCSYMI(iZ,dimZ)
-         aR = innR(k,i,iiR)
+         aR = innR(j,i,iiR)
          is = segpoorsv (j)
          as = acidtype (j)
          bs = basictype (j)
 
          sumtrans_tosend(iiR,iiZ,j) =  sumtrans_tosend(iiR,iiZ,j) +  pro(i)*float(Ntrans(j,i))
-         avpol_tmp(is,aR,aZ)=avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
-         avpola_tmp(ia,aR,aZ)=avpola_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpola_tmp is avg number of acid segments "ic" at position "j"
-         avpolb_tmp(ib,aR,aZ)=avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
+         avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
+         avpola_tmp(ia,aR,aZ) = avpola_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpola_tmp is avg number of acid segments "ic" at position "j"
+         avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
 
       enddo ! j
-
    enddo ! i
 
 enddo ! iiR
 enddo ! iiZ
+
 
 avpol_tosend(:, 1:dimR, 1:dimZ)=avpol_tmp(:, 1:dimR, 1:dimZ) 
 avpola_tosend(:, 1:dimR, 1:dimZ)=avpola_tmp(:, 1:dimR, 1:dimZ)
@@ -305,8 +304,8 @@ avpolb_tosend(:, 1:dimR, 1:dimZ)=avpolb_tmp(:, 1:dimR, 1:dimZ)
 
 sumpol = 0.0
 
-do iR = 1, dimZ
-do iZ = 1, dimR
+do iR = 1, dimR
+do iZ = 1, dimZ
    do is = 0, Npoorsv
 
       select case (curvature)

@@ -35,9 +35,6 @@ if(rank.eq.0)print*,'Kai calculation'
 
 allocate(sumaXu(Npoorsv,Npoorsv))
 
-dimR=40
-dimZ=1
-
 cutoff = (float(Xulimit)+0.5)*deltaR
 
 pi=dacos(-1.0d0)          ! pi = arccos(-1) 

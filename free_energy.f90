@@ -85,7 +85,7 @@ F_Mix_p = 0.0
 
 do iR = 1, maxntotcounterR                                                
 do iZ = 1, maxntotcounterZ
-   F_Mix_p = F_Mix_p + xpol(iR,iZ)*(dlog(xpol(iR,iZ))-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0)                                     
+   F_Mix_p = F_Mix_p + xpol(iR,iZ)*(dlog(xpol(iR,iZ))-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0) 
 enddo                                                            
 enddo
 

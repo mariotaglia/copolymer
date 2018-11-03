@@ -37,7 +37,7 @@ real*8 zc(dimR)           ! z-coordinate layer
 
 REAL*8 sumrhoz, meanz     ! Espesor medio pesado
 real*8 pro                ! probability distribution function 
-real*8 trash
+real*8 trash, trash2
 
 integer n                 ! number of lattice sites
 integer itmax             ! maximum number of iteration allowed for 
@@ -215,24 +215,22 @@ enddo
 !     init guess from files fort.100 (solvent) and fort.200 (potential)                      
 
 if (infile.ge.1) then
-
    do iR=1,dimR
    do iZ=1,dimZ
 
-     read(100,*)trash,trash,xfile(dimR*(iZ-1)+iR)   ! solvent
+     read(100,*)trash,trash2,xfile(dimR*(iZ-1)+iR)   ! solvent
      x1(dimR*(iZ-1)+iR)=xfile(dimR*(iZ-1)+iR)
      xg1(dimR*(iZ-1)+iR)=xfile(dimR*(iZ-1)+iR)
+     do is=1,Npoorsv 
 
-     do is=1,npoorsv 
-
-       read(100+is,*)trash,trash,xfile(n*is+dimR*(iZ-1)+iR)   ! poorsolvent desde 1 a npoorsv 
+       read(100+is,*)trash,trash2,xfile(n*is+dimR*(iZ-1)+iR)   ! poorsolvent desde 1 a npoorsv 
 !       if(xfile(i+n*is).lt.1.0d-30)xfile(i+n*is)=1.0d-30
        x1(n*is+dimR*(iZ-1)+iR)=xfile(n*is+dimR*(iZ-1)+iR)
        xg1(n*is+dimR*(iZ-1)+iR)=xfile(n*is+dimR*(iZ-1)+iR)
 
      enddo !is
 
-     read(200,*)trash,trash,xfile(n*(Npoorsv+1)+dimR*(iZ-1)+iR)
+     read(200,*)trash,trash2,xfile(n*(Npoorsv+1)+dimR*(iZ-1)+iR)
      x1(n*(npoorsv+1)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+1)+dimR*(iZ-1)+iR)
      xg1(n*(npoorsv+1)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+1)+dimR*(iZ-1)+iR)
 
@@ -240,7 +238,6 @@ if (infile.ge.1) then
    enddo !iZ
 
 endif
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! CHAIN GENERATION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
