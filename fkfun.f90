@@ -63,9 +63,8 @@ do iZ=1,dimZ
 enddo
 enddo
 
-phi(0,:)=phi(1,:)
-phi(dimR+1,:)=0.0
-
+phi(0,:)=phi(1,:) ! symmetry at r = 0
+phi(dimR+1,:)=0.0 ! bulk for r -> inf
 
 ! Recover xtotal from input
 do is = 1,Npoorsv
@@ -122,7 +121,7 @@ enddo
 
 ! dielectrics
 do iZ = 1,dimZ
-   jZp=iZ+1
+   jZp=iZ+1 ! jZ plus one
    iZp=PBCSYMI(jZ,dimZ)
 do iR = 1,dimR
    gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
