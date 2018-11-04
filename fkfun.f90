@@ -20,7 +20,7 @@ real*8 xh(dimR+1,dimZ)
 real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
 real*8 pro(cuantas)
 real*8 time1, time2, duration, looptime1, looptime2, loopduration
-integer iR,iZ,kZ,kkZ,k,i,j,k1,k2,ii,jj,ic,aR,aZ,iZm,iZp,jZp,jZm,as,bs        ! dummy indices
+integer iR,iZ,kZ,kkZ,k,i,j,k1,k2,ii,jj,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
 integer is, js,ia,ib,iiR,iiZ,jR,jZ
 integer err
 integer n
@@ -238,8 +238,8 @@ do iiZ=1, maxntotcounterZ
          aZ = PBCSYMI(iZ,dimZ)
          aR = innR(j,i,iiR)
          is = segpoorsv (j)
-         as = acidtype (j)
-         bs = basictype (j)
+         ia = acidtype (j)
+         ib = basictype (j)
 
          sumtrans_tosend(iiR,iiZ,j) =  sumtrans_tosend(iiR,iiZ,j) +  pro(i)*float(Ntrans(j,i))
          avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
