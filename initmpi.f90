@@ -1,6 +1,6 @@
 subroutine initmpi
 use MPI
-used seed1
+use seed1
 implicit none
 
 call MPI_INIT(ierr)

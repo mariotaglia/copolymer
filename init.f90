@@ -7,7 +7,7 @@ use volume
 use bulk
 use longs
 use MPI
-
+use pis
 implicit none
 
 real*8 solvetime1, solvetime2, solveduration
@@ -54,7 +54,6 @@ integer in1tmp(long,2)
 pi=dacos(-1.0d0)          ! pi = arccos(-1) 
 itmax=200                 ! maximum number of iterations       
 n=ntot                    ! size of lattice
-conf=0                    ! counter for conformations
 
 vsol=0.030                ! volume solvent molecule in (nm)^3
 vpol(:)=vpol(:)/vsol  ! volume polymer segment in units of vsol
@@ -108,6 +107,11 @@ expmupos=xposbulk/vpos/xsolbulk**vpos
 expmuneg=xnegbulk/vneg/xsolbulk**vneg           
 expmuHplus=xHplusbulk/xsolbulk ! vHplus=vsol
 expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
+
+do i = 1, dimR
+zc(iR)= (iR-0.5) * deltaR
+enddo
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

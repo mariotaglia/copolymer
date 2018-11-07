@@ -14,15 +14,12 @@ subroutine solve
 
 use globals
 use MPI
-
+use mkai
 implicit none
 
 real*8 solvetime1, solvetime2, solveduration
 integer is,ic
 integer *4 ier ! Kinsol error flag
-real*8 pi
-real*8 Na               
-parameter (Na=6.02d23)
 integer av1(ntot), av2(ntot)
 real*8 avtmp
 real*8 x1((npoorsv+2)*ntot),xg1((npoorsv+2)*ntot),x1ini((npoorsv+2)*ntot)   ! density solvent iteration vector
@@ -51,7 +48,6 @@ integer il,inda,ncha
 REAL*8 xfile((npoorsv+2)*ntot)                        
 real*8 algo, algo2                  
 
-real*8 zp(long)
 real*8 sum,sumel          ! auxiliary variable used in free energy computation  
 
 integer countfile         ! enumerates the outputfiles 
@@ -88,7 +84,6 @@ do iZ=1,dimZ
    enddo
 
 enddo
-   zc(iR)= (iR-0.5) * deltaR
 enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

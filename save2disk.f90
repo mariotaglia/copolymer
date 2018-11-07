@@ -9,15 +9,13 @@ use bulk
 use longs
 use mkai
 use transgauche
-
+use pis
 implicit none
 
+integer counter, counter2
 real*8 solvetime1, solvetime2, solveduration
 integer is,ic
 integer *4 ier ! Kinsol error flag
-real*8 pi
-real*8 Na               
-parameter (Na=6.02d23)
 integer av1(ntot), av2(ntot)
 real*8 avtmp
 real*8 x1((npoorsv+2)*ntot),xg1((npoorsv+2)*ntot),x1ini((npoorsv+2)*ntot)   ! density solvent iteration vector
@@ -76,11 +74,6 @@ INTEGER cc
 write(533,*) npol, dlog(xpol(1,1))-dlog(q(1,1))
 flush(533)
 
-do is=0,Npoorsv+1
-   write(534,*) is, Rgyrprom(is)
-enddo
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Single run files
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -137,13 +130,14 @@ enddo ! is
 ! Frac A min
 do ic=1,Nacids
 write(fracAmin,'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionAmin',ic,'.',counter,'.',counter2,'.dat'
-open(unit=1050, file=fracAmin(ic))
+open(unit=1050, file=fracAmin)
 do iR=1,dimR
    do iZ=1,dimZ
        write(1050,*)zc(iR),iZ,fAmin(ic,iR,iZ)
    enddo
 enddo
 close(1050)
+enddo
 
 ! Density acid
 do ic=1,Nacids
@@ -155,17 +149,19 @@ do iR=1,dimR
    enddo
 enddo
 close(1780)
+enddo
 
 ! Frac B min
 do ic=1,NBasics
 write(fracBHplus,'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionBHplus',ic,'.',counter,'.',counter2,'.dat'
-open(unit=1050, file=fracBHplus(ic))
+open(unit=1050, file=fracBHplus)
 do iR=1,dimR
    do iZ=1,dimZ
        write(1050,*)zc(iR),iZ,fBHplus(ic,iR,iZ)
    enddo
 enddo
 close(1050)
+enddo
 
 ! Density basic
 do ic=1,NBasics
@@ -177,6 +173,7 @@ do iR=1,dimR
    enddo
 enddo
 close(1780)
+enddo
 
 ! Solvent
 

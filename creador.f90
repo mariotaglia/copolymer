@@ -7,15 +7,12 @@ use seed1
 use longs
 use MPI
 use transgauche
-
+use mkai
 implicit none
 
 real*8 solvetime1, solvetime2, solveduration
 integer is,ic
 integer *4 ier ! Kinsol error flag
-real*8 pi
-real*8 Na               
-parameter (Na=6.02d23)
 integer av1(ntot), av2(ntot)
 real*8 avtmp
 
@@ -145,4 +142,14 @@ if(rank.eq.0) then
    enddo
 
 endif
+
+! print Rgyr 
+
+do is=0,Npoorsv+1
+   write(534,*) is, Rgyrprom(is)
+enddo
+close(534)
+
+
+
 end
