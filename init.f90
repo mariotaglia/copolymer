@@ -10,43 +10,17 @@ use MPI
 use pis
 implicit none
 
-real*8 solvetime1, solvetime2, solveduration
-integer is,ic
-integer *4 ier ! Kinsol error flag
-integer av1(ntot), av2(ntot)
-real*8 avtmp
 real*8 zc(dimR)           ! z-coordinate layer 
-
-REAL*8 sumrhoz, meanz     ! Espesor medio pesado
-real*8 pro                ! probability distribution function 
-real*8 trash, trash2
 
 integer n                 ! number of lattice sites
 integer itmax             ! maximum number of iteration allowed for 
-real*8 fnorm              ! L2 norm of residual vector function fcn
 
 external fcnelect         ! function containing the SCMFT eqs for solver
-integer i,j,k,m,ii,flag,c, jj, iR,iZ ! dummy indice0s
-
-INTEGER temp_R, temp_Z
-real*8 tempr_R, tempr_Z
-real*8 tmp
-
-real*8 min1               ! variable to determine minimal position of chain
-integer qqq,www,eee
-
-integer il,inda,ncha
-
-real*8 algo, algo2                  
+integer i, iR ! dummy indice0s
 
 ! MPI
-integer tag, source
+integer tag
 parameter(tag = 0)
-integer err
-integer ier_tosend
-double  precision norma_tosend
-
-integer in1tmp(long,2)
 
 
 !     initializations of variables 
@@ -108,7 +82,7 @@ expmuneg=xnegbulk/vneg/xsolbulk**vneg
 expmuHplus=xHplusbulk/xsolbulk ! vHplus=vsol
 expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
 
-do i = 1, dimR
+do iR = 1, dimR
 zc(iR)= (iR-0.5) * deltaR
 enddo
 

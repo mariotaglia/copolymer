@@ -10,45 +10,25 @@ use transgauche
 use mkai
 implicit none
 
-real*8 solvetime1, solvetime2, solveduration
-integer is,ic
-integer *4 ier ! Kinsol error flag
-integer av1(ntot), av2(ntot)
-real*8 avtmp
+integer is
 
-integer i,j,k,m,ii,flag,c, jj, iR,iZ ! dummy indice0s
+integer j,k,ii ! dummy indice0s
 
-INTEGER temp_R, temp_Z
+INTEGER temp_R
 real*8 tempr_R, tempr_Z
-real*8 tmp
 
-real*8 min1               ! variable to determine minimal position of chain
-integer qqq,www,eee
-
-integer il,inda,ncha
-
-REAL*8 xfile((npoorsv+2)*ntot)                        
-real*8 algo, algo2                  
+integer ncha
 
 real*8 chains(3,long,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
-real*8 zp(long)
 real*8 Uconf
 integer*1 Ntconf(long)
-real*8 sum,sumel          ! auxiliary variable used in free energy computation  
-real*8 sumpi,sumrho,sumrhopol, sumrho2, sumrho2mol !suma de la fraccion de polimero
 real*8 sumUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
 
 integer conf              ! counts number of conformations
-INTEGER cc
 
 ! MPI
-integer tag, source
+integer tag
 parameter(tag = 0)
-integer err
-integer ier_tosend
-double  precision norma_tosend
-
-integer in1tmp(long,2)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! CHAIN GENERATION

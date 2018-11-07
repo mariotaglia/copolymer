@@ -67,24 +67,19 @@ end
 !* rotates a given chains conformation                        *  
 !* pre: xend = input chain                                    *
 !* post: xendr= rotated chain                                 *
-!*        test= if equal N the rotation took the chain to z<0 *
-!*              and has to be rejected as allowd conf         * 
 !**************************************************************     
 
-subroutine rota(xend,xendr,n,test)
+subroutine rota(xend,xendr,n)
 use seed1
 use layer
+use pis
 implicit none
 
 integer n
 real*8 xend(3,n+5),rands,xendr(3,n+5)
-real*8 theta,theta1,x(120),y(120),r,xp(120),yp(120),pi
-character*1 test
-integer k,m1,i
-real*8 fac,fac1,fac2,sbe,cbe,sal,cal,sga,dist
+integer i
+real*8 fac,fac1,fac2,sbe,cbe,sal,cal,sga
 real*8 alfa,gama,cga,a,b,c
-
-pi=acos(-1.0)
 
 fac=rands(seed)
 fac1=rands(seed)
@@ -131,13 +126,12 @@ use globals
 use mkai
 implicit none
 
-integer i,state,ii,j,k1,k2,ncha, kk, is
+integer i,state,j,k1,k2,ncha, is
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3), m_branch(3,3,50)
 real*8 x(3),xend(3,long+5),xendr(3,long+5), xendcom(3,long+5), xend_branch(3,50)
-REAL*8 chains(3,long,ncha_max), chainsw(ncha_max), Uconf
-character*1 test
+REAL*8 chains(3,long,ncha_max), Uconf
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
 integer*1 Ntconf(long), seglength(0:Npoorsv)
 real*8 Ugyr, Rgyr(0:Npoorsv+1)
@@ -318,7 +312,7 @@ ncha=0
 do i=1,12
 
   call com(xend,xendcom,long)       ! substracts center of mass
-  call rota(xendcom,xendr,long,test)   ! rotate chain conformation ncha time
+  call rota(xendcom,xendr,long)   ! rotate chain conformation ncha time
   ncha=ncha+1
 
 !  call print_ent2(xendr)
@@ -341,7 +335,7 @@ use seed1
 use layer
 implicit none
 
-integer n, i, k, long
+integer i, k, long
 real*8 xend(3,long+5),xendcom(3,long+5)
 real*8 cm(3)
 

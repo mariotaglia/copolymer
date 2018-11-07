@@ -37,7 +37,6 @@ integer*4 ier
 integer*8 neq, i
 double precision udata(*), uscale(*), fdata(*), fscale(*)
 double precision vtemp1(*), vtemp2(*)
-integer ncells
 
 common /psize/ neq
 
@@ -68,7 +67,6 @@ use mkai
 
 implicit none
 
-integer i
 integer*4 ier
 
 real*8 x1_old((Npoorsv+2)*ntot)
@@ -122,7 +120,6 @@ integer*8 neq ! Kinsol number of equations
 integer*4 max_niter
 common /psize/ neq ! Kinsol
 integer ierr
-integer ncells
 
 
 ! INICIA KINSOL

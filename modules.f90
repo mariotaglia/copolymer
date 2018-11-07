@@ -77,8 +77,8 @@ endmodule
 module mcharge
 real*8 dielP
 integer electroflag
-integer*8 Nacids, Nbasics
-integer*8, allocatable :: acidtype(:), basictype(:)
+integer Nacids, Nbasics
+integer, allocatable :: acidtype(:), basictype(:)
 real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
 real*8, allocatable :: phi(:,:), avpos(:,:), avneg(:,:), avHplus(:,:), avOHmin(:,:), xcharge(:,:), fAmin(:,:,:), fBHplus(:,:,:)
 real*8 Csalt, wperm, rhosalt, expmupos, expmuneg, xposbulk, xnegbulk

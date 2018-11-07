@@ -17,15 +17,14 @@ integer pos
 integer, parameter :: fh = 15
 integer, parameter :: stdout = 6
 integer ios
-integer line, linemax
+integer line
 integer i, j
 character(len=50) :: filename = 'DEFINITIONS.txt'
-character basura
 integer ndi ! undetermined integer
 real*8 ndr ! undetermined real
 
 ! not defined variables, change if any variable can take the value
-ndi = -1e5
+ndi = -10000
 ndr = -1.0d10
 
 ! default values, if ndi or ndr is used, then variable is required

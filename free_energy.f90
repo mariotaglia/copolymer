@@ -1,4 +1,4 @@
-subroutine calc_free_energy(counter, counter2)
+subroutine calc_free_energy
 
 use globals
 use mcharge
@@ -12,17 +12,14 @@ use mkai
 use longs
 implicit none                                 
 
-double precision Factorcurv                   
-
 real*8 gradphi2
 real*8 Free_energy, F_Mix_s, F_Mix_pos, F_mix_p        
 real*8 F_Mix_neg, F_Mix_Hplus                 
-real*8 Free_energy2, sumpi, sumrho, sumel, sum, sumpol, mupol, sumdiel
+real*8 Free_energy2, sumpi, sumrho, sumel,sumpol, mupol, sumdiel
 real*8 F_Mix_OHmin, F_Conf, F_Uchain     
-real*8  F_Conf2, F_Conf_temp2, F_Eq, F_Eq_P, F_vdW(Npoorsv,Npoorsv), F_electro                            
+real*8  F_Eq,F_vdW(Npoorsv,Npoorsv), F_electro                            
 !real*8 F_mup
-integer counter, counter2                                    
-integer i, iC, jC, is, js, iR, iZ, jR, jZ, kZ, kkZ, jZp, jZm, iZp, iZm
+integer is, js, iR, iZ, jR, jZ, kZ, kkZ, jZp, iZp
 integer, external :: PBCSYMI
 double precision, external :: jacobian
 
@@ -390,7 +387,7 @@ endif
 !enddo                      
 !endif
 
-1515    continue
+continue
 
 end                                                              
 

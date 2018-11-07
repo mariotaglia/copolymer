@@ -13,40 +13,17 @@ use pis
 implicit none
 
 integer counter, counter2
-real*8 solvetime1, solvetime2, solveduration
 integer is,ic
-integer *4 ier ! Kinsol error flag
-integer av1(ntot), av2(ntot)
-real*8 avtmp
-real*8 x1((npoorsv+2)*ntot),xg1((npoorsv+2)*ntot),x1ini((npoorsv+2)*ntot)   ! density solvent iteration vector
 real*8 zc(dimR)           ! z-coordinate layer 
 
-REAL*8 sumrhoz, meanz     ! Espesor medio pesado
-real*8 pro                ! probability distribution function 
-real*8 trash, trash2
-
-integer n                 ! number of lattice sites
-integer itmax             ! maximum number of iteration allowed for 
-real*8 fnorm              ! L2 norm of residual vector function fcn
-
 external fcnelect         ! function containing the SCMFT eqs for solver
-integer i,j,k,m,ii,flag,c, jj, iR,iZ ! dummy indice0s
-
-real*8 min1               ! variable to determine minimal position of chain
-integer qqq,www,eee
-
-integer il,inda,ncha
-
-REAL*8 xfile((npoorsv+2)*ntot)                        
-real*8 algo, algo2                  
+integer i,iR,iZ ! dummy indice0s
 
 ! single layer files
 character*18 sysfilename      ! contains value of free energy, input parameter etc
 character*29 phifilename      ! electric potential 
 character*26 denssolfilename  ! contains the denisty of the solvent
 character*27 lnqfilename  ! contains the denisty of the solvent
-character*28 densendfilename
-CHARACTER*24 totalfilename
 CHARACTER*24 xtotalfilename
 CHARACTER*18 ntransfilename
 character*27 densposfilename
@@ -59,12 +36,6 @@ character*50 fracBHplus
 character*48 fracAmin
 character*47 densAcidfilename
 character*48 densBasicfilename
-
-integer conf              ! counts number of conformations
-
-integer readsalt          !integer to read salt concentrations
-
-INTEGER cc
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

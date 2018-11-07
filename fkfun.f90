@@ -14,13 +14,13 @@ implicit none
 
 real*8 all_tosend(4*ntot), all_toreceive(4*ntot)
 integer*4 ier2
-real*8 protemp, sttemp
+real*8 protemp
 real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
 real*8 xh(dimR+1,dimZ) 
 real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
 real*8 pro(cuantas)
-real*8 time1, time2, duration, looptime1, looptime2, loopduration
-integer iR,iZ,kZ,kkZ,k,i,j,k1,k2,ii,jj,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
+!real*8 time1, time2, duration, looptime1, looptime2, loopduration
+integer iR,iZ,kZ,kkZ,k,i,j,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
 integer is, js,ia,ib,iiR,iiZ,jR,jZ
 integer err
 integer n

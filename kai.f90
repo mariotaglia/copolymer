@@ -18,13 +18,11 @@ real*8 xmin,xmax,ymin,ymax,zmin,zmax
 integer MCsteps ! numero de steps de MC
 
 
-real*8 R,theta,z
-real*8 rn
-integer i, ii, is, js, a, b, c
-real*8 rands
+real*8 R,z
+integer ii, is, js, a, b, c
 real*8 pi
 real*8 x1,x2,y1, y2, z1, z2, vect
-integer iR, ix,iy,iz, itheta
+integer ix,iy,iz
 integer jR, jZ
 
 real*8 cutoff

@@ -17,52 +17,25 @@ use MPI
 use mkai
 implicit none
 
-real*8 solvetime1, solvetime2, solveduration
-integer is,ic
+integer is
 integer *4 ier ! Kinsol error flag
-integer av1(ntot), av2(ntot)
-real*8 avtmp
 real*8 x1((npoorsv+2)*ntot),xg1((npoorsv+2)*ntot),x1ini((npoorsv+2)*ntot)   ! density solvent iteration vector
-real*8 zc(dimR)           ! z-coordinate layer 
 
-REAL*8 sumrhoz, meanz     ! Espesor medio pesado
-real*8 pro                ! probability distribution function 
 real*8 trash, trash2
 
 integer n                 ! number of lattice sites
-integer itmax             ! maximum number of iteration allowed for 
-real*8 fnorm              ! L2 norm of residual vector function fcn
 
 external fcnelect         ! function containing the SCMFT eqs for solver
-integer i,j,k,m,ii,flag,c, jj, iR,iZ ! dummy indice0s
-
-INTEGER temp_R, temp_Z
-real*8 tempr_R, tempr_Z
-real*8 tmp
-
-real*8 min1               ! variable to determine minimal position of chain
-integer qqq,www,eee
-
-integer il,inda,ncha
+integer i,iR,iZ ! dummy indices
 
 REAL*8 xfile((npoorsv+2)*ntot)                        
-real*8 algo, algo2                  
-
-real*8 sum,sumel          ! auxiliary variable used in free energy computation  
 
 integer countfile         ! enumerates the outputfiles 
-integer conf              ! counts number of conformations
 
-integer readsalt          !integer to read salt concentrations
-
-INTEGER cc
 
 ! MPI
-integer tag, source
+integer tag
 parameter(tag = 0)
-integer err
-integer ier_tosend
-double  precision norma_tosend
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -71,6 +44,8 @@ double  precision norma_tosend
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !     initial guess all 1.0 
+
+n=dimR*dimZ
 
 do iR=1,dimR
 do iZ=1,dimZ
@@ -136,7 +111,7 @@ maxntotcounterZ = maxntotZ
 npol = npolini
 
 do while (actionflag.lt.3)
-   123 if(rank.eq.0)print*, ' npol:', npol, 'maxntotR:', maxntotcounterR, 'maxntotZ:', maxntotcounterZ
+   if(rank.eq.0)print*, ' npol:', npol, 'maxntotR:', maxntotcounterR, 'maxntotZ:', maxntotcounterZ
 
    do i=1,(npoorsv+2)*n             ! initial guess for x1
       xg1(i)=x1(i)
@@ -169,7 +144,7 @@ do while (actionflag.lt.3)
 ! calc free energy
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-   call calc_free_energy(actionflag, countfile)
+   call calc_free_energy
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !! save to disk
