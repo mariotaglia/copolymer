@@ -22,6 +22,9 @@ real*8 dimRkais
 endmodule
 
 module globals
+real*8 pi
+real*8 Na
+parameter (Na=6.02d23)
 
 integer, parameter :: base = 80
 real*8 lseg

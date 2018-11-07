@@ -2,7 +2,7 @@ TARGET = assembly
 
 #SRC = modules.f90 SPmain.f90 parser.f90 init.f90 allocation.f90 allocateell.f90 3D.f90 cadenas.f90 cadenasMK.f90 fe.f90  fkfun.f90  kai.f90  kinsol.f90  pxs.f90  savetodisk.f90 rands.f90 ellipsoid.f90 dielectric.f90 monomers.definitions-onck.f90 chains.definitions.f90 sphere.f90 kapfromfile.f90
 
-SRC = modules.f90 read.f90 allocation.f90 main.f90 fkfun.f90 cadenas.f90 rands.f90 kinsol.f90 initmpi.f90 kai.f90 factorcurv.f90 free_energy.f90 printent.f90 dielectric.f90 parser.f90 PBC.f90
+SRC = modules.f90 read.f90 allocation.f90 main.f90 fkfun.f90 cadenas.f90 rands.f90 kinsol.f90 initmpi.f90 kai.f90 factorcurv.f90 free_energy.f90 printent.f90 dielectric.f90 parser.f90 PBC.f90 creador.f90 init.f90 save2disk.f90
 
 HOST=$(shell hostname)
 $(info HOST is ${HOST})
