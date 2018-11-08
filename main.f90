@@ -134,7 +134,6 @@ do while (actionflag.lt.3)
    if((norma.gt.error).or.(ier.lt.0).or.(isnan(norma))) then
       if(actionflag.gt.0) then
          print*, " I am ", rank, " I stopped the work"
-         stop
       endif
    endif
 
@@ -151,7 +150,6 @@ do while (actionflag.lt.3)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   if(rank.eq.0)call save2disk(actionflag, countfile)
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  next calculation

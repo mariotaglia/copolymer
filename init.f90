@@ -22,6 +22,7 @@ integer i, iR ! dummy indice0s
 integer tag
 parameter(tag = 0)
 
+error = 1e-6
 
 !     initializations of variables 
 
