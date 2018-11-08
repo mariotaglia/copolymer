@@ -271,7 +271,7 @@ enddo
 
 Free_Energy = Free_Energy + F_electro                            
 
-if(rank.eq.0)print*, 'Free Energy, method I: ', Free_Energy
+if(rank.eq.0)print*, 'Free Energy, method I : ', Free_Energy
 
 ! Method II                                                          
 
