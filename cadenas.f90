@@ -116,8 +116,7 @@ end
 !* on a three state RIS-model see Flory book                 *
 !* GENERA CADENAS DE PAH-Os                                  *
 !*************************************************************
-subroutine cadenas(chains,ncha,Uconf, Ntconf,Ugyr, Rgyr)
-use longs
+subroutine cadenas(chains,ncha,Uconf, Ntconf,Ugyr, Rgyr, long, long_branches,nbranches)
 use seed1
 use pis
 use matrices
@@ -125,7 +124,7 @@ use senos
 use globals
 use mkai
 implicit none
-
+integer long, long_branches, nbranches
 integer i,state,j,k1,k2,ncha, is
 real*8 rn,dista
 real*8 rands,angle

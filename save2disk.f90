@@ -42,8 +42,10 @@ character*48 densBasicfilename
 ! Multiple run files
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-write(533,*) npol, dlog(xpol(1,1))-dlog(q(1,1))
-flush(533)
+do NC = 1, Ncomp
+write(1533+NC,*) npol, dlog(xpol(1,1,NC))-dlog(q(1,1,NC))
+flush(1533+NC)
+enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Single run files
@@ -72,6 +74,9 @@ open(unit=310,file=sysfilename)
       write(310,*)'cuantas     = ',cuantas
       write(310,*)'iterations  = ',iter
 
+
+      write(310,*)'npolratios  = ',npolratio
+
       close(310)
  
 ! Electrostatic potential
@@ -87,16 +92,18 @@ close(311)
 
 ! Density polymer
 
+do NC=1, Ncomp
 do is=0,Npoorsv
-write(denspolfilename,'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitypolymer',is,'.',counter,'.',counter2,'.dat'
+write(denspolfilename,'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A1,I3.3,A4)')'densitypolymer',NC,'.',is,'.',counter,'.',counter2,'.dat'
 open(unit=1320,file=denspolfilename)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(1320,*)zc(iR),iZ,avpol(is,iR,iZ)
+       write(1320,*)zc(iR),iZ,avpol(is,iR,iZ,NC)
    enddo
 enddo
 close(311)
 enddo ! is
+enddo ! NC
 
 ! Frac A min
 do ic=1,Nacids
@@ -111,16 +118,18 @@ close(1050)
 enddo
 
 ! Density acid
+do NC = 1, Ncomp
 do ic=1,Nacids
-write(densAcidfilename,'(A11,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densityacid',ic,'.',counter,'.',counter2,'.dat'
+write(densAcidfilename,'(A11,BZ,I3.3,A1,I3.3, A1, I3.3,A1,I3.3,A4)')'densityacid',NC,'.',ic,'.',counter,'.',counter2,'.dat'
 open(unit=1780, file=densAcidfilename)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(1780,*)zc(iR),iz,avpola(ic,iR,iZ)
+       write(1780,*)zc(iR),iz,avpola(ic,iR,iZ,NC)
    enddo
 enddo
 close(1780)
 enddo
+enddo ! NC
 
 ! Frac B min
 do ic=1,NBasics
@@ -135,17 +144,18 @@ close(1050)
 enddo
 
 ! Density basic
+do NC = 1, Ncomp
 do ic=1,NBasics
-write(densBasicfilename,'(A11,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitybasic',ic,'.',counter,'.',counter2,'.dat'
+write(densBasicfilename,'(A11,BZ,I3.3,A1,I3.3,A1,I3.3,A1,I3.3,A4)')'densitybasic',NC,'.',ic,'.',counter,'.',counter2,'.dat'
 open(unit=1780, file=densBasicfilename)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(1780,*)zc(iR),iz,avpolb(ic,iR,iZ)
+       write(1780,*)zc(iR),iz,avpolb(ic,iR,iZ,NC)
    enddo
 enddo
 close(1780)
 enddo
-
+enddo ! NC
 ! Solvent
 
 write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', counter,'.',counter2,'.dat'
@@ -213,35 +223,38 @@ close(335)
 
 ! xtotal
 
-write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'xdensitytota.',counter,'.',counter2,'.dat'
+do NC = 1, Ncomp
+write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'xdensitytota.',NC,'.',counter,'.',counter2,'.dat'
 open(unit=329,file=xtotalfilename)
  do iR=1,dimR
    do iZ=1,dimZ
-      write(329,*)zc(iR),iZ,xpol(iR,iZ)
+      write(329,*)zc(iR),iZ,xpol(iR,iZ,NC)
    enddo
  enddo
 close(329)
+enddo
 
 ! Number trans
-
-write(ntransfilename,'(A7,BZ,I3.3,A1,I3.3,A4)')'ntrans.',counter,'.',counter2,'.dat'
+do NC = 1, NComp
+write(ntransfilename,'(A7,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'ntrans.',NC,'.',counter,'.',counter2,'.dat'
 open(unit=327,file=ntransfilename)
 do i = 3, long-1
-         write(327,*)i, trans(i)
+         write(327,*)i, trans(i,NC)
 enddo
 close(327)
+enddo ! NC
 
 ! lnq
 
-write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'chemical_potent.',counter,'.',counter2,'.dat'
+do NC = 1,Ncomp
+write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'chemical_potent.',NC,'.',counter,'.',counter2,'.dat'
 open(unit=324,file=lnqfilename)
 do iR = 1, maxntotR
    do iZ = 1, maxntotZ
-       write(324,*)zc(i),iR,dlog(xpol(iR,iZ))-dlog(q(iR,iZ))
+       write(324,*)zc(i),iR,dlog(xpol(iR,iZ,NC))-dlog(q(iR,iZ,NC))
     enddo
 enddo
 close(324)
+enddo ! NC
 
-
-close(534)
 end

@@ -34,7 +34,22 @@ parameter(tag = 0)
 ! CHAIN GENERATION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+
 call initcha              ! init matrices for chain generation
+
+innR = 0
+innZ = 0
+Uchain = 0.
+Ntrans = 0
+
+do NC = 1, Ncomp
+
+sumRgyr=0.
+sumUgyr=0.
+Rgyrprom=0.
+Uconf=0.
+Ntcong=0.
 
 conf=0                    ! counter of number of conformations
 
@@ -43,15 +58,9 @@ if (rank.gt.0) then
    print*, "rank", rank, "received from rank", rank-1,"seed =", seed
 endif
 
-innR = 0
-innZ = 0
-sumRgyr(:)=0.
-sumUgyr=0.
-Rgyrprom(:)=0.
-
 do while (conf.lt.cuantas)
 
-   call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr)
+   call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,long(NC),long_branches(NC),nbranches(NC))
    
    do is=0,Npoorsv+1
       sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr)
@@ -64,10 +73,10 @@ do while (conf.lt.cuantas)
       if(conf.lt.cuantas) then
 
          conf=conf+1
-         Uchain(conf)=Uconf
-         Ntrans(:,conf) = Ntconf(:)
+         Uchain(conf,NC)=Uconf
+         Ntrans(:,conf,NC) = Ntconf(:,NC)
 
-         do k=1,long
+         do k=1,long(NC)
             do ii = 1,maxntotR ! position of first segment (or Center of mass?)
 
                select case (abs(curvature))
@@ -87,12 +96,12 @@ do while (conf.lt.cuantas)
                   stop
                endif
 
-              innR(k,conf,ii)=temp_R ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
+              innR(k,conf,iii,NC)=temp_R ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
          
             enddo ! ii
          
          tempr_Z=chains(3,k,j)
-         innZ(k,conf)=int(anint(tempr_Z/deltaZ))
+         innZ(k,conf,NC)=int(anint(tempr_Z/deltaZ))
 
          enddo ! k
 
@@ -115,7 +124,7 @@ call MPI_BARRIER(MPI_COMM_WORLD, ierr)
 
 if(rank.eq.0) then
 
-   print*," chains ready"
+   print*," chains component ", NC, " out of ", Ncomp, " ready"
 
    do is=0,Npoorsv+1
       print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr
@@ -126,10 +135,10 @@ endif
 ! print Rgyr 
 
 do is=0,Npoorsv+1
-   write(534,*) is, Rgyrprom(is)
+   write(2533+NC,*) is, Rgyrprom(is)
 enddo
-close(534)
+close(2533+NC)
 
-
+enddo ! NC
 
 end

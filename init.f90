@@ -18,6 +18,8 @@ integer itmax             ! maximum number of iteration allowed for
 external fcnelect         ! function containing the SCMFT eqs for solver
 integer i, iR ! dummy indice0s
 
+character*10 lnqfile, rogfile
+
 ! MPI
 integer tag
 parameter(tag = 0)
@@ -35,9 +37,12 @@ vpol(:)=vpol(:)/vsol  ! volume polymer segment in units of vsol
 vpol_a(:)=vpol_a(:)/vsol
 vpol_b(:)=vpol_b(:)/vsol
 
+
 vchain=0.0
+do NC = 1, Ncomp
 do i=1,long
-  vchain=vchain+vpol(segpoorsv(i))
+  vchain(NC)=vchain(NC)+vpol(segpoorsv(i,NC))
+enddo
 enddo
 
 vneg=4/3*pi*0.2**3/vsol !volume of anion in units of vsol
@@ -92,8 +97,11 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Files for multiple runs
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-open(unit=533,file='lnq.dat')
-open(unit=534,file='rgyration.dat')
+do NC = 1, Ncomp
+write(lnqfile,'(A4,I2,A4)')'lnq.',NC,'.dat'
+open(unit=1533+NC,file=lnqfile)
+write(rogfile,'(A4,I2,A4)')'rog.',NC,'.dat'
+open(unit=2533+NC,file=rogfile)
+enddo
 
 end

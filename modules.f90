@@ -1,7 +1,7 @@
 module transgauche
-real*8, allocatable :: trans(:)
-integer*1, allocatable :: Ntrans(:,:)
-real*8, allocatable :: Uchain(:)
+real*8, allocatable :: trans(:,:)
+integer*1, allocatable :: Ntrans(:,:,:)
+real*8, allocatable :: Uchain(:,:)
 endmodule
 
 
@@ -24,11 +24,12 @@ endmodule
 module globals
 real*8 Na
 parameter (Na=6.02d23)
-
+integer Ncomp
 integer, parameter :: base = 80
 real*8 lseg
 INTEGER actionflag
-real*8 npolini, npolfirst, npollast, npolstep 
+real*8 npolini, npolfirst, npollast, npolstep
+real*8, allocatable :: npolratio(:) 
 real*8 npol
 real*8 error              ! error imposed accuaracy
 real*8 infile             ! inputfile control variable for reading input files  value 0,1
@@ -36,9 +37,9 @@ CHARACTER nada
 real*8 norma
 INTEGER adsmax
 integer ntot, dimR,dimZ, maxntotR, maxntotZ, maxntotcounter_ini, maxntotcounterR, maxntotcounterZ ! lattice sites
-real*8, allocatable :: avpol(:,:,:) ! volume fraction of chains 
-real*8, allocatable :: avpola(:,:,:), avpolb(:,:,:) ! volume fraction of acid and basic segments 
-real*8, allocatable :: xpol(:,:) ! volume fraction polymers already adsorbed
+real*8, allocatable :: avpol(:,:,:,:) ! volume fraction of chains 
+real*8, allocatable :: avpola(:,:,:,:), avpolb(:,:,:,:) ! volume fraction of acid and basic segments 
+real*8, allocatable :: xpol(:,:,:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xsol(:,:)
 INTEGER totalcuantas, cuantas
 integer curvature
@@ -50,7 +51,7 @@ real*8, allocatable :: Depsfcn(:,:)
 
 integer first, last
 
-integer*2, allocatable :: innR(:,:,:), innZ(:,:)
+integer*2, allocatable :: innR(:,:,:,:), innZ(:,:,:)
 
 integer iter              ! counts number of iterations
 
@@ -60,8 +61,8 @@ integer, parameter :: ncha_max = 700
 endmodule
 
 module partfunc
-real*8, allocatable :: q(:,:)
-real*8, allocatable ::  sumprolnpro(:,:), sumprouchain(:,:)
+real*8, allocatable :: q(:,:,:)
+real*8, allocatable ::  sumprolnpro(:,:,:), sumprouchain(:,:,:)
 endmodule
 
 module layer
@@ -70,7 +71,8 @@ real*8 deltaZ
 endmodule
 
 module volume
-real*8 vchain, vsol, vpos, vneg
+real*8, allocatable :: vchain(:)
+real*8 vsol, vpos, vneg
 real*8, allocatable :: vpol(:), vpol_a(:), vpol_b(:)
 endmodule
 
@@ -78,7 +80,7 @@ module mcharge
 real*8 dielP
 integer electroflag
 integer Nacids, Nbasics
-integer, allocatable :: acidtype(:), basictype(:)
+integer, allocatable :: acidtype(:,:), basictype(:,:)
 real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
 real*8, allocatable :: phi(:,:), avpos(:,:), avneg(:,:), avHplus(:,:), avOHmin(:,:), xcharge(:,:), fAmin(:,:,:), fBHplus(:,:,:)
 real*8 Csalt, wperm, rhosalt, expmupos, expmuneg, xposbulk, xnegbulk
@@ -97,10 +99,11 @@ endmodule
 
 
 module longs
-integer long            ! length of polymer
-integer, allocatable :: segpoorsv(:)
-integer nbranches
-integer long_branches
+integer, allocatable :: long(:)            ! length of polymer
+integer maxlong
+integer, allocatable :: segpoorsv(:,:)
+integer nbranches(:)
+integer long_branches(:)
 integer, allocatable :: branch_pos(:), branch_long(:) ! position and lenght of branches read from input
 endmodule
 

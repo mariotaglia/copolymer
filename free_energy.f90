@@ -9,7 +9,6 @@ use bulk
 use layer
 use volume
 use mkai
-use longs
 implicit none                                 
 
 real*8 gradphi2
@@ -18,7 +17,6 @@ real*8 F_Mix_neg, F_Mix_Hplus
 real*8 Free_energy2, sumpi, sumrho, sumel,sumpol, mupol, sumdiel
 real*8 F_Mix_OHmin, F_Conf, F_Uchain     
 real*8  F_Eq,F_vdW(Npoorsv,Npoorsv), F_electro                            
-!real*8 F_mup
 integer is, js, iR, iZ, jR, jZ, kZ, kkZ, jZp, iZp
 integer, external :: PBCSYMI
 double precision, external :: jacobian
@@ -36,7 +34,7 @@ open(unit=305, file='F_mixH.dat')
 open(unit=306, file='F_mixOH.dat')                         
 open(unit=307, file='F_conf.dat')                          
 open(unit=308, file='F_eq.dat')                            
-!open(unit=313 ,file='F_eq_P.dat')                            
+
 do is=1,Npoorsv
 do js=1,Npoorsv
 write(F_vdWfilename(is,js),'(A6,BZ,I3.3,A1,I3.3,A4)')'F_vdW.',is,'.',js,'.dat'
@@ -57,7 +55,6 @@ endif
 Free_Energy = 0.0                                                
 Free_Energy2 = 0.0                                               
 
-mupol = dlog(xpol(1,1))-dlog(q(1,1))
 
 ! 1. Solvent translational entropy
 F_Mix_s = 0.0                                                    
@@ -142,12 +139,12 @@ Free_Energy = Free_Energy + F_Mix_OHmin
 
 ! 6. Polymer conformational entropy                                         
 
-
+do NC = 1, Ncomp
 F_conf = 0 
 
 do iR = 1, maxntotcounterR
 do iZ = 1, maxntotcounterZ
-  F_Conf = F_conf + (sumprolnpro(iR,iZ)/q(iR,iZ)-dlog(q(iR,iZ)))*jacobian(iR)*deltaR*deltaZ*xpol(iR,iZ)
+  F_Conf = F_conf + (sumprolnpro(iR,iZ,NC)/q(iR,iZ,NC)-dlog(q(iR,iZ,NC)))*jacobian(iR)*deltaR*deltaZ*xpol(iR,iZ,NC)
 enddo 
 enddo
 
@@ -157,11 +154,12 @@ F_Uchain = 0.0
 
 do iR=1, maxntotcounterR
 do iZ=1, maxntotcounterZ
-  F_Uchain = F_Uchain + deltaR*deltaZ*xpol(iR,iZ)*jacobian(iR)*(sumprouchain(iR,iZ)/q(iR,iZ))
+  F_Uchain = F_Uchain + deltaR*deltaZ*xpol(iR,iZ,NC)*jacobian(iR)*(sumprouchain(iR,iZ,NC)/q(iR,iZ,NC))
 enddo
 enddo
 
 Free_Energy = Free_Energy + F_Uchain
+enddo
 
 ! 7. Chemical Equilibrium                                              
 
@@ -338,14 +336,16 @@ do is=1,Npoorsv
   enddo
 enddo
 
+do NC = 1,Ncomp
+mupol = dlog(xpol(1,1,NC))-dlog(q(1,1,NC))
 do iR = 1, maxntotcounterR
 do iZ = 1, maxntotcounterZ
-  sumpol = sumpol + xpol(iR,iZ)*mupol*jacobian(iR)*deltaR*deltaZ
+  sumpol = sumpol + xpol(iR,iZ,NC)*mupol*jacobian(iR)*deltaR*deltaZ
+enddo
 enddo
 enddo
 
 Free_Energy2 = Free_Energy2 + sumpol 
-!Free_Energy2 = Free_Energy2 + F_mup
 
 if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 

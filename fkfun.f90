@@ -24,7 +24,7 @@ integer iR,iZ,kZ,kkZ,k,i,j,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
 integer is, js,ia,ib,iiR,iiZ,jR,jZ
 integer err
 integer n
-real*8 avpol_tmp(0:Npoorsv,dimR,dimZ), avpola_tmp(0:Nacids,dimR,dimZ), avpolb_tmp(0:Nbasics,dimR,dimZ)
+real*8 avpol_tmp(0:Npoorsv,2*dimR,dimZ), avpola_tmp(0:Nacids,2*dimR,dimZ), avpolb_tmp(0:Nbasics,2*dimR,dimZ) ! overdim R coordinate just in case
 real*8 avpol_tosend(0:Npoorsv,dimR,dimZ), avpola_tosend(0:Nacids,dimR,dimZ), avpolb_tosend(0:Nbasics,dimR,dimZ)
 real*8 xpol_tosend(dimR,dimZ)
 real*8 algo, algo1,algo2
@@ -177,46 +177,50 @@ do iZ = 1, dimZ
 enddo
 enddo
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !    probability distribution
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-avpola_tosend = 0.0
-avpola_tmp = 0.0
 avpola = 0.0
-avpolb_tosend = 0.0
-avpolb_tmp = 0.0
 avpolb = 0.0
-avpol_tosend = 0.0
-xpol_tosend = 0.0
-avpol_tmp = 0.0
 avpol = 0.0
 xpol = 0.0
 q = 0.0
-q_tosend=0.0d0                   ! init q to zero
-sumprolnpro_tosend = 0.0
 sumprolnpro = 0.0
-sumprouchain_tosend=0.0
 sumprouchain=0.0
 sumtrans_tosend = 0.0
 sumtrans = 0.0
-all_tosend = 0.0
 all_toreceive = 0.0
 xpot_a(0,:,:)=1.0
 xpot_b(0,:,:)=1.0
 
+do NC = 1, Ncomp ! loop over components
+
+q_tosend=0.0d0                   ! init q to zero for each component
+avpola_tosend = 0.0
+avpolb_tosend = 0.0
+avpol_tosend = 0.0
+xpol_tosend = 0.0
+sumprolnpro_tosend = 0.0
+sumprouchain_tosend=0.0
+all_tosend = 0.0
+avpola_tmp = 0.0
+avpolb_tmp = 0.0
+avpol_tmp = 0.0
 
 do iiR=1, maxntotcounterR ! position of center of mass 
 do iiZ=1, maxntotcounterZ
    do i=1, cuantas ! loop over conformations
  
-      pro(i) = exp(-Uchain(i))
+      pro(i) = exp(-Uchain(i, NC))
 
-      do k=1,long
-         iZ = innZ(k,i)+iiZ
+      do k=1,long(NC)
+         iZ = innZ(k,i,NC)+iiZ
          aZ = PBCSYMI(iZ,dimZ)
-         aR = innR(k,i,iiR)
-         is = segpoorsv(k)
-         ia = acidtype(k)
-         ib = basictype(k) 
+         aR = innR(k,i,iiR,NC)
+         is = segpoorsv(k,NC)
+         ia = acidtype(k,NC)
+         ib = basictype(k,NC) 
          
          pro(i)= pro(i) * xpot(is,aR,aZ)
 
@@ -228,20 +232,20 @@ do iiZ=1, maxntotcounterZ
 
       q_tosend(iiR,iiZ) = q_tosend(iiR,iiZ) + pro(i) ! all_tosend(ii) = all_tosend(ii) + pro(i) 
       sumprolnpro_tosend(iiR,iiZ) = sumprolnpro_tosend(iiR,iiZ) + pro(i)*dlog(pro(i)) ! all_tosend(ntot+ii) = all_tosend(ntot+ii) + pro(i)*dlog(pro(i))
-      sumprouchain_tosend(iiR,iiZ) = sumprouchain_tosend(iiR,iiZ) + pro(i)*Uchain(i) !all_tosend(ntot*2+ii) = all_tosend(ntot*2+ii) + pro(i)*Uchain(i) 
+      sumprouchain_tosend(iiR,iiZ) = sumprouchain_tosend(iiR,iiZ) + pro(i)*Uchain(i,NC) !all_tosend(ntot*2+ii) = all_tosend(ntot*2+ii) + pro(i)*Uchain(i) 
 
       xpol_tosend(iiR,iiZ) = xpol_tosend(iiR,iiZ)+pro(i) ! all_tosend(ntot*3+ii) = all_tosend(ntot*3+ii) + pro(i)
 
-      do j = 1, long ! loop over number of segments
+      do j = 1, long(NC) ! loop over number of segments
 
-         iZ = innZ(j,i)+iiZ
+         iZ = innZ(j,i,NC)+iiZ
          aZ = PBCSYMI(iZ,dimZ)
-         aR = innR(j,i,iiR)
-         is = segpoorsv (j)
-         ia = acidtype (j)
-         ib = basictype (j)
+         aR = innR(j,i,iiR,NC)
+         is = segpoorsv (j,NC)
+         ia = acidtype (j,NC)
+         ib = basictype (j,NC)
 
-         sumtrans_tosend(iiR,iiZ,j) =  sumtrans_tosend(iiR,iiZ,j) +  pro(i)*float(Ntrans(j,i))
+         sumtrans_tosend(iiR,iiZ,j) =  sumtrans_tosend(iiR,iiZ,j) +  pro(i)*float(Ntrans(j,i,NC))
          avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
          avpola_tmp(ia,aR,aZ) = avpola_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpola_tmp is avg number of acid segments "ic" at position "j"
          avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
@@ -258,120 +262,93 @@ avpola_tosend(:, 1:dimR, 1:dimZ)=avpola_tmp(:, 1:dimR, 1:dimZ)
 avpolb_tosend(:, 1:dimR, 1:dimZ)=avpolb_tmp(:, 1:dimR, 1:dimZ)
 
 !------------------ MPI -----------------`-----------------------------
-!1. Todos al jefe
 
 !call MPI_Barrier(MPI_COMM_WORLD, err)
 
-! Jefe
-
-!  Junta avpol       
-
-! Subordinados
-
-
-!  Junta avpol       
-
-   call MPI_ALLREDUCE(avpola_tosend, avpola, Nacids*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(avpolb_tosend, avpolb, Nbasics*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(avpol_tosend, avpol, (Npoorsv+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(xpol_tosend, xpol, ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-!   call MPI_ALLREDUCE(all_tosend, all_toreceive, ntot*4, MPI_DOUBLE_PRECISION,MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(q_tosend, q, ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(sumprolnpro_tosend, sumprolnpro, ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(sumprouchain_tosend, sumprouchain, ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(avpola_tosend, avpola(:,:,:,NC), Nacids*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(avpolb_tosend, avpolb(:,:,:,NC), Nbasics*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(avpol_tosend, avpol(:,:,:,NC), (Npoorsv+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(xpol_tosend, xpol(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(q_tosend, q(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(sumprolnpro_tosend, sumprolnpro(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(sumprouchain_tosend, sumprouchain(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(sumtrans_tosend, sumtrans, ntot*long, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-!!!!!!!!!!! IMPORTANTE, LOS SUBORDINADOS TERMINAN ACA... SINO VER !MPI_allreduce!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 
-
-!if(rank.ne.0) then
-!   ier2 = 0
-!   goto 3333
-
-!endif
-
-!if (rank.eq.0) then
-!   looptime2=MPI_WTIME()
-!   loopduration=looptime2-looptime1
-!endif
-
-! norma avpol
-! integrate over whole system
-
-! q(:) = all_toreceive(1:ntot)
-! sumprolnpro(:) = all_toreceive(ntot+1:2*ntot)
-! sumprouchain(:) = all_toreceive(ntot*2+1:3*ntot)
-! xpol(:) = all_toreceive(ntot*3+1:4*ntot)
-
+!----------------------- Norm -----------------------------------------
 
 sumpol = 0.0
 
 do iR = 1, dimR
 do iZ = 1, dimZ
    do is = 0, Npoorsv
-
       select case (curvature)
-
        case (0)
-        sumpol = sumpol + avpol(is,iR,iZ)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or in units of chains/nm of belt (2D)
+        sumpol = sumpol + avpol(is,iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or in units of chains/nm of belt (2D)
        case(1)
-        sumpol = sumpol + avpol(is,iR,iZ)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm of fiber (1D) or chains/fiber (2D)
+        sumpol = sumpol + avpol(is,iR,iZ,NC)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm of fiber (1D) or chains/fiber (2D)
        case(2)
-        sumpol = sumpol + avpol(is,iR,iZ)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
-
+        sumpol = sumpol + avpol(is,iR,iZ,NC)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
       end select
-
    enddo
 enddo
 enddo
 
-sumpol = sumpol/(vchain*vsol) 
-avpol = avpol/sumpol*npol ! integral of avpol is fixed
-avpola = avpola/sumpol*npol
-avpolb = avpolb/sumpol*npol
-sumpol = 0.0
+sumpol = sumpol/(vchain(NC)*vsol) 
+avpol = avpol/sumpol*npol*npolratio(NC) ! integral of avpol is fixed
+avpola = avpola/sumpol*npol*npolratio(NC)
+avpolb = avpolb/sumpol*npol*npolratio(NC)
 
+sumpol = 0.0
 
 do iR = 1, dimR
 do iZ = 1, dimZ
    select case (curvature)
     case (0)
-     sumpol = sumpol + xpol(iR,iZ)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
+     sumpol = sumpol + xpol(iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
     case (1)
-     sumpol = sumpol + xpol(iR,iZ)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
+     sumpol = sumpol + xpol(iR,iZ,NC)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
     case (2)
-     sumpol = sumpol + xpol(iR,iZ)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
+     sumpol = sumpol + xpol(iR,iZ,NC)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
    end select
 enddo
 enddo
 
-xpol = xpol/sumpol*npol ! integral of avpol is fixed
+xpol = xpol/sumpol*npol*npolratio(NC) ! integral of avpol is fixed
 
-trans = 0.0
+trans(:,NC) = 0.0
 
 do iR = 1, maxntotcounterR
 do iZ = 1, maxntotcounterZ
    select case (curvature)
     case (0)
-     trans(:) = trans(:) + sumtrans(iR,iZ,:)/q(iR,iZ)*xpol(iR,iZ)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
+     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ)*xpol(iR,iZ)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
     case(1)
-     trans(:) = trans(:) + sumtrans(iR,iZ,:)/q(iR,iZ)*xpol(iR,iZ)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
+     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ)*xpol(iR,iZ)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
     case(2)
-     trans(:) = trans(:) + sumtrans(iR,iZ,:)/q(iR,iZ)*xpol(iR,iZ)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
+     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ)*xpol(iR,iZ)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
    end select
 enddo
 enddo
 
-trans(:) = trans(:)/npol
+trans(:,NC) = trans(:,NC)/npol/npolratio(NC)
+ 
+      !!!!!!
+enddo ! NC !
+      !!!!!!
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! contruction of f and the volume fractions
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 do iR = 1, dimR
 do iZ = 1, dimZ
 
    f(dimR*(iZ-1)+iR)=xh(iR,iZ)+avneg(iR,iZ)+avpos(iR,iZ)+avHplus(iR,iZ)+avOHmin(iR,iZ)-1.0d0
 
+   do NC = 1,Ncomp
    do is=0, Npoorsv
-      f(dimR*(iZ-1)+iR) = f(dimR*(iZ-1)+iR) + avpol(is,iR,iZ)
+      f(dimR*(iZ-1)+iR) = f(dimR*(iZ-1)+iR) + avpol(is,iR,iZ,NC)
+   enddo
    enddo
 
 enddo
@@ -383,13 +360,16 @@ xcharge(:,:) = avpos(:,:)/(vpos*vsol)-avneg(:,:)/(vneg*vsol)+avHplus(:,:)/vsol-a
 do iR = 1, dimR
 do iZ = 1, dimZ
 
+   do NC = 1, Ncomp
    do ic= 1,Nacids
-     xcharge(iR,iZ)=xcharge(iR,iZ)-avpola(ic,iR,iZ)*fAmin(ic,iR,iZ)/(vpol_a(ic)*vsol)
+     xcharge(iR,iZ)=xcharge(iR,iZ)-avpola(ic,iR,iZ,NC)*fAmin(ic,iR,iZ)/(vpol_a(ic)*vsol)
    enddo
 
    do ic= 1,Nbasics
-     xcharge(iR,iZ)=xcharge(iR,iZ)+avpolb(ic,iR,iZ)*fBHplus(ic,iR,iZ)/(vpol_b(ic)*vsol)
+     xcharge(iR,iZ)=xcharge(iR,iZ)+avpolb(ic,iR,iZ,NC)*fBHplus(ic,iR,iZ)/(vpol_b(ic)*vsol)
    enddo
+   enddo ! NC
+
    iZp=iZ+1
    iZm=iZ-1
    jZp = PBCSYMI(iZp,dimZ)
@@ -424,13 +404,15 @@ do iZ = 1, dimZ
 enddo
 enddo
 
+do NC = 1,Ncomp
 do is=1,Npoorsv
    do iR=1,dimR
    do iZ=1,dimZ ! xtotal
-      f(n*is+dimR*(iZ-1)+iR) = -avpol(is,iR,iZ)+xtotal(is,iR,iZ) 
+      f(n*is+dimR*(iZ-1)+iR) = -avpol(is,iR,iZ,NC)+xtotal(is,iR,iZ) 
    enddo
    enddo
-enddo
+enddo ! is
+enddo ! NC
 
 
 iter=iter+1
@@ -444,7 +426,7 @@ do i = 1, n*(Npoorsv+1)
 end do
 
 if(rank.eq.0) then 
-   print*, iter, algo, q(1,1), Q(2,1), q(3,1), q(4,1)
+   print*, iter, algo, q(1,1,1)
 endif
 
 norma=algo
