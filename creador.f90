@@ -19,9 +19,9 @@ real*8 tempr_R, tempr_Z
 
 integer ncha
 
-real*8 chains(3,long,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
+real*8 chains(3,maxlong,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
 real*8 Uconf
-integer*1 Ntconf(long)
+integer*1 Ntconf(maxlong)
 real*8 sumUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
 
 integer conf              ! counts number of conformations
@@ -29,7 +29,7 @@ integer conf              ! counts number of conformations
 ! MPI
 integer tag
 parameter(tag = 0)
-
+integer NC
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! CHAIN GENERATION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -49,7 +49,7 @@ sumRgyr=0.
 sumUgyr=0.
 Rgyrprom=0.
 Uconf=0.
-Ntcong=0.
+Ntconf=0.
 
 conf=0                    ! counter of number of conformations
 
@@ -60,7 +60,7 @@ endif
 
 do while (conf.lt.cuantas)
 
-   call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,long(NC),long_branches(NC),nbranches(NC))
+   call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
    
    do is=0,Npoorsv+1
       sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr)
@@ -74,7 +74,7 @@ do while (conf.lt.cuantas)
 
          conf=conf+1
          Uchain(conf,NC)=Uconf
-         Ntrans(:,conf,NC) = Ntconf(:,NC)
+         Ntrans(:,conf,NC) = Ntconf(:)
 
          do k=1,long(NC)
             do ii = 1,maxntotR ! position of first segment (or Center of mass?)
@@ -96,7 +96,7 @@ do while (conf.lt.cuantas)
                   stop
                endif
 
-              innR(k,conf,iii,NC)=temp_R ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
+              innR(k,conf,ii,NC)=temp_R ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
          
             enddo ! ii
          

@@ -11,7 +11,7 @@ use pis
 use mkai
 use transgauche
 implicit none
-
+integer NC
 real*8 all_tosend(4*ntot), all_toreceive(4*ntot)
 integer*4 ier2
 real*8 protemp
@@ -32,8 +32,8 @@ double precision, external :: factorcurv
 real*8 sumpol
 real*8 q_tosend(dimR,dimZ)
 real*8 sumprolnpro_tosend(dimR,dimZ), sumprouchain_tosend(dimR,dimZ)
-real*8 sumtrans_tosend(dimR,dimZ,long)
-real*8 sumtrans(dimR,dimZ,long)
+real*8 sumtrans_tosend(dimR,dimZ,maxlong)
+real*8 sumtrans(dimR,dimZ,maxlong)
 real*8 gradphi2
 integer, external :: PBCSYMI
 ! Jefe
@@ -272,7 +272,7 @@ avpolb_tosend(:, 1:dimR, 1:dimZ)=avpolb_tmp(:, 1:dimR, 1:dimZ)
    call MPI_ALLREDUCE(q_tosend, q(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(sumprolnpro_tosend, sumprolnpro(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(sumprouchain_tosend, sumprouchain(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(sumtrans_tosend, sumtrans, ntot*long, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(sumtrans_tosend, sumtrans, ntot*maxlong, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
 
 !----------------------- Norm -----------------------------------------
 
@@ -321,11 +321,11 @@ do iR = 1, maxntotcounterR
 do iZ = 1, maxntotcounterZ
    select case (curvature)
     case (0)
-     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ)*xpol(iR,iZ)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
+     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
     case(1)
-     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ)*xpol(iR,iZ)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
+     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
     case(2)
-     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ)*xpol(iR,iZ)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
+     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
    end select
 enddo
 enddo

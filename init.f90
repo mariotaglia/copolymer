@@ -8,6 +8,7 @@ use bulk
 use longs
 use MPI
 use pis
+use mkai, only : segpoorsv 
 implicit none
 
 real*8 zc(dimR)           ! z-coordinate layer 
@@ -17,7 +18,7 @@ integer itmax             ! maximum number of iteration allowed for
 
 external fcnelect         ! function containing the SCMFT eqs for solver
 integer i, iR ! dummy indice0s
-
+integer NC
 character*10 lnqfile, rogfile
 
 ! MPI
@@ -40,7 +41,7 @@ vpol_b(:)=vpol_b(:)/vsol
 
 vchain=0.0
 do NC = 1, Ncomp
-do i=1,long
+do i=1,long(NC)
   vchain(NC)=vchain(NC)+vpol(segpoorsv(i,NC))
 enddo
 enddo

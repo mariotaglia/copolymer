@@ -11,6 +11,7 @@ endmodule
 
 
 module mkai
+integer, allocatable :: segpoorsv(:,:)
 integer Npoorsv ! number of different types of poor solvent
 REAL*8, allocatable ::  xtotal(:,:,:)
 real*8, allocatable :: st(:,:)
@@ -101,10 +102,10 @@ endmodule
 module longs
 integer, allocatable :: long(:)            ! length of polymer
 integer maxlong
-integer, allocatable :: segpoorsv(:,:)
-integer nbranches(:)
-integer long_branches(:)
-integer, allocatable :: branch_pos(:), branch_long(:) ! position and lenght of branches read from input
+integer, allocatable :: nbranches(:)
+integer maxnbranches
+integer, allocatable :: long_branches(:)
+integer, allocatable :: branch_pos(:,:), branch_long(:,:) ! position and lenght of branches read from input
 endmodule
 
 module pis

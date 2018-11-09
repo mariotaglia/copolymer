@@ -15,7 +15,7 @@ implicit none
 integer counter, counter2
 integer is,ic
 real*8 zc(dimR)           ! z-coordinate layer 
-
+integer NC
 external fcnelect         ! function containing the SCMFT eqs for solver
 integer i,iR,iZ ! dummy indice0s
 
@@ -238,7 +238,7 @@ enddo
 do NC = 1, NComp
 write(ntransfilename,'(A7,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'ntrans.',NC,'.',counter,'.',counter2,'.dat'
 open(unit=327,file=ntransfilename)
-do i = 3, long-1
+do i = 3, long(NC)-1
          write(327,*)i, trans(i,NC)
 enddo
 close(327)

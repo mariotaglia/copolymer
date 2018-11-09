@@ -7,7 +7,6 @@ use MPI
 use mkai
 use volume
 use layer
-
 implicit none
 integer block_cuantas, restcuantas
 
@@ -22,6 +21,8 @@ integer i, j
 character(len=50) :: filename = 'DEFINITIONS.txt'
 integer ndi ! undetermined integer
 real*8 ndr ! undetermined real
+integer NC
+character*17 filename2
 
 ! not defined variables, change if any variable can take the value
 ndi = -10000
@@ -31,13 +32,11 @@ ndr = -1.0d10
 dielP = 78.54
 curvature = ndi
 ntot = ndi
-! maxntotcounter_ini = ndi
 maxntotR = ndi
 maxntotZ = ndi
 dimR = ndi
 dimZ = ndi
 totalcuantas = ndi
-long = ndi
 Npoorsv = ndi ! zero by default
 Nacids = 0
 Nbasics = 0
@@ -66,6 +65,18 @@ if(rank.eq.0)write(stdout,*) 'parser:', 'Reading parameters from ', filename
 ! ios is negative  if an end of record condition is encountered or if
 ! an endfile condition was detected.  It is positive  if an error was
 ! detected.  ios is zero otherwise.
+
+read(fh, '(A)', iostat=ios) buffer
+pos = scan(buffer, ' ')
+label = buffer(1:pos)
+buffer = buffer(pos+1:)
+
+if(label.ne.'Ncomp') then
+   if(rank.eq.0)print*,'FIRST LINE IN DEFINITIONS SHOULD BE Ncomp'
+   stop
+endif
+
+read(buffer, *, iostat=ios) Ncomp
 
 do while (ios == 0)
 
@@ -137,10 +148,19 @@ select case (label)
    restcuantas=totalcuantas-size*12*block_cuantas
    if(rank.eq.(size-1))cuantas=cuantas+restcuantas
 
-  case ('long')
-   read(buffer, *, iostat=ios) long
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   case ('long')
+   allocate(long(NComp))
+   do NC = 1, NComp
+     read(fh, *) long(NC)
+   enddo
+   maxlong = maxval(long)
 
+   case ('npolratio')
+   allocate(npolratio(NComp))
+   do NC = 1, NComp
+     read(fh, *) npolratio(NC)
+   enddo
+  
   case ('npoorsv')
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -208,18 +228,24 @@ select case (label)
    read(buffer, *, iostat=ios) pHbulk
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
-  case ('nbranches')
-   read(buffer, *, iostat=ios) nbranches
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
-   allocate (branch_pos(nbranches))
-   allocate (branch_long(nbranches))
-   long_branches = 0
-
-   do j = 1, nbranches
-   read(fh,*) branch_pos(j), branch_long(j)
-   long_branches = long_branches + branch_long(j)
+   case ('nbranches')
+   allocate(nbranches(NComp))
+   do NC = 1, NComp
+     read(fh, *)nbranches(NC)
    enddo
+   maxnbranches = maxval(nbranches)
+ 
+   allocate (branch_pos(maxnbranches,Ncomp))
+   allocate (branch_long(maxnbranches,Ncomp))
+
+   do NC = 1, Ncomp
+   long_branches(NC) = 0
+     do j = 1, nbranches(NC)
+        read(fh,*) branch_pos(j,NC), branch_long(j,NC)
+        long_branches(NC) = long_branches(NC) + branch_long(j,NC)
+     enddo
+   enddo ! NC
+ 
 endselect
 
 endif
@@ -235,7 +261,6 @@ if(ntot.eq.ndi)call stopundef('ntot')
 if(maxntotR.eq.ndi)call stopundef('maxntotR')
 if(maxntotZ.eq.ndi)call stopundef('maxntotZ')
 if(totalcuantas.eq.ndi)call stopundef('cuantas')
-if(long.eq.ndi)call stopundef('long')
 if(infile.eq.ndi)call stopundef('infile')
 if(npolini.eq.ndi)call stopundef('npolini')
 if(npolfirst.eq.ndi)call stopundef('npolfirst')
@@ -257,13 +282,19 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Read chain structure from structure.in
 
-open(file='structure.in', unit = 9)
-allocate(segpoorsv(long))
-allocate(acidtype(long))
-allocate(basictype(long))
-do i = 1, long
-read(9,*),segpoorsv(i), acidtype(i), basictype(i)
+allocate(segpoorsv(maxlong,Ncomp))
+allocate(acidtype(maxlong,Ncomp))
+allocate(basictype(maxlong,Ncomp))
+
+do NC = 1, Ncomp
+
+write(filename2,'(A10,I3.3,A4)')'structure.',NC,'.dat'
+open(file=filename2, unit = 9)
+do i = 1, long(NC)
+read(9,*),segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC)
 enddo
+close(9)
+enddo ! NC
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Read st(i,j) from epsilon.in

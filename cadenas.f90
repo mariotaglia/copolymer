@@ -116,27 +116,28 @@ end
 !* on a three state RIS-model see Flory book                 *
 !* GENERA CADENAS DE PAH-Os                                  *
 !*************************************************************
-subroutine cadenas(chains,ncha,Uconf, Ntconf,Ugyr, Rgyr, long, long_branches,nbranches)
+subroutine cadenas(chains,ncha,Uconf, Ntconf,Ugyr, Rgyr, NC)
 use seed1
 use pis
 use matrices
 use senos
 use globals
 use mkai
+use longs
 implicit none
-integer long, long_branches, nbranches
 integer i,state,j,k1,k2,ncha, is
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3), m_branch(3,3,50)
-real*8 x(3),xend(3,long+5),xendr(3,long+5), xendcom(3,long+5), xend_branch(3,50)
-REAL*8 chains(3,long,ncha_max), Uconf
+real*8 x(3),xend(3,maxlong+5),xendr(3,maxlong+5), xendcom(3,maxlong+5), xend_branch(3,50)
+REAL*8 chains(3,maxlong,ncha_max), Uconf
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
-integer*1 Ntconf(long), seglength(0:Npoorsv)
+integer*1 Ntconf(maxlong), seglength(0:Npoorsv)
 real*8 Ugyr, Rgyr(0:Npoorsv+1)
-real*8 distance(long,long)
+real*8 distance(maxlong,maxlong)
 integer state_branch(50)
 real*8 xendt(3)
+integer NC
 
 tolerancia = 1.0e-5
 
@@ -175,7 +176,7 @@ xend(2,2)=xend(2,1)+x(2)
 xend(3,2)=xend(3,1)+x(3)
 
 
-do i=3,long-long_branches          ! loop over remaining positions!
+do i=3,long(NC)-long_branches(NC)          ! loop over remaining positions!
 
 rn=rands(seed)
 state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
@@ -187,7 +188,7 @@ state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
   if (state.eq.0) then
 !*********************************** TRANS     
     call mrrrr(m,tt,mm)
-    if(i.gt.3)Uconf=Uconf+Ut(segpoorsv(i-1)) ! first segment to have a dihedral angle is i = 4
+    if(i.gt.3)Uconf=Uconf+Ut(segpoorsv(i-1,NC)) ! first segment to have a dihedral angle is i = 4
                                            ! OJO : the order of chain grown changes the assigment of diehdral angles
     if(i.gt.3)Ntconf(i-1) = 1   
 
@@ -195,17 +196,17 @@ state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
 
 !********************************** GAUCHE +
     call mrrrr(m,tp,mm)
-    if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1))
+    if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1,NC))
 
   elseif (state.eq.2) then
 !********************************** GAUCHE -
     call mrrrr(m,tm,mm)
-    if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1))
+    if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1,NC))
 
   endif
 
-do j = 1, nbranches ! loop over branches
- if(branch_pos(j).eq.i-1) then ! last segment was a branching point
+do j = 1, nbranches(NC) ! loop over branches
+ if(branch_pos(j,NC).eq.i-1) then ! last segment was a branching point
    m_branch(:,:,j) = m(:,:) ! save rotation matrix
    xend_branch(:,j) = xend(:,i-1) ! save last position
    state_branch(j) = state
@@ -226,14 +227,14 @@ enddo
 
 !!! Add branches
 
-i = long-long_branches
+i = long(NC)-long_branches(NC)
 
-do j = 1, nbranches 
+do j = 1, nbranches(NC) 
 
 m(:,:) = m_branch(:,:,j)
 xendt(:) = xend_branch(:,j)
 
-do k1=1, branch_long(j)       
+do k1=1, branch_long(j,NC)       
  
 state = state_branch(j)
 do while (state.eq.state_branch(j)) ! choose a state different to that of the backbone
@@ -271,8 +272,8 @@ enddo ! j
 
 dista=0.0                       ! check self avoiding constraint (segmentos)
 
-do k1=1,long
-  do k2=k1+1,long
+do k1=1,long(NC)
+  do k2=k1+1,long(NC)
     dista=(xend(1,k2)-xend(1,k1))**(2.0)
     dista=dista+(xend(2,k2)-xend(2,k1))**(2.0)
     dista=dista+(xend(3,k2)-xend(3,k1))**(2.0)
@@ -283,16 +284,16 @@ do k1=1,long
   enddo
 enddo
 
-do i=1,long
-  seglength(segpoorsv(i))=seglength(segpoorsv(i))+1
-  do j=1,long
+do i=1,long(NC)
+  seglength(segpoorsv(i,NC))=seglength(segpoorsv(i,NC))+1
+  do j=1,long(NC)
 
     if (i.ne.j) then
       distance(i,j)=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-xend(3,j))**2.0)
       distance(i,j)=sqrt(distance(i,j))
-      if (segpoorsv(i).eq.segpoorsv(j))Rgyr(segpoorsv(i))=Rgyr(segpoorsv(i))+distance(i,j)**2.0
+      if (segpoorsv(i,NC).eq.segpoorsv(j,NC))Rgyr(segpoorsv(i,NC))=Rgyr(segpoorsv(i,NC))+distance(i,j)**2.0
       Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)+distance(i,j)**2.0
-      Ugyr=Ugyr-0.5*st(segpoorsv(i),segpoorsv(j))*(lseg/distance(i,j))**(dimf(segpoorsv(i),segpoorsv(j)))
+      Ugyr=Ugyr-0.5*st(segpoorsv(i,NC),segpoorsv(j,NC))*(lseg/distance(i,j))**(dimf(segpoorsv(i,NC),segpoorsv(j,NC)))
     endif
 
   enddo
@@ -304,19 +305,19 @@ do is=0,Npoorsv
 enddo 
 
 Rgyr(Npoorsv+1)=sqrt(Rgyr(Npoorsv+1)/2.0)
-Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)/float(long)
+Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)/float(long(NC))
 
 ncha=0
 
 do i=1,12
 
-  call com(xend,xendcom,long)       ! substracts center of mass
-  call rota(xendcom,xendr,long)   ! rotate chain conformation ncha time
+  call com(xend,xendcom,long(NC))       ! substracts center of mass
+  call rota(xendcom,xendr,long(NC))   ! rotate chain conformation ncha time
   ncha=ncha+1
 
 !  call print_ent2(xendr)
 
-  do j=1,long
+  do j=1,long(NC)
     chains(1,j,ncha)=xendr(1,j)       ! output 
     chains(2,j,ncha)=xendr(2,j)
     chains(3,j,ncha)=xendr(3,j)
