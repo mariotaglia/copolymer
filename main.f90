@@ -2,8 +2,8 @@
 
 call initmpi
 call parser
-call init
 call allocation
+call init
 call kai
 call creador
 call solve

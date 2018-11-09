@@ -22,7 +22,7 @@ character(len=50) :: filename = 'DEFINITIONS.txt'
 integer ndi ! undetermined integer
 real*8 ndr ! undetermined real
 integer NC
-character*17 filename2
+character*16 filename2
 
 ! not defined variables, change if any variable can take the value
 ndi = -10000
@@ -50,7 +50,6 @@ Xulimit = ndi
 lseg = ndr
 Csalt = ndr
 pHbulk = ndr
-nbranches = 0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Control file variables
@@ -230,6 +229,8 @@ select case (label)
 
    case ('nbranches')
    allocate(nbranches(NComp))
+   allocate(long_branches(NComp))
+
    do NC = 1, NComp
      read(fh, *)nbranches(NC)
    enddo
@@ -288,7 +289,7 @@ allocate(basictype(maxlong,Ncomp))
 
 do NC = 1, Ncomp
 
-write(filename2,'(A10,I3.3,A4)')'structure.',NC,'.dat'
+write(filename2,'(A10,I3.3,A3)')'structure.',NC,'.in'
 open(file=filename2, unit = 9)
 do i = 1, long(NC)
 read(9,*),segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC)
