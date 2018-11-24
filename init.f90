@@ -11,7 +11,6 @@ use pis
 use mkai, only : segpoorsv 
 implicit none
 
-real*8 zc(dimR)           ! z-coordinate layer 
 
 integer n                 ! number of lattice sites
 integer itmax             ! maximum number of iteration allowed for 
@@ -88,11 +87,6 @@ expmupos=xposbulk/vpos/xsolbulk**vpos
 expmuneg=xnegbulk/vneg/xsolbulk**vneg           
 expmuHplus=xHplusbulk/xsolbulk ! vHplus=vsol
 expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
-
-do iR = 1, dimR
-zc(iR)= (iR-0.5) * deltaR
-enddo
-
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

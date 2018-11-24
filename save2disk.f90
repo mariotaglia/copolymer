@@ -14,11 +14,10 @@ implicit none
 
 integer counter, counter2
 integer is,ic
-real*8 zc(dimR)           ! z-coordinate layer 
 integer NC
 external fcnelect         ! function containing the SCMFT eqs for solver
 integer i,iR,iZ ! dummy indice0s
-
+real*8 zc(dimR)
 ! single layer files
 character*50 sysfilename      ! contains value of free energy, input parameter etc
 character*50 phifilename      ! electric potential 
@@ -36,6 +35,12 @@ character*50 fracBHplus
 character*50 fracAmin
 character*50 densAcidfilename
 character*50 densBasicfilename
+
+
+do iR = 1, dimR
+zc(iR)= (iR-0.5) * deltaR
+enddo
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
