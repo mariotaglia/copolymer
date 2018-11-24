@@ -121,7 +121,7 @@ endif
 do is=1,Npoorsv
 do js=1,Npoorsv
 
-  write(kaisfilename,'(A5,BZ,I3.3,A1,I3.3,A4)')'kais.',is,'.',js,'.dat'
+  write(kaisfilename,'(A5,BZ,I3.3,A1,I3.3,A3)')'kais.',is,'.',js,'.in'
   open(unit=200,file='suma.dat')
   open(unit=is*110+js, file=kaisfilename)
 

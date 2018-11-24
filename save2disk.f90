@@ -20,22 +20,22 @@ external fcnelect         ! function containing the SCMFT eqs for solver
 integer i,iR,iZ ! dummy indice0s
 
 ! single layer files
-character*18 sysfilename      ! contains value of free energy, input parameter etc
-character*29 phifilename      ! electric potential 
-character*26 denssolfilename  ! contains the denisty of the solvent
-character*27 lnqfilename  ! contains the denisty of the solvent
-CHARACTER*24 xtotalfilename
-CHARACTER*18 ntransfilename
-character*27 densposfilename
-character*27 dielfilename
-character*27 densnegfilename
-character*24 densHplusfilename
-character*24 densOHminfilename
+character*50 sysfilename      ! contains value of free energy, input parameter etc
+character*50 phifilename      ! electric potential 
+character*50 denssolfilename  ! contains the denisty of the solvent
+character*50 lnqfilename  ! contains the denisty of the solvent
+CHARACTER*50 xtotalfilename
+CHARACTER*50 ntransfilename
+character*50 densposfilename
+character*50 dielfilename
+character*50 densnegfilename
+character*50 densHplusfilename
+character*50 densOHminfilename
 character*50 denspolfilename
 character*50 fracBHplus
-character*48 fracAmin
-character*47 densAcidfilename
-character*48 densBasicfilename
+character*50 fracAmin
+character*50 densAcidfilename
+character*50 densBasicfilename
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
