@@ -336,6 +336,8 @@ trans(:,NC) = trans(:,NC)/npol/npolratio(NC)
 enddo ! NC !
       !!!!!!
 
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! contruction of f and the volume fractions
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -404,15 +406,17 @@ do iZ = 1, dimZ
 enddo
 enddo
 
-do NC = 1,Ncomp
+
 do is=1,Npoorsv
    do iR=1,dimR
    do iZ=1,dimZ ! xtotal
-      f(n*is+dimR*(iZ-1)+iR) = -avpol(is,iR,iZ,NC)+xtotal(is,iR,iZ) 
+      f(n*is+dimR*(iZ-1)+iR) = xtotal(is,iR,iZ) 
+      do NC = 1,Ncomp
+          f(n*is+dimR*(iZ-1)+iR) = -avpol(is,iR,iZ,NC)+f(n*is+dimR*(iZ-1)+iR) 
+      enddo ! NC
    enddo
    enddo
 enddo ! is
-enddo ! NC
 
 
 iter=iter+1
