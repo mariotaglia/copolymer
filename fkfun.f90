@@ -425,7 +425,7 @@ algo = 0.0
 algo1 = 0.0
 algo2 = 0.0
 
-do i = 1, n*(Npoorsv+1)
+do i = 1, n*(Npoorsv+2)
    algo = algo + f(i)**2
 end do
 
