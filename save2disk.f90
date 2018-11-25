@@ -11,7 +11,7 @@ use mkai
 use transgauche
 use pis
 implicit none
-
+real*8 tmp
 integer counter, counter2
 integer is,ic
 integer NC
@@ -26,6 +26,7 @@ character*50 lnqfilename  ! contains the denisty of the solvent
 CHARACTER*50 xtotalfilename
 CHARACTER*50 ntransfilename
 character*50 densposfilename
+character*50 denstotfilename
 character*50 dielfilename
 character*50 densnegfilename
 character*50 densHplusfilename
@@ -99,16 +100,39 @@ close(311)
 
 do NC=1, Ncomp
 do is=0,Npoorsv
+
 write(denspolfilename,'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A1,I3.3,A4)')'densitypolymer',NC,'.',is,'.',counter,'.',counter2,'.dat'
-open(unit=1320,file=denspolfilename)
+open(unit=311,file=denspolfilename)
+
 do iR=1,dimR
    do iZ=1,dimZ
-       write(1320,*)zc(iR),iZ,avpol(is,iR,iZ,NC)
+       write(311,*)zc(iR),iZ,avpol(is,iR,iZ,NC)
+   enddo
+enddo
+
+close(311)
+enddo ! is
+enddo ! NC
+
+
+! Density polymer total
+
+do is=0,Npoorsv
+write(denstotfilename,'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitytotalpol',is,'.',counter,'.',counter2,'.dat'
+open(unit=311,file=denstotfilename)
+
+do iR=1,dimR
+   do iZ=1,dimZ
+       tmp = 0
+       do NC = 1, Ncomp 
+       tmp = tmp + avpol(is,iR,iZ,NC)
+       enddo
+       write(311,*)zc(iR),iZ,tmp
    enddo
 enddo
 close(311)
 enddo ! is
-enddo ! NC
+
 
 ! Frac A min
 do ic=1,Nacids
