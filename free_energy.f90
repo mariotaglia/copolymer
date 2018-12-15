@@ -354,24 +354,37 @@ Free_Energy2 = Free_Energy2 + sumpol
 if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 
 if(rank.eq.0) then                                                                 
-  write(301,*) npol, Free_energy/npol                       
-  write(302,*) npol, F_Mix_s/npol                           
-  write(303,*) npol, F_Mix_pos/npol                       
-  write(304,*) npol, F_Mix_neg/npol                         
-  write(305,*) npol, F_Mix_Hplus/npol                       
-  write(306,*) npol, F_Mix_OHmin/npol                       
+  write(301,*) npol, Free_energy/npol        
+  flush(301)               
+  write(302,*) npol, F_Mix_s/npol   
+  flush(302)                        
+  write(303,*) npol, F_Mix_pos/npol
+  flush(303)                       
+  write(304,*) npol, F_Mix_neg/npol
+  flush(304)                         
+  write(305,*) npol, F_Mix_Hplus/npol
+  flush(305)                       
+  write(306,*) npol, F_Mix_OHmin/npol
+  flush(306)                       
   write(307,*) npol, F_Conf/npol                            
+  flush(307)                       
   write(308,*) npol, F_Eq/npol                            
+  flush(308)                       
 ! write(313,*)counter, counter2, F_Eq_P                              
   do is=1,Npoorsv
     do js=1,Npoorsv
        write(10000*is+js,*) npol, F_vdW(is,js)/npol                             
+      flush(10000*is+js)                       
     enddo
   enddo
   write(311,*) npol, F_electro/npol                         
+  flush(311)                       
   write(312,*) npol, Free_energy2/npol                      
+  flush(312)                       
   write(313,*) npol, F_Mix_p/npol                          
+  flush(313)                       
   write(314,*) npol, F_Uchain/npol
+  flush(314)                       
 endif                           
 
 ! Save end-to-end distances         
