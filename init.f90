@@ -24,7 +24,7 @@ character*10 lnqfile, rogfile
 integer tag
 parameter(tag = 0)
 
-error = 1e-6
+error = 1e-3
 
 !     initializations of variables 
 

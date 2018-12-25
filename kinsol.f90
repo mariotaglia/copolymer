@@ -41,11 +41,11 @@ double precision vtemp1(*), vtemp2(*)
 common /psize/ neq
 
 do i = 1, ntot
-   pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+   pp(i) = 0.01 / (1.0+exp(1.0-udata(i)))
 enddo
 
 do i = ntot+1, (Npoorsv+1)*ntot
-pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+pp(i) = 0.01 / (1.0+exp(1.0-udata(i)))
 enddo
 do i=1,ntot
 pp(i+ntot*npoorsv+ntot)=1.0
@@ -125,8 +125,8 @@ integer ierr
 ! INICIA KINSOL
 neq = (Npoorsv+2)*ntot
 msbpre  = 10 ! maximum number of iterations without prec. setup (?)
-fnormtol = 1.0d-6 ! Function-norm stopping tolerance
-scsteptol = 1.0d-6 ! Function-norm stopping tolerance
+fnormtol = 1.0d-4 ! Function-norm stopping tolerance
+scsteptol = 1.0d-4 ! Function-norm stopping tolerance
 
 maxl = 2000 ! maximum Krylov subspace dimesion (?!?!?!) ! Esto se usa para el preconditioner
 maxlrst = 50 ! maximum number of restarts
