@@ -20,7 +20,7 @@ implicit none
 integer is
 integer *4 ier ! Kinsol error flag
 real*8 x1((npoorsv+2)*ntot),xg1((npoorsv+2)*ntot),x1ini((npoorsv+2)*ntot)   ! density solvent iteration vector
-
+real*8 f((Npoorsv+2)*ntot)
 real*8 trash, trash2
 
 integer n                 ! number of lattice sites
@@ -124,6 +124,7 @@ do while (actionflag.lt.3)
 
    iter=0
    call call_kinsol(x1, xg1, ier)
+!   call fkfun(x1, f, ier)
 
    do iR=1,dimR
    do iZ=1,dimZ

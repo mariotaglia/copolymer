@@ -10,6 +10,7 @@ use longs
 use mkai
 use transgauche
 use pis
+
 implicit none
 real*8 tmp
 integer counter, counter2
@@ -24,6 +25,7 @@ character*50 phifilename      ! electric potential
 character*50 denssolfilename  ! contains the denisty of the solvent
 character*50 lnqfilename  ! contains the denisty of the solvent
 CHARACTER*50 xtotalfilename
+CHARACTER*50 xtotal2filename
 CHARACTER*50 ntransfilename
 character*50 densposfilename
 character*50 denstotfilename
@@ -113,6 +115,23 @@ enddo
 close(311)
 enddo ! is
 enddo ! NC
+
+
+! xtotal
+
+do is=1,Npoorsv
+
+write(xtotal2filename,'(A7,I3.3,A1,I3.3,A1,I3.3,A4)')'xtotal.',is,'.',counter,'.',counter2,'.dat'
+open(unit=311,file=xtotal2filename)
+
+do iR=1,dimR
+   do iZ=1,dimZ
+       write(311,*)zc(iR),iZ,xtotal(is,iR,iZ)
+   enddo
+enddo
+
+close(311)
+enddo ! is
 
 
 ! Density polymer total
@@ -250,7 +269,7 @@ open(unit=335,file=dielfilename)
 enddo
 close(335)
 
-! xtotal
+! xpol
 
 do NC = 1, Ncomp
 write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'xdensitytota.',NC,'.',counter,'.',counter2,'.dat'
