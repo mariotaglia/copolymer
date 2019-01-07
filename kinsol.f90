@@ -124,12 +124,12 @@ integer ierr
 
 ! INICIA KINSOL
 neq = (Npoorsv+2)*ntot
-msbpre  = 10 ! maximum number of iterations without prec. setup (?)
-fnormtol = 1.0d-4 ! Function-norm stopping tolerance
-scsteptol = 1.0d-4 ! Function-norm stopping tolerance
+msbpre  = 1 ! maximum number of iterations without prec. setup (?)
+fnormtol = 1.0d-5 ! Function-norm stopping tolerance
+scsteptol = 1.0d-5 ! Function-norm stopping tolerance
 
-maxl = 2000 ! maximum Krylov subspace dimesion (?!?!?!) ! Esto se usa para el preconditioner
-maxlrst = 50 ! maximum number of restarts
+maxl = 1000 ! maximum Krylov subspace dimesion (?!?!?!) ! Esto se usa para el preconditioner
+maxlrst = 500 ! maximum number of restarts
 max_niter = 2000
 globalstrat = 0
 
@@ -177,7 +177,7 @@ if (ier .ne. 0) then
   call MPI_FINALIZE(ierr) ! finaliza MPI
   stop
 endif
-call fkinspilssetprec(1, ier) ! preconditiones
+!call fkinspilssetprec(1, ier) ! preconditiones
 
 do i = 1, neq ! scaling vector
   scale(i) = 1.0
