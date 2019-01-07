@@ -265,8 +265,8 @@ avpolb_tosend(:, 1:dimR, 1:dimZ)=avpolb_tmp(:, 1:dimR, 1:dimZ)
 
 !call MPI_Barrier(MPI_COMM_WORLD, err)
 
-   call MPI_ALLREDUCE(avpola_tosend, avpola(:,:,:,NC), Nacids*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(avpolb_tosend, avpolb(:,:,:,NC), Nbasics*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(avpola_tosend, avpola(:,:,:,NC), (Nacids+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(avpolb_tosend, avpolb(:,:,:,NC), (Nbasics+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(avpol_tosend, avpol(:,:,:,NC), (Npoorsv+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(xpol_tosend, xpol(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(q_tosend, q(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
