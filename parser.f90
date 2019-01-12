@@ -312,10 +312,18 @@ read(10,*)(st(i,j), j = 1, i)
  enddo
 enddo
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Check curvature = 2
 
-
-
-
+if(curvature.eq.2) then
+ if(dimZ.ne.1) then 
+    if(rank.eq.0)print*, 'parser: dimZ should be 1 for curvature = 2'
+    call MPI_FINALIZE(ierr) ! finaliza MPI
+    stop
+ endif
+ deltaZ = 1.0
+ if(rank.eq.0)print*,'parser: Curvature = 2, deltaZ forced to 1.0'   
+endif 
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
