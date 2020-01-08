@@ -45,8 +45,8 @@ do i=1,long(NC)
 enddo
 enddo
 
-vneg=4/3*pi*0.2**3/vsol !volume of anion in units of vsol
-vpos=4/3*pi*0.2**3/vsol !volume of cation in units of vsol 
+vneg=4/3*pi*r_neg**3/vsol !volume of anion in units of vsol
+vpos=4/3*pi*r_pos**3/vsol !volume of cation in units of vsol 
 
 pKw=14.0
 

@@ -72,7 +72,7 @@ open(unit=310,file=sysfilename)
       write(310,*)'deltaZ      = ',deltaZ
       write(310,*)'vsol        = ',vsol
       write(310,*)'vpol        = ',vpol*vsol
-
+      write(310,*)'rsalt = ',r_pos,r_neg
       write(310,*)'npol       = ', npol
       write(310,*)'st         = ', st
       write(310,*)'Actionflag = ', counter

@@ -42,6 +42,8 @@ Nacids = 0
 Nbasics = 0
 infile = ndi
 flagkai = 0 ! zero by default
+r_pos = 0.3
+r_neg = 0.3
 npolini = ndi
 npolfirst = ndi
 npollast = ndi
@@ -92,6 +94,10 @@ do while (ios == 0)
 
 
 select case (label)
+
+  case('rsalt')
+   read(buffer, *, iostat=ios) r_pos, r_neg
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case ('vpol')
    read(buffer, *, iostat=ios) Npoorsv
@@ -277,6 +283,8 @@ if (rank.eq.0) then
  print*, 'vpol = ', vpol
  print*, 'vpol_a = ', vpol_a
  print*, 'vpol_b = ', vpol_b
+ print*, 'r_pos = ', r_pos
+ print*, 'r_neg = ', r_neg
  print*, 'dimf = ', dimf
 endif
 
