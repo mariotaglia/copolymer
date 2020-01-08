@@ -1,44 +1,76 @@
+#Number of compounds#
+Ncomp 2 
+
+#Proportion of each compound#
+npolratio
+0.4
+0.6
+
 curvature 0
 
-! DimR DimZ maxntotR maxntotZ 
+#DimR DimZ maxntotR maxntotZ #
 dimensions 140 1 18 1
-layersize 0.2 1
-cuantas 100000
-long 16
 
+#Size of layer R and Z#
+layersize 0.2 1
+
+#Number of conformations#
+cuantas 10000
+
+#Number of beads of each compound#
+long 
+16
+8
+
+#Number of types of beads that have non-zero interaction parameter#
 Npoorsv 2
 
-! After vpol and dimf, indicate again npoorsv
+#Bead volume of all types of beads. After vpol repeat npoorsv#
 vpol 2
 0.096
 0.096
 0.096
+
+#Radius of cation and anion
+rsalt 0.3 0.3
+
+#Exponent that governs interactions between beads. After dimf repeat npoorsv"
 dimf 2
 6
 6	6
 
-! Below nacids and basics indicate pKa and pKb
-Nacids 1
-0
+#Number of types of acid beads and their pKa's# 
+Nacids 2
+1.5
+9
+#Number of types of basic beads and their pKb's#
 Nbasics 1
 7
 
-! After vpol_a and vpol_b indicate nacids and nbasics
-vpol_a 1
+#Bead volume. It should coincide with vpol. After vpol_a and vpol_b indicate nacids and nbasics#
+vpol_a 2
+0.096
 0.096
 vpol_b 1
 0.096
 
-infile 1
+#infile=1 means initial guess is read from file#
+infile 1 
+#flagkai=1 means kai.dat is calculated. flagkai=0 means kai.dat is read from
+file#
 flagkai 1
 
-! Npolini, Npolfirst, Npollast, Npolstep
+# Npolini=initial density # Npolfirst=minimum density # npollast=maximum
+density # Npolstep = step
+# Npolini, Npolfirst, Npollast, Npolstep #
 npol 0.4 0.1 1.4 0.01
 
+#Xulimit is the interaction cutoff in terms of layers#
 Xulimit 5
 lseg 0.5
 
-! After Utg indicate again npoorsv
+#Energy penalization of trans and gauche configurations. After Utg indicate
+again npoorsv #
 Utg 2
 0.0 0.0
 0.0 0.0
@@ -48,8 +80,12 @@ csalt 1
 pHbulk 7
 dielP 3.0
 
-! number of branches and then position and length of each branch
-nbranches 3
+#Number of branches of each compound and then position and length of each
+branch of each compound#
+nbranches 
+3
+1
 5 1
 6 1
 9 2
+2 1
