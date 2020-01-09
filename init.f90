@@ -95,7 +95,7 @@ expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
 do NC = 1, Ncomp
 write(lnqfile,'(A4,I2.2,A4)')'lnq.',NC,'.dat'
 open(unit=1533+NC,file=lnqfile)
-write(rogfile,'(A4,I2,A4)')'rog.',NC,'.dat'
+write(rogfile,'(A4,I2.2,A4)')'rog.',NC,'.dat'
 open(unit=2533+NC,file=rogfile)
 enddo
 

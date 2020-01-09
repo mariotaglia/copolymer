@@ -1,81 +1,106 @@
-File name: fort.8
-Description: general input file
-Example with comments:
 
-# curvature # 
-0
-#dimz maxntotcounter_ini maxntot# ! comment: dimz is the nº of layers of the box, maxntotcounter_ini is the first value of the maxntot loop and maxntot is the final value.
-80 18 18
-# cuantas# ! comment: total number of conformations
-100000
-#long# ! comment: length of the chain
-15
-#Npoorsv# ! comment: number of types of poor solvent segments (2 for triblock anphiphiles)
-2
-#dimf# ! comment: exponent for the geometric dependency of interactions (6 for vdW interactions)
-6
-0       6
-#Ncharge# (# of charge types) 
-1
-#charge# !comment: charge of each charge type
-1
-#infile# ! comment: flag that indicates if the initial guess should be read from files (1) (fort.100 fort.101 etc) or not
-1
-#flagkai# ! comment: flag that indicates if the geometric dependency of interactions should be calculated (1) or read (0) from files (kais.001.001.dat kais.001.002.dat etc) 
-0
-#npolini, npolfirst, npollast, npolstep#  
-0.51 0.1 1.0 0.01
-#eps#
-0.0
-#Xulimit#
-5
-#lseg# ! length of one segment
-0.5
-#Ut(0:Npoorsv), Ug(0:Npoorsv)# ! comment:  energy of the trans and gauche states of each block
-0.0 0.0
-0.0 0.0
-0.0 0.0
-#Csalt /M# ! comment: concentration of salt in molar
-0.1
+##              INPUTS               ##
+
+File name: DEFINITIONS.txt
+Description: see example in main directory. Mandatory.
 
 File name: kais.001.001.dat kais.001.002.dat etc
-Description: geometric dependency of 1-1 interactions, 1-2 interactions, etc. Should be added if flagkai is 0.
+Description: geometric dependency of 1-1 interactions, 1-2 interactions, etc.
+Depends on curvature, dimR, Xulimit and dimf. If any of those parameteres
+changes, it has to be recalculated. Should be added if flagkai is 0.
 
 File name: fort.100 
-Description: densitysolvent of the first case. Should be added if infile is 1.
+Description: initial guess for solvent volume fraction. Should be added if infile is 1.
 
 File name: fort.101 fort.102 etc
-Description: densitypolymer001 densitypolymer102 etc of the first case. Should be added if infile is 1.
+Description: initial guess for volume fraction of bead 1, 2, etc. If Ncomp > 1,
+fort.101 is the sum of the volume fraction of bead 1 from all the compounds.
+Shold be added if infile is 1.
+
+File name: fort.200
+Description: initial guess for electrostatic potential. Should be added if
+infile is 1.
 
 File: epsilon.in
-Description: a textfile with a matrix with inter segment interactions. It is generated automatically by the python script from martini parameters 
+Description: matrix with inter bead interactions. It can be generated
+automatically by the martini_to_theory python script from martini parameters.
+Mandatory.
+
 Example: 
 
-2.1604414403 4.32088288061 4.32088288061 5.18505945673
+"2.1604414403 4.32088288061 4.32088288061 5.18505945673
 4.32088288061 6.48132432091 4.32088288061 7.34550089703
 4.32088288061 4.32088288061 6.48132432091 9.50594233733
 5.18505945673 7.34550089703 9.50594233733 19.4439729627
-0: W    1: PEO  2: Gly  3: Ala  4: Tail
+0: W    1: PEO  2: Gly  3: Ala  4: Tail"
 
-File name: structure.in
-Description: a text file with 2 columns. The first column indicates which type is each segments. The second column indicates which type of charge has each segment. Poor solvent segments are 1, 2, 3, etc. Hydrophilic segments are 0. Usually 1 indicates tail segments and 2 indicates linker segmentes.
+File name: structure.001.in structure.002.in etc
+Description: these files indicate the structure of compounds 1, 2, etc. The
+file contains three columns. Each line of the file indicates poorsv type,
+acid type and basic type of each bead. The number of lines should coincide
+with long. Branches go at the end ordered as in DEFINITINOS.txt (see example
+in main directory). Mandatory.
 
-Example:
+Example (long=8, npoorsv=2, Nacids=1, Nbasics=0):
 
-1	0	
-1	0
-1	0	
-1	0	
-2	0
-2	0
-2	0
-2	0
-0	0
-0	0
-0	0
-0	0
-0	0
-0	0
-0	1
+1	0	0
+1	0	0
+1	0	0
+1	0	0
+2	0	0
+2	0	0
+0	0	0
+0	1	0
 
+##            OUTPUTS             ##
 
+File name: system.#FLAG.#COUNTER.dat
+Description: system data. #FLAG indicates increasing npol (#FLAG=001) or 
+decreasing npol (#002) and #COUNTER is the case counter.
+
+File name: densityacid#NC.#ATYPE.#FLAG.#COUNTER.dat densitybasi#NC.#BTYPE.#FLAG.#COUNTER.dat
+Description: volume fraction of beads with acid type #ATYPE and with basic
+type #BTYPE that are part of compound #NC.
+
+File name: densitypolymer#NC.#PTYPE.#FLAG.#COUNTER.dat
+Description: volume fraction of beads with poorsv type #PTYPE that are part of
+compound #NC.
+
+File name: densitytotalpo#PTYPE.#FLAG.#COUNTER.dat (fort.101 fort.102 etc)
+Description: total volume fraction of beads with poorsv type #PTYPE 
+
+File name: xdensitytota.#NC.#FLAG.#COUNTER.dat 
+Description: number density of compound #NC.
+
+File name: densityHplus.#FLAG.#COUNTER.dat, densityOHmin.#FLAG.#COUNTER.dat,
+densitynegative.#FLAG.#COUNTER.dat, densitypositive.#FLAG.#COUNTER.dat,
+densitysolvent..#FLAG.#COUNTER.dat (fort.100)
+Description: volume fraction of H+, OH-, anion, cation and solvent.
+
+File name: electricpotential.#FLAG.#COUNTER.dat (fort.200) dielectric_cons.#FLAG.#COUNTER.dat
+Description: electric potential and dielectric constant (relative to water: 78.54) 
+
+File name: fractionAmin#ATYPE.#FLAG.#COUNTER.dat fractionBHpl#BTYPE.#FLAG.#COUNTER.dat 
+Description: fraction of acids beads of type #ATYPE and basic beads of type
+#BTYPE that are charged.
+
+File name: chemical_potent.#NC.#FLAG.#COUNTER.dat lnq.#NC.dat
+Description: chemical potential of compound #NC as a function of R and z, and
+as a function of npol. 
+
+File name: ntrans#NC.#FLAG.#COUNTER.dat 
+Description: average trans configuration as a function of bead number for
+compound #NC.
+
+File name: rog.#NC.dat
+Description: radius of gyration of compound #NC. In the file the first lines
+are the radius of gyration of each poorsv type (in case of needing the rog of
+parts of the chain) and the last line is the rog of the full chain.
+
+File name: F_tot.dat and F_tot2.dat
+Description: Excess semi grand canonical potential as a function of npol (see
+free_energy.f90).
+
+File name: F_conf.dat F_electro.dat etc
+Description: Different contributions to the excess semi grand canonical
+potential as a function of npol (see free_energy.f90).

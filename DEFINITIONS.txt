@@ -56,12 +56,10 @@ vpol_b 1
 
 #infile=1 means initial guess is read from file#
 infile 1 
-#flagkai=1 means kai.dat is calculated. flagkai=0 means kai.dat is read from
-file#
+#flagkai=1 means kai.dat is calculated. flagkai=0 means kai.dat is read from file#
 flagkai 1
 
-# Npolini=initial density # Npolfirst=minimum density # npollast=maximum
-density # Npolstep = step
+# Npolini=initial density # Npolfirst=minimum density # npollast=maximum density # Npolstep = step
 # Npolini, Npolfirst, Npollast, Npolstep #
 npol 0.4 0.1 1.4 0.01
 
@@ -69,8 +67,7 @@ npol 0.4 0.1 1.4 0.01
 Xulimit 5
 lseg 0.5
 
-#Energy penalization of trans and gauche configurations. After Utg indicate
-again npoorsv #
+#Energy penalization of trans and gauche configurations. After Utg indicate again npoorsv #
 Utg 2
 0.0 0.0
 0.0 0.0
@@ -80,8 +77,7 @@ csalt 1
 pHbulk 7
 dielP 3.0
 
-#Number of branches of each compound and then position and length of each
-branch of each compound#
+#Number of branches of each compound and then position and length of each branch of each compound#
 nbranches 
 3
 1

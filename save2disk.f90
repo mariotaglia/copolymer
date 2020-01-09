@@ -233,7 +233,8 @@ close(333)
 ! OH-
 
 write(densOHminfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densityOHmin.',counter,'.',counter2,'.dat'
- do iR=1,dimR
+open(unit=334,file=densOHminfilename)
+do iR=1,dimR
    do iZ=1,dimZ
        write(334,*)zc(iR),iZ,avOHmin(iR,iZ)
    enddo
@@ -269,7 +270,7 @@ do NC = 1, NComp
 write(ntransfilename,'(A7,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'ntrans.',NC,'.',counter,'.',counter2,'.dat'
 open(unit=327,file=ntransfilename)
 do i = 3, long(NC)-1
-         write(327,*)i, trans(i,NC)
+    write(327,*)i, trans(i,NC)
 enddo
 close(327)
 enddo ! NC
@@ -281,7 +282,7 @@ write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'chemical_potent.',NC,'.',c
 open(unit=324,file=lnqfilename)
 do iR = 1, maxntotR
    do iZ = 1, maxntotZ
-       write(324,*)zc(i),iR,dlog(xpol(iR,iZ,NC))-dlog(q(iR,iZ,NC))
+       write(324,*)zc(iR),iZ,dlog(xpol(iR,iZ,NC))-dlog(q(iR,iZ,NC))
     enddo
 enddo
 close(324)

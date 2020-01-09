@@ -62,7 +62,7 @@ enddo
 enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!     init guess from files fort.100 (solvent) and fort.200 (potential)                      
+!     init guess from files fort.100 (solvent), fort.10n (poorsv) and fort.200 (potential)                      
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 if (infile.ge.1) then
