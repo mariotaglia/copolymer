@@ -327,7 +327,7 @@ do iR = 1, dimR
 do iZ = 1, dimZ
   jZp = iZ + 1
   iZp = PBCSYMI(jZp,dimZ)
-  gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR + (phi(iR,iZp)-phi(iR,iZ)/deltaZ))**2
+  gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR + (phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
   sumdiel = sumdiel + 0.5*wperm*dielpol(iR,iZ)*Depsfcn(iR,iZ)*gradphi2*jacobian(iR)*vsol
 enddo
 enddo
