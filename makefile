@@ -20,6 +20,11 @@ LFLAGS = -L/home/conda/gzaldivar/bin/kinsol/lib  -lsundials_fkinsol -lsundials_k
 endif
 
 
+ifeq ($(HOST),login.crane.hcc.unl.edu)
+LFLAGS = -L/home/conda/gzaldivar/bin/kinsol/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/home/conda/gzaldivar/bin/kinsol/lib
+endif
+
+
 ifeq ($(HOST),service0)
 LFLAGS = -lm  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial
 endif
