@@ -41,7 +41,7 @@ write(F_vdWfilename(is,js),'(A6,BZ,I3.3,A1,I3.3,A4)')'F_vdW.',is,'.',js,'.dat'
 open(unit=10000*is+js, file=F_vdWfilename(is,js) )                           
 enddo
 enddo
-open(unit=311, file='F_electro.dat')                       
+open(unit=3110, file='F_electro.dat')                       
 open(unit=312, file='F_tot2.dat')                          
 open(unit=313, file='F_mixp.dat')                          
 open(unit=314, file='F_Uchain.dat')
@@ -368,7 +368,7 @@ if(rank.eq.0) then
        write(10000*is+js,*) npol, F_vdW(is,js)/npol                             
     enddo
   enddo
-  write(311,*) npol, F_electro/npol                         
+  write(3110,*) npol, F_electro/npol                         
   write(312,*) npol, Free_energy2/npol                      
   write(313,*) npol, F_Mix_p/npol                          
   write(314,*) npol, F_Uchain/npol
