@@ -93,6 +93,8 @@ if (infile.eq.2) then
  open(unit=8, file='in.in', form='unformatted')
  read(8)xflag
  close(8)
+ x1=xflag
+ xg1=xflag
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
