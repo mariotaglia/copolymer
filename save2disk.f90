@@ -36,6 +36,7 @@ character*50 fracBHplus
 character*50 fracAmin
 character*50 densAcidfilename
 character*50 densBasicfilename
+character*50 outfilename
 
 
 do iR = 1, dimR
@@ -287,5 +288,11 @@ do iR = 1, maxntotR
 enddo
 close(324)
 enddo ! NC
+
+write(outfilename,'(A4, I3.3,A1,I3.3,A4)')'out.', counter, '.', counter2, '.dat'
+open(unit=8, file=outfilename, form='unformatted')
+write(8)xflag
+close(8)
+
 
 end

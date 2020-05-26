@@ -41,7 +41,7 @@ double precision vtemp1(*), vtemp2(*)
 common /psize/ neq
 
 do i = 1, ntot
-   pp(i) = 1.0 !0.1 / (1.0+exp(1.0-udata(i)))
+   pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
 enddo
 
 do i = ntot+1, (Npoorsv+1)*ntot

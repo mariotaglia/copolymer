@@ -8,7 +8,7 @@ use mkai
 use transgauche
 use volume
 
-
+allocate (Xflag((npoorsv+2)*ntot))
 allocate (phi(0:dimR+1,dimZ))
 allocate (fAmin(Nacids,dimR,dimZ), fBHplus(Nbasics,dimR,dimZ), avpos(dimR,dimZ), avneg(dimR,dimZ))
 allocate (avHplus(dimR,dimZ),avOHmin(dimR,dimZ), xcharge(dimR,dimZ))

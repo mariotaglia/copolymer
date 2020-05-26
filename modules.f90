@@ -23,6 +23,8 @@ real*8 dimRkais
 endmodule
 
 module globals
+
+real*8, allocatable :: xflag(:)
 real*8 Na
 parameter (Na=6.02d23)
 integer Ncomp

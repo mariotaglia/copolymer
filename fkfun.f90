@@ -122,7 +122,7 @@ enddo
 ! dielectrics
 do iZ = 1,dimZ
    jZp=iZ+1 ! jZ plus one
-   iZp=PBCSYMI(jZ,dimZ)
+   iZp=PBCSYMI(jZp,dimZ)
 do iR = 1,dimR
    gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
    xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)

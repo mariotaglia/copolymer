@@ -65,7 +65,7 @@ enddo
 !     init guess from files fort.100 (solvent), fort.10n (poorsv) and fort.200 (potential)                      
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-if (infile.ge.1) then
+if (infile.eq.1) then
    do iR=1,dimR
    do iZ=1,dimZ
 
@@ -87,7 +87,12 @@ if (infile.ge.1) then
 
    enddo !iR
    enddo !iZ
+endif
 
+if (infile.eq.2) then
+ open(unit=8, file='in.in', form='unformatted')
+ read(8)xflag
+ close(8)
 endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -139,6 +144,8 @@ do while (actionflag.lt.3)
    endif
 
    print*, "norma", rank
+   xflag = x1 ! to save in out file 
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! calc free energy
