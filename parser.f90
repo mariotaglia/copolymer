@@ -52,6 +52,8 @@ Xulimit = ndi
 lseg = ndr
 Csalt = ndr
 pHbulk = ndr
+PBCflag = 1 ! flag for PBC in z direction
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Control file variables
@@ -94,6 +96,10 @@ do while (ios == 0)
 
 
 select case (label)
+
+  case('PBCflag')
+   read(buffer, *, iostat=ios) PBCflag
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case('rsalt')
    read(buffer, *, iostat=ios) r_pos, r_neg

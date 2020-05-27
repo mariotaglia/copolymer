@@ -23,7 +23,7 @@ real*8 dimRkais
 endmodule
 
 module globals
-
+integer PBCflag
 real*8, allocatable :: xflag(:)
 real*8 Na
 parameter (Na=6.02d23)

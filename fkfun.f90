@@ -36,6 +36,7 @@ real*8 sumtrans_tosend(dimR,dimZ,maxlong)
 real*8 sumtrans(dimR,dimZ,maxlong)
 real*8 gradphi2
 integer, external :: PBCSYMI
+integer, external :: PBCREFI
 ! Jefe
 !flagsolver=1
 
@@ -122,7 +123,10 @@ enddo
 ! dielectrics
 do iZ = 1,dimZ
    jZp=iZ+1 ! jZ plus one
-   iZp=PBCSYMI(jZp,dimZ)
+
+   if(PBCflag.eq.1)iZp=PBCSYMI(jZp,dimZ)
+   if(PBCflag.eq.2)iZp=PBCREFI(jZp,dimZ)
+
 do iR = 1,dimR
    gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
    xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
@@ -141,7 +145,10 @@ do iR = 1, dimR
          do jR = 1, dimR
          do jZ = -Xulimit, Xulimit
             kZ=jZ+iZ
-            kkZ=PBCSYMI(kZ,dimZ)
+
+            if(PBCflag.eq.1)kkZ=PBCSYMI(kZ,dimZ)
+            if(PBCflag.eq.2)kkZ=PBCREFI(kZ,dimZ)
+
             protemp = protemp+st(is,js)*Xu(iR,jR,jZ,is,js)*xtotal(js,jR,kkZ)/(vpol(js)*vsol) ! vpol*vsol in units of nm^3
          enddo
          enddo
@@ -158,7 +165,9 @@ enddo
 do is= 1, Npoorsv
   do iZ= 1, dimZ
   jZp=iZ+1
-  iZp=PBCSYMI(jZp,dimZ)
+
+  if(PBCflag.eq.1)iZp=PBCSYMI(jZp,dimZ)
+  if(PBCflag.eq.2)iZp=PBCREFI(jZp,dimZ)
     do iR= 1, dimR
       gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
       xpot(is,iR,iZ) = xpot(is,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(is)*vsol*wperm/2.0)
@@ -216,7 +225,10 @@ do iiZ=1, maxntotcounterZ
 
       do k=1,long(NC)
          iZ = innZ(k,i,NC)+iiZ
-         aZ = PBCSYMI(iZ,dimZ)
+
+         if(PBCflag.eq.1)aZ = PBCSYMI(iZ,dimZ)
+         if(PBCflag.eq.2)aZ = PBCREFI(iZ,dimZ)
+
          aR = innR(k,i,iiR,NC)
          is = segpoorsv(k,NC)
          ia = acidtype(k,NC)
@@ -239,7 +251,8 @@ do iiZ=1, maxntotcounterZ
       do j = 1, long(NC) ! loop over number of segments
 
          iZ = innZ(j,i,NC)+iiZ
-         aZ = PBCSYMI(iZ,dimZ)
+         if(PBCflag.eq.1)aZ = PBCSYMI(iZ,dimZ)
+         if(PBCflag.eq.2)aZ = PBCREFI(iZ,dimZ)
          aR = innR(j,i,iiR,NC)
          is = segpoorsv (j,NC)
          ia = acidtype (j,NC)
@@ -374,8 +387,15 @@ do iZ = 1, dimZ
 
    iZp=iZ+1
    iZm=iZ-1
+
+   if(PBCflag.eq.1) then
    jZp = PBCSYMI(iZp,dimZ)
    jZm = PBCSYMI(iZm,dimZ)
+   else if (PBCflag.eq.2) then
+   jZp = PBCREFI(iZp,dimZ)
+   jZm = PBCREFI(iZm,dimZ)
+   endif 
+
    select case (curvature)
 
     case (0)

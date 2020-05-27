@@ -19,6 +19,7 @@ real*8 F_Mix_OHmin, F_Conf, F_Uchain
 real*8  F_Eq,F_vdW(Npoorsv,Npoorsv), F_electro                            
 integer is, js, iR, iZ, jR, jZ, kZ, kkZ, jZp, iZp
 integer, external :: PBCSYMI
+integer, external :: PBCREFI
 double precision, external :: jacobian
 integer NC,MC
 character*17 F_vdWfilename(Npoorsv,Npoorsv)
@@ -234,7 +235,8 @@ do iZ = 1, dimZ
     do jR= 1, dimR
     do jZ= -Xulimit, Xulimit    
 kZ = jZ + iZ
-kkZ = PBCSYMI (kZ,dimZ)
+if(PBCflag.eq.1)kkZ = PBCSYMI (kZ,dimZ)
+if(PBCflag.eq.2)kkZ = PBCREFI (kZ,dimZ)
 F_vdW (is,js) = F_vdW(is,js) &
         - 0.5*Xu(iR,jR,jZ,is,js)*avpol(is,iR,iZ,NC)*avpol(js,jR,kkZ,MC)  &
         *st(is,js)/(vpol(is)*vpol(js)*vsol**2)*jacobian(iR)*deltaR*deltaZ
@@ -263,7 +265,8 @@ F_electro = 0.0
 do iR = 1, dimR
 do iZ = 1, dimZ
   jZp= iZ+1
-  iZp= PBCSYMI(jZp,dimZ)
+if(PBCflag.eq.1)iZp= PBCSYMI(jZp,dimZ)
+if(PBCflag.eq.2)iZp= PBCREFI(jZp,dimZ)
   gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
   F_electro = F_electro + (xcharge(iR,iZ)*phi(iR,iZ) - wperm*epsfcn(iR,iZ)/2.0*gradphi2)*jacobian(iR)*deltaR*deltaZ
 enddo
@@ -315,7 +318,8 @@ enddo
 do iR = 1, dimR
 do iZ = 1, dimZ
   jZp = iZ + 1
-  iZp = PBCSYMI(jZp,dimZ)
+  if(PBCflag.eq.1)iZp = PBCSYMI(jZp,dimZ)
+  if(PBCflag.eq.2)iZp = PBCREFI(jZp,dimZ)
   gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
   sumel = sumel - wperm*epsfcn(iR,iZ)/2.0*gradphi2*jacobian(iR)*deltaR*deltaZ
 enddo
@@ -326,7 +330,8 @@ enddo
 do iR = 1, dimR
 do iZ = 1, dimZ
   jZp = iZ + 1
-  iZp = PBCSYMI(jZp,dimZ)
+  if(PBCflag.eq.1)iZp = PBCSYMI(jZp,dimZ)
+  if(PBCflag.eq.2)iZp = PBCREFI(jZp,dimZ)
   gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR + (phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
   sumdiel = sumdiel + 0.5*wperm*dielpol(iR,iZ)*Depsfcn(iR,iZ)*gradphi2*jacobian(iR)*vsol
 enddo
