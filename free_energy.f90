@@ -17,7 +17,7 @@ real*8 F_Mix_neg, F_Mix_Hplus
 real*8 Free_energy2, sumpi, sumrho, sumel,sumpol, mupol, sumdiel
 real*8 F_Mix_OHmin, F_Conf, F_Uchain     
 real*8  F_Eq,F_vdW(Npoorsv,Npoorsv), F_electro                            
-integer is, js, iR, iZ, jR, jZ, kZ, kkZ, jZp, iZp
+integer is, js, iR, iZ, jR, jZ, kZ, kkZ, jZp, iZp, iZm, jZm
 integer, external :: PBCSYMI
 integer, external :: PBCREFI
 double precision, external :: jacobian
@@ -264,10 +264,22 @@ F_electro = 0.0
  
 do iR = 1, dimR
 do iZ = 1, dimZ
+
   jZp= iZ+1
-if(PBCflag.eq.1)iZp= PBCSYMI(jZp,dimZ)
-if(PBCflag.eq.2)iZp= PBCREFI(jZp,dimZ)
-  gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
+  jZm= iZ-1
+
+if(PBCflag.eq.1) then
+ iZp= PBCSYMI(jZp,dimZ)
+ iZm= PBCSYMI(jZm,dimZ)
+else if(PBCflag.eq.2) then
+ iZp= PBCREFI(jZp,dimZ)
+ iZm= PBCREFI(jZm,dimZ)
+endif
+
+
+
+
+  gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
   F_electro = F_electro + (xcharge(iR,iZ)*phi(iR,iZ) - wperm*epsfcn(iR,iZ)/2.0*gradphi2)*jacobian(iR)*deltaR*deltaZ
 enddo
 enddo
@@ -317,11 +329,21 @@ enddo
 
 do iR = 1, dimR
 do iZ = 1, dimZ
-  jZp = iZ + 1
-  if(PBCflag.eq.1)iZp = PBCSYMI(jZp,dimZ)
-  if(PBCflag.eq.2)iZp = PBCREFI(jZp,dimZ)
-  gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
+
+  jZp= iZ+1
+  jZm= iZ-1
+
+if(PBCflag.eq.1) then
+ iZp= PBCSYMI(jZp,dimZ)
+ iZm= PBCSYMI(jZm,dimZ)
+else if(PBCflag.eq.2) then
+ iZp= PBCREFI(jZp,dimZ)
+ iZm= PBCREFI(jZm,dimZ)
+endif
+
+  gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
   sumel = sumel - wperm*epsfcn(iR,iZ)/2.0*gradphi2*jacobian(iR)*deltaR*deltaZ
+
 enddo
 enddo
 
@@ -329,10 +351,19 @@ enddo
 
 do iR = 1, dimR
 do iZ = 1, dimZ
+
   jZp = iZ + 1
-  if(PBCflag.eq.1)iZp = PBCSYMI(jZp,dimZ)
-  if(PBCflag.eq.2)iZp = PBCREFI(jZp,dimZ)
-  gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR + (phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
+  jZm = iZ - 1
+
+if(PBCflag.eq.1) then
+ iZp= PBCSYMI(jZp,dimZ)
+ iZm= PBCSYMI(jZm,dimZ)
+else if(PBCflag.eq.2) then
+ iZp= PBCREFI(jZp,dimZ)
+ iZm= PBCREFI(jZm,dimZ)
+endif
+
+  gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR + (phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
   sumdiel = sumdiel + 0.5*wperm*dielpol(iR,iZ)*Depsfcn(iR,iZ)*gradphi2*jacobian(iR)*vsol
 enddo
 enddo

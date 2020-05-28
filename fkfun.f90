@@ -123,12 +123,18 @@ enddo
 ! dielectrics
 do iZ = 1,dimZ
    jZp=iZ+1 ! jZ plus one
+   jZm=iZ-1 ! jZ minus one
 
-   if(PBCflag.eq.1)iZp=PBCSYMI(jZp,dimZ)
-   if(PBCflag.eq.2)iZp=PBCREFI(jZp,dimZ)
+   if(PBCflag.eq.1) then
+      iZp=PBCSYMI(jZp,dimZ)
+      iZm=PBCSYMI(jZm,dimZ)
+   else if(PBCflag.eq.2) then
+      iZp=PBCREFI(jZp,dimZ)
+      iZm=PBCREFI(jZm,dimZ)
+   endif
 
 do iR = 1,dimR
-   gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
+   gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
    xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
 enddo 
 enddo
@@ -164,12 +170,21 @@ enddo
 
 do is= 1, Npoorsv
   do iZ= 1, dimZ
-  jZp=iZ+1
 
-  if(PBCflag.eq.1)iZp=PBCSYMI(jZp,dimZ)
-  if(PBCflag.eq.2)iZp=PBCREFI(jZp,dimZ)
+  jZp=iZ+1
+  jZm=iZ-1
+
+   if(PBCflag.eq.1) then
+      iZp=PBCSYMI(jZp,dimZ)
+      iZm=PBCSYMI(jZm,dimZ)
+   else if(PBCflag.eq.2) then
+      iZp=PBCREFI(jZp,dimZ)
+      iZm=PBCREFI(jZm,dimZ)
+   endif
+
+
     do iR= 1, dimR
-      gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZ))/deltaZ)**2
+      gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
       xpot(is,iR,iZ) = xpot(is,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(is)*vsol*wperm/2.0)
     enddo
   enddo
@@ -411,7 +426,7 @@ do iZ = 1, dimZ
      +wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-2.0*phi(iR,iZ)+phi(iR-1,iZ))*deltaR**(-2) &
      +wperm*epsfcn(iR,iZ)*(phi(iR,jZp)-2.0*phi(iR,iZ)+phi(iR,jZm))*deltaZ**(-2) &
      +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR,iZ))*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2) &
-     +wperm*(epsfcn(iR,jZp)-epsfcn(iR,iZ))*(phi(iR,jZp)-phi(iR,iZ))*deltaZ**(-2)
+     +wperm*(epsfcn(iR,jZp)-epsfcn(iR,jZm))*(phi(iR,jZp)-phi(iR,jZm))/4.0*deltaZ**(-2)
 
     case(2)
      f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) &
