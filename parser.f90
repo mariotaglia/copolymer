@@ -228,7 +228,7 @@ select case (label)
    Ut=0.0
    Ug=0.0
    do i = 0, Npoorsv
-     read(fh,*), Ut(i), Ug(i)
+     read(fh,*) Ut(i), Ug(i)
    enddo
 
   case ('csalt')
@@ -306,7 +306,7 @@ do NC = 1, Ncomp
 write(filename2,'(A10,I3.3,A3)')'structure.',NC,'.in'
 open(file=filename2, unit = 9)
 do i = 1, long(NC)
-read(9,*),segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC)
+read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC)
 enddo
 close(9)
 enddo ! NC
