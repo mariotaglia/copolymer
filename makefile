@@ -7,6 +7,9 @@ SRC = modules.f90 allocation.f90 main.f90 fkfun.f90 cadenas.f90 rands.f90 initmp
 HOST=$(shell hostname)
 $(info HOST is ${HOST})
 
+USER=$(shell id -u -n)
+$(info USER is ${USER})
+
 
 # some definitions
 SHELL = /bin/bash
@@ -21,9 +24,10 @@ endif
 
 
 ifeq ($(HOST),login.crane.hcc.unl.edu)
+ifeq ($(USER),gzaldivar)
 LFLAGS = -L/home/conda/gzaldivar/bin/kinsol/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/home/conda/gzaldivar/bin/kinsol/lib
 endif
-
+endif
 
 ifeq ($(HOST),service0)
 LFLAGS = -lm  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial
