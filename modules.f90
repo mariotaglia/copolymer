@@ -23,6 +23,7 @@ real*8 dimRkais
 endmodule
 
 module globals
+integer vtkflag, maxT
 integer PBCflag
 real*8, allocatable :: xflag(:)
 real*8 Na

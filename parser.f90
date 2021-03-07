@@ -53,7 +53,8 @@ lseg = ndr
 Csalt = ndr
 pHbulk = ndr
 PBCflag = 1 ! flag for PBC in z direction
-
+vtkflag = 0
+maxT = 1
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Control file variables
@@ -209,6 +210,16 @@ select case (label)
   case ('infile')
    read(buffer, *, iostat=ios) infile
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+  case ('vtkflag')
+   read(buffer, *, iostat=ios) vtkflag
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+  case ('vtkT')
+   read(buffer, *, iostat=ios) maxT
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+
 
   case ('flagkai')
    read(buffer, *, iostat=ios) flagkai

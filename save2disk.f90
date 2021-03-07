@@ -11,7 +11,7 @@ use mkai
 use transgauche
 use pis
 implicit none
-real*8 tmp
+real*8 tmp(dimR,dimZ)
 integer counter, counter2
 integer is,ic
 integer NC
@@ -98,6 +98,9 @@ do iR=1,dimR
    enddo
 enddo
 close(311)
+if(vtkflag.eq.1)call savevtk(phifilename, phi)
+
+
 
 ! Density polymer
 
@@ -114,6 +117,7 @@ do iR=1,dimR
 enddo
 
 close(311)
+if(vtkflag.eq.1)call savevtk(denspolfilename, avpol(is,:,:,NC))
 enddo ! is
 enddo ! NC
 
@@ -129,6 +133,7 @@ do iR=1,dimR
        write(311,*)zc(iR),iZ,xtotal(is,iR,iZ)
    enddo
 enddo
+if(vtkflag.eq.1)call savevtk(poorsvfilename, xtotal(is,:,:))
 
 close(311)
 enddo ! is
@@ -139,16 +144,17 @@ do is=0,Npoorsv
 write(denstotfilename,'(A14,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'densitytotalpol',is,'.',counter,'.',counter2,'.dat'
 open(unit=311,file=denstotfilename)
 
+tmp = 0
 do iR=1,dimR
    do iZ=1,dimZ
-       tmp = 0
        do NC = 1, Ncomp 
-       tmp = tmp + avpol(is,iR,iZ,NC)
+       tmp(iR,iZ) = tmp(iR,iZ) + avpol(is,iR,iZ,NC)
        enddo
-       write(311,*)zc(iR),iZ,tmp
+       write(311,*)zc(iR),iZ,tmp(iR,iZ)
    enddo
 enddo
 close(311)
+if(vtkflag.eq.1)call savevtk(denstotfilename, tmp)
 enddo ! is
 
 
@@ -279,6 +285,7 @@ open(unit=329,file=xtotalfilename)
       write(329,*)zc(iR),iZ,xpol(iR,iZ,NC)
    enddo
  enddo
+if(vtkflag.eq.1)call savevtk(xtotalfilename, xpol(:,:,NC))
 close(329)
 enddo
 
@@ -312,3 +319,67 @@ close(8)
 
 
 end
+
+subroutine savevtk(filename,array)
+
+use globals
+use layer
+
+implicit none
+      
+character*50 filename, filename2
+character*30 tempc
+real*4 singlepres
+real*8 array(dimR,dimZ)
+integer iR, iT, iZ
+real*8 posx, posy, posz
+
+filename2 = filename(1:len(trim(filename))-3)//'vtk'
+
+! Archivo paraview 3D
+
+open (unit=45, file=filename2)
+write(45,'(A)')'# vtk DataFile Version 2.0'
+write(45,'(A)')'data'
+write(45,'(A)')'ASCII'
+write(45,'(A)')'DATASET STRUCTURED_GRID '
+write(45,'(A, I5, A1, I5, A1, I5)') 'DIMENSIONS', dimZ+1, ' ', maxT+1, ' ',dimR+1
+write(45,'(A, I8, A)')'POINTS ',(dimZ+1)*(maxT+1)*(dimR+1),' float'
+
+      do iR = 0, dimR
+        do iT = 0, maxT
+          do iz = 0, dimZ
+
+      posx = sin(dfloat(iT)/maxT*2.0*3.14159)*(iR)*deltaR
+      posy = cos(dfloat(iT)/maxT*2.0*3.14159)*(iR)*deltaR
+      posz = iz*deltaZ
+
+      write(45, *)posx,'   ',posy, '   ', posz 
+          enddo
+        enddo
+      enddo
+
+write(45,'(A, I8)')'CELL_DATA ', dimR*dimZ*maxT
+tempc = 'SCALARS data float 1'
+write(45,'(A)')tempc
+write(45,'(A)')'LOOKUP_TABLE default'
+
+       do iR = 1, dimR
+        do iT = 1, maxT
+          do iZ = 1, dimZ
+
+            singlepres = array(iR, iZ) ! Lo necesito en single presicion
+
+            write(45,*)singlepres
+          enddo
+        enddo
+      enddo
+      close (45)
+      return
+end
+
+
+
+
+
+
