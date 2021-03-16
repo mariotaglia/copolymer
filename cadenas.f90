@@ -315,7 +315,7 @@ do i=1,12
   call rota(xendcom,xendr,long(NC))   ! rotate chain conformation ncha time
   ncha=ncha+1
 
-!  call print_ent2(xendr)
+  call print_ent2(xendr, ncha, NC)
 
   do j=1,long(NC)
     chains(1,j,ncha)=xendr(1,j)       ! output 
@@ -356,3 +356,47 @@ do k = 1, long
 enddo
 
 end subroutine
+
+subroutine print_ent2(xend, indexncha, NC)
+
+use longs
+implicit none
+
+real*8 xend(3,200)
+integer i,j,jj, indexncha, NC
+character*25 filename
+
+
+! Imprime cadenas en formato ENT
+
+write(filename,'(A6,A1, I3.3, A1, I3.3, A4)') 'cadena','.', indexncha,'.',NC, '.ent'
+
+open(unit=4400, file=filename)
+
+do i=1, long(NC) ! Imprime todo
+WRITE(4400,'(A6,I5,A3,I12,A4,F8.3,F8.3,F8.3)') &
+"HETATM",i,"  C",i,"    ",xend(1, i)*10,  &
+xend(2, i)*10,xend(3, i)*10
+end do
+
+i = 1
+do j = 1, long(NC)-long_branches(NC)-1 ! Une segmentos backbone
+   WRITE((4400),'(A6,I5,I5)')"CONECT", i, i+1
+   i = i + 1
+end do
+
+do j = 1, nbranches(NC) ! loop over branches
+   WRITE((4400),'(A6,I5,I5)')"CONECT", branch_pos(j,NC), i+1
+   i = i + 1
+   do jj = 1, branch_long(j,NC)-1
+       WRITE((4400),'(A6,I5,I5)')"CONECT", i, i+1
+       i = i + 1
+   enddo
+enddo 
+
+WRITE(4400,*)"END"
+
+close(4400)
+end subroutine
+
+

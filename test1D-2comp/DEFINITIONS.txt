@@ -6,9 +6,9 @@ npolratio
 
 curvature 0
 dimensions 140 1 18 1
-cuantas 10000
+cuantas 10
 long 
-10
+12
 2
 
 layersize 0.2 1.0
@@ -57,5 +57,5 @@ dielP 3.0
 nbranches
 2
 0
-5 1
-6 1
+5 2
+9 1
