@@ -54,6 +54,7 @@ Csalt = ndr
 pHbulk = ndr
 PBCflag = 1 ! flag for PBC in z direction
 vtkflag = 0
+entflag = 0
 maxT = 1
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -215,10 +216,13 @@ select case (label)
    read(buffer, *, iostat=ios) vtkflag
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
+  case ('entflag')
+   read(buffer, *, iostat=ios) entflag
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
   case ('vtkT')
    read(buffer, *, iostat=ios) maxT
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
 
 
   case ('flagkai')

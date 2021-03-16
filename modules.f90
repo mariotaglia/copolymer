@@ -103,6 +103,7 @@ endmodule
 
 
 module longs
+integer entflag
 integer, allocatable :: long(:)            ! length of polymer
 integer maxlong
 integer, allocatable :: nbranches(:)

@@ -125,7 +125,7 @@ use globals
 use mkai
 use longs
 implicit none
-integer i,state,j,k1,k2,ncha, is
+integer i,state,j,k1,k2,ncha, is, jj
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3), m_branch(3,3,50)
@@ -235,8 +235,10 @@ m(:,:) = m_branch(:,:,j)
 xendt(:) = xend_branch(:,j)
 
 do k1=1, branch_long(j,NC)       
- 
+i = i + 1
+
 state = state_branch(j)
+
 do while (state.eq.state_branch(j)) ! choose a state different to that of the backbone
 rn=rands(seed)
 state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
@@ -253,13 +255,19 @@ enddo
     call mrrrr(m,tm,mm)
   endif
 
+do jj = j+1, nbranches(NC) ! loop over remaining branches
+ if(branch_pos(jj,NC).eq.i-1) then ! last segment was a branching point
+   m_branch(:,:,jj) = m(:,:) ! save rotation matrix
+   xend_branch(:,jj) = xend(:,i-1) ! save last position
+   state_branch(jj) = state
+ endif
+enddo
+
 m = mm ! update rotation matrix
 
 x(1)=m(1,1)*lseg
 x(2)=m(2,1)*lseg
 x(3)=m(3,1)*lseg
-
-i = i + 1
 
 xend(1,i)=xendt(1)+x(1)   ! ith postion chain
 xend(2,i)=xendt(2)+x(2)
@@ -315,7 +323,7 @@ do i=1,12
   call rota(xendcom,xendr,long(NC))   ! rotate chain conformation ncha time
   ncha=ncha+1
 
-  call print_ent2(xendr, ncha, NC)
+  if(entflag.eq.1)call print_ent2(xendr,ncha,NC)
 
   do j=1,long(NC)
     chains(1,j,ncha)=xendr(1,j)       ! output 
@@ -324,6 +332,7 @@ do i=1,12
   enddo
 enddo
 
+if(entflag.eq.1)stop
 if (ncha.eq.0) goto 223
 
 return
