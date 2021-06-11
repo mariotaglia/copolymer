@@ -1,9 +1,9 @@
 import numpy
 
-beadslist=["Qda","Qd","Qa","Q0","P5","P4","P3","P2","P1","Nda","Nd","Na","N0","C5","C4","C3","C2","C1","SC1","SP0"]
+beadslist=["Qda","Qd","Qa","Q0","P5","P4","P3","P2","P1","Nda","Nd","Na","N0","C5","C4","C3","C2","C1","SC4"]
 
 print("------------------------------------------------------------------------------------------------")
-print("Possible types of martini beads: Qda  Qd  Qa  Q0  P5  P4  P3  P2  P1  Nda  Nd  Na  N0  C5  C4  C3  C2  C1 SC1 SP0")
+print("Possible types of martini beads: Qda  Qd  Qa  Q0  P5  P4  P3  P2  P1  Nda  Nd  Na  N0  C5  C4  C3  C2  C1 SC4")
 print("Please use exactly the same spelling, including lower and upper cases.")
 print("------------------------------------------------------------------------------------------------")
 print("")
@@ -26,9 +26,9 @@ for i in range(0,n):
    bead_type_index[i]=beadslist.index(type_tmp)
    name= name+str(i)+": "+name_tmp+"	"
 
-data=numpy.loadtxt("table_martini.dat", skiprows=1, usecols=(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20))
-epslist=data[:][20]
-sigmalist=data[:][21]
+data=numpy.loadtxt("table_martini.dat", skiprows=1, usecols=(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19))
+epslist=data[:][19]
+sigmalist=data[:][20]
 epsilon=numpy.zeros((n,n))
 epsilon_th=numpy.zeros((n,n))
 interaction_index=numpy.zeros((n,n),dtype=numpy.int8)
@@ -69,7 +69,6 @@ for i in range(1,n):
 
 
 f.write(name)
-
 
 
 
