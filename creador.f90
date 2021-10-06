@@ -12,7 +12,7 @@ implicit none
 
 integer is
 
-integer j,k,ii ! dummy indice0s
+integer i,j,k,ii ! dummy indice0s
 
 INTEGER temp_R
 real*8 tempr_R, tempr_Z
@@ -30,7 +30,8 @@ integer conf              ! counts number of conformations
 integer tag
 parameter(tag = 0)
 integer NC
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! CHAIN GENERATION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -58,10 +59,21 @@ if (rank.gt.0) then
    print*, "rank", rank, "received from rank", rank-1,"seed =", seed
 endif
 
+
 do while (conf.lt.cuantas)
 
    call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
-   
+
+!   open(unit=100000,file='chains.dat')
+!   do i=1,3
+!   do j=1,long(1)
+!   do k=1,ncha
+!     write(100000,*)conf+k-1,i,j,k,chains(i,j,k)
+!   enddo
+!   enddo
+!   enddo
+
+
    do is=0,Npoorsv+1
       sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr)
    enddo
@@ -69,36 +81,6 @@ do while (conf.lt.cuantas)
    sumUgyr=sumUgyr+exp(-Ugyr)
 
    do j=1,ncha
-
-      if(conf.lt.cuantas) then
-         conf=conf+1
-         Uchain(conf,NC)=Uconf
-         Ntrans(:,conf,NC) = Ntconf(:)
-         do k=1,long(NC)
-            do ii = 1,maxntotR ! position of first segment (or Center of mass?)
-
-               select case (abs(curvature))
-                 case (2)
-                  tempr_R=((chains(1,k,j)+(float(ii)-0.5)*deltaR)**2 + chains(2,k,j)**2 + chains(3,k,j)**2 )**(0.5)
-                  temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
-                 case (1)
-                  tempr_R=((chains(1,k,j)+(float(ii)-0.5)*deltaR)**2+chains(2,k,j)**2)**(0.5)
-                  temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
-                 case (0) 
-                  tempr_R=abs(chains(1,k,j)+(float(ii)-0.5)*deltaR)
-                  temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
-               endselect
-             
-               if(temp_R.gt.dimR) then
-                  if(rank.eq.0)print*, 'main.f90: increase dimR'
-                  stop
-               endif
-              innR(k,conf,ii,NC)=temp_R ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
-            enddo ! ii
-         tempr_Z=chains(3,k,j)
-         innZ(k,conf,NC)=int(anint(tempr_Z/deltaZ))
-         enddo ! k
-      endif
 
       if(conf.lt.cuantas) then
          conf=conf+1
