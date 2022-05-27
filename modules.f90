@@ -84,6 +84,8 @@ module mcharge
 real*8 dielP
 integer electroflag
 integer Nacids, Nbasics
+real*8 pKcopmol, pKcopion, pKmolion ! LEO
+real*8 Kcopmol, Kcopion, Kmolion ! LEO
 integer, allocatable :: acidtype(:,:), basictype(:,:)
 real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
 real*8, allocatable :: phi(:,:), avpos(:,:), avneg(:,:), avHplus(:,:), avOHmin(:,:), xcharge(:,:), fAmin(:,:,:), fBHplus(:,:,:)

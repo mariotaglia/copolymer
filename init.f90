@@ -83,6 +83,7 @@ if (Nbasics.gt.0) then
   enddo
 endif
 
+
 expmupos=xposbulk/vpos/xsolbulk**vpos  
 expmuneg=xnegbulk/vneg/xsolbulk**vneg           
 expmuHplus=xHplusbulk/xsolbulk ! vHplus=vsol

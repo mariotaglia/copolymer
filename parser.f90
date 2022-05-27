@@ -40,6 +40,9 @@ totalcuantas = ndi
 Npoorsv = ndi ! zero by default
 Nacids = 0
 Nbasics = 0
+pKcopmol = ndr ! LEO
+pKcopion = ndr ! LEO
+pKmolion = ndr ! LEO
 infile = ndi
 flagkai = 0 ! zero by default
 r_pos = 0.3
@@ -208,6 +211,18 @@ select case (label)
      read(fh,*)pKb(i) ! acid constants of each acid segment
    enddo
 
+  case ('pKcopmol') ! LEO
+   read(buffer, *, iostat=ios) pKcopmol
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+  case ('pKcopion') ! LEO
+   read(buffer, *, iostat=ios) pKcopion
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+  
+  case ('pKmolion') ! LEO
+   read(buffer, *, iostat=ios) pKmolion
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   
   case ('infile')
    read(buffer, *, iostat=ios) infile
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -297,6 +312,9 @@ if(npolstep.eq.ndi)call stopundef('npolstep')
 if(Xulimit.eq.ndi)call stopundef('Xulimit')
 if(lseg.eq.ndr)call stopundef('lseg')
 if(pHbulk.eq.ndi)call stopundef('pHbulk')
+if(pKcopmol.eq.ndr)call stopundef('pKcopmol') ! LEO
+if(pKcopion.eq.ndr)call stopundef('pKcopion') ! LEO
+if(pKmolion.eq.ndr)call stopundef('pKmolion') ! LEO
 
 if (rank.eq.0) then
  print*, 'pKa = ', pka
