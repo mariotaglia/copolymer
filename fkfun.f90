@@ -35,6 +35,13 @@ real*8 sumprolnpro_tosend(dimR,dimZ), sumprouchain_tosend(dimR,dimZ)
 real*8 sumtrans_tosend(dimR,dimZ,maxlong)
 real*8 sumtrans(dimR,dimZ,maxlong)
 real*8 gradphi2
+! LEO definitions for fraction calculation
+real*8 auxA, auxB, auxC
+real*8 quadPlus, quadMinus, discriminant
+real*8 vcopmol
+real*8 betaCopA, gammaCopA, deltaCopA, alphaCopA
+real*8 betaMol, gammaMol, deltaMol, alphaMol
+real*8 kappaMol, omegaMol, Omega
 integer, external :: PBCSYMI
 integer, external :: PBCREFI
 ! Jefe
@@ -72,9 +79,20 @@ do is = 1,Npoorsv
   do iR=1,dimR
   do iZ=1,dimZ
     xtotal(is,iR,iZ) = x(n*is+dimR*(iZ-1)+iR) !  segments volume fractions (xtotal) are read from the x provided by kinsol
-  enddo
+    enddo
   enddo
 enddo
+
+
+do iR=1,dimR
+do iZ=1,dimZ
+
+    xNcopA(iR,iZ) = x(n*(Npoorsv+2) + dimR*(iZ-1)+iR) !LEO
+    xNmol(iR,iZ) = x(n*(Npoorsv+3) + dimR*(iZ-1)+iR) ! LEO
+
+enddo
+enddo
+
 
 avpos=0.0
 avneg=0.0
@@ -87,14 +105,54 @@ do iZ=1,dimZ
    avneg(iR,iZ)=vneg*expmuneg*xh(iR,iZ)**vneg*dexp(phi(iR,iZ)) ! volume fraction of anions
    avHplus(iR,iZ)=expmuHplus*xh(iR,iZ)*dexp(-phi(iR,iZ)) ! volume fraction of H+
    avOHmin(iR,iZ)=expmuOHmin*xh(iR,iZ)*dexp(phi(iR,iZ)) ! volume fraction of OH-
+   
+   ! Par ionic LEO
+   vcopmol = 1.0 ! redefine la Kcopmol para que sea igual a lo de Gaby
+   betaCopA=Ka(1)*xh(iR,iZ)/avHplus(iR,iZ)
+   betaMol=Kb(1)*xh(iR,iZ)/avOHmin(iR,iZ)
+   alphaCopA=Kcopion*avpos(iR,iZ)/(vpos*xh(iR,iZ)**(vpos))
+   alphaMol=Kmolion*avneg(iR,iZ)/(vneg*xh(iR,iZ)**(vneg))
+   gammaCopA=betaCopA*alphaCopA/(1.0 + betaCopA)
+   gammaMol=betaMol*alphaMol/(1.0 + betaMol)
+   deltaCopA=(1.0 + betaCopA)*(1.0 + gammaCopA)
+   deltaMol=(1.0 + betaMol)*(1.0 + gammaMol)
+   omegaMol=1.0/(1.0 + betaMol) - gammaMol/deltaMol
+   kappaMol=gammaMol/deltaMol*(xNcopA(iR,iZ)/xNmol(iR,iZ)) - 1.0/(1.0 + betaMol)
+   Omega=deltaCopA/(Kcopmol*betaCopA*betaMol*vcopmol*xNmol(iR,iZ))
+   ! Quadratic equation
+   auxA=1.0
+   auxB=(kappaMol + omegaMol - Omega)/kappaMol
+   auxC=omegaMol/kappaMol
+   discriminant = sqrt(auxB**2 - 4.0*auxA*auxC)
+   quadPlus=(- auxB + discriminant)/(2.0*auxA)
+   quadMinus=(- auxB - discriminant)/(2.0*auxA)
+   
+   if((quadPlus.gt.0.0).and.(quadPlus.lt.1.0))then
+      fASmol(iR,iZ)=quadPlus
+   endif
+   if((quadMinus.gt.0.0).and.(quadMinus.lt.1.0))then
+      fASmol(iR,iZ)=quadMinus
+   endif
+   if(((quadMinus.gt.0.0).and.(quadMinus.lt.1.0)).and.((quadPlus.gt.0.0).and.(quadPlus.lt.1.0)))then
+      print*, 'Both quadratic solutions are between 0 and 1!!!'
+      stop
+   endif
 
-   do is=1,Nacids
-     fAmin(is,iR,iZ)=1.0/(avHplus(iR,iZ)/(Ka(is)*xh(iR,iZ))+1.0)
-   enddo
+   ! Fraction calculation
+   fcopANC(iR,iZ)  = (1.0 + fASmol(iR,iZ))/deltaCopA
+   fcopAC(iR,iZ) = fcopANC(iR,iZ) * betaCopA
+   fcopAion(iR,iZ) = gammaCopA/(1.0 + gammaCopA)*(1.0 - fAsmol(iR,iZ))
+   fmolNC(iR,iZ) = omegaMol + kappaMol*fASmol(iR,iZ)
+   fmolC(iR,iZ) = fmolNC(iR,iZ) * betaMol
+   fmolion(iR,iZ)  = (1.0 - (xNcopA(iR,iZ)/xNmol(iR,iZ))*fAsmol(iR,iZ))*gammaMol/(1.0 + gammaMol)
+   
+   !do is=1,Nacids
+   !  fAmin(is,iR,iZ)=1.0/(avHplus(iR,iZ)/(Ka(is)*xh(iR,iZ))+1.0)
+   !enddo
 
-   do is=1,Nbasics
-     fBHplus(is,iR,iZ)=1.0/(avOHmin(iR,iZ)/(Kb(is)*xh(iR,iZ))+1.0)
-   enddo
+   !do is=1,Nbasics
+   !  fBHplus(is,iR,iZ)=1.0/(avOHmin(iR,iZ)/(Kb(is)*xh(iR,iZ))+1.0)
+   !enddo
 
 enddo
 enddo
@@ -192,12 +250,10 @@ enddo
 
 do iR = 1, dimR
 do iZ = 1, dimZ
-  do ic = 1,Nacids
-    xpot_a(ic,iR,iZ) = 1.0/fAmin(ic,iR,iZ)*exp(phi(iR,iZ))
-  enddo
-  do ic = 1,Nbasics
-    xpot_b(ic,iR,iZ)= 1.0/fBHplus(ic,iR,iZ)*exp(-phi(iR,iZ))
-  enddo
+  
+    xpot_a(1,iR,iZ) = 1.0/fcopANC(iR,iZ)*exp(phi(iR,iZ))
+  
+    xpot_b(1,iR,iZ)= 1.0/fmolNC(iR,iZ)*exp(-phi(iR,iZ))
 enddo
 enddo
 
@@ -391,13 +447,13 @@ do iR = 1, dimR
 do iZ = 1, dimZ
 
    do NC = 1, Ncomp
-   do ic= 1,Nacids
-     xcharge(iR,iZ)=xcharge(iR,iZ)-avpola(ic,iR,iZ,NC)*fAmin(ic,iR,iZ)/(vpol_a(ic)*vsol)
-   enddo
+!   do ic= 1,Nacids
+     xcharge(iR,iZ)=xcharge(iR,iZ)-avpola(ic,iR,iZ,NC)*fcopANC(iR,iZ)/(vpol_a(ic)*vsol)  !LEO
+!   enddo
 
-   do ic= 1,Nbasics
-     xcharge(iR,iZ)=xcharge(iR,iZ)+avpolb(ic,iR,iZ,NC)*fBHplus(ic,iR,iZ)/(vpol_b(ic)*vsol)
-   enddo
+ !  do ic= 1,Nbasics
+     xcharge(iR,iZ)=xcharge(iR,iZ)+avpolb(ic,iR,iZ,NC)*fmolNC(iR,iZ)/(vpol_b(ic)*vsol) !LEO
+!   enddo
    enddo ! NC
 
    iZp=iZ+1
@@ -452,6 +508,15 @@ do is=1,Npoorsv
    enddo
    enddo
 enddo ! is
+
+ do iR=1,dimR
+   do iZ=1,dimZ ! xtotal
+
+    f(n*(Npoorsv+2)+dimR*(iZ-1)+iR)= -avpola(1,iR,iZ,1)  +   f(n*(Npoorsv+2)+dimR*(iZ-1)+iR)
+    f(n*(Npoorsv+3)+dimR*(iZ-1)+iR)= -avpolb(1,iR,iZ,2)  +   f(n*(Npoorsv+3)+dimR*(iZ-1)+iR)
+
+   enddo
+  enddo
 
 
 iter=iter+1

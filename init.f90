@@ -83,6 +83,13 @@ if (Nbasics.gt.0) then
   enddo
 endif
 
+! LEO
+Kcopmol=10**(-pKcopmol)
+Kcopmol=Kcopmol**(Na/1.0d24)
+Kcopion=10**(-pKcopion)
+Kcopion=(Kcopion*vsol/xsolbulk)*(Na/1.0d24)
+Kmolion=10**(-pKmolion)
+Kmolion=(Kmolion*vsol/xsolbulk)*(Na/1.0d24)
 
 expmupos=xposbulk/vpos/xsolbulk**vpos  
 expmuneg=xnegbulk/vneg/xsolbulk**vneg           

@@ -18,6 +18,9 @@ SHELL = /bin/bash
  FFLAGS= -O3 
 # FFLAGS=-g -fbacktrace -fbounds-check # -ffpe-trap=zero,overflow,underflow 
 
+LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
+
+
 ifeq ($(HOST),login.tusker.hcc.unl.edu)
 LFLAGS = -L/home/conda/gzaldivar/bin/kinsol/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/home/conda/gzaldivar/bin/kinsol/lib
 endif

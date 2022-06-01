@@ -14,6 +14,7 @@ module mkai
 integer, allocatable :: segpoorsv(:,:)
 integer Npoorsv ! number of different types of poor solvent
 REAL*8, allocatable ::  xtotal(:,:,:)
+REAL*8, allocatable ::  xNcopA(:,:), xNmol(:,:) ! LEO
 real*8, allocatable :: st(:,:)
 real*8, allocatable :: dimf(:,:), dimfkais(:,:)
 real*8, allocatable :: Xu(:,:,:,:,:)
@@ -88,7 +89,8 @@ real*8 pKcopmol, pKcopion, pKmolion ! LEO
 real*8 Kcopmol, Kcopion, Kmolion ! LEO
 integer, allocatable :: acidtype(:,:), basictype(:,:)
 real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
-real*8, allocatable :: phi(:,:), avpos(:,:), avneg(:,:), avHplus(:,:), avOHmin(:,:), xcharge(:,:), fAmin(:,:,:), fBHplus(:,:,:)
+real*8, allocatable :: phi(:,:), avpos(:,:), avneg(:,:), avHplus(:,:), avOHmin(:,:), xcharge(:,:)! fAmin(:,:,:), fBHplus(:,:,:)
+real*8, allocatable :: fcopANC(:,:), fcopAC(:,:), fcopAion(:,:), fASmol(:,:), fmolNC(:,:), fmolC(:,:), fmolion(:,:)
 real*8 Csalt, wperm, rhosalt, expmupos, expmuneg, xposbulk, xnegbulk
 real*8 cHplus, cOHmin, pHbulk, pOHbulk, pKw, xHplusbulk, xOHminbulk, expmuHplus, expmuOHmin
 endmodule

@@ -171,20 +171,20 @@ F_Eq = 0.0
 do NC = 1, Ncomp
 do iR=1,dimR
 do iZ=1,dimZ
-
-do is=1, Nacids
-F_Eq = F_Eq + fAmin(is,iR,iZ)*dlog(fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
-F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(1.0-fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)                                     
-F_Eq = F_Eq - (1.0-fAmin(is,iR,iZ))*dlog(expmuHplus)*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
-F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(Ka(is))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
-enddo
+!LEO
+!do is=1, Nacids
+!F_Eq = F_Eq + fAmin(is,iR,iZ)*dlog(fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
+!F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(1.0-fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)                                     
+!F_Eq = F_Eq - (1.0-fAmin(is,iR,iZ))*dlog(expmuHplus)*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
+!F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(Ka(is))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
+!enddo
   
-do is=1, Nbasics
-F_Eq = F_Eq + fBHplus(is,iR,iZ)*dlog(fBHplus(is,iR,iZ))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
-F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(1.0-fBHplus(is,iR,iZ))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
-F_Eq = F_Eq - (1.0-fBHplus(is,iR,iZ))*dlog(expmuOHmin)*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
-F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(Kb(is))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
-enddo    
+!do is=1, Nbasics
+!F_Eq = F_Eq + fBHplus(is,iR,iZ)*dlog(fBHplus(is,iR,iZ))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
+!F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(1.0-fBHplus(is,iR,iZ))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
+!F_Eq = F_Eq - (1.0-fBHplus(is,iR,iZ))*dlog(expmuOHmin)*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
+!F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(Kb(is))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
+!enddo    
 
 enddo
 enddo

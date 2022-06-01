@@ -164,7 +164,7 @@ write(fracAmin,'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionAmin',ic,'.',counter,
 open(unit=1050, file=fracAmin)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(1050,*)zc(iR),iZ,fAmin(ic,iR,iZ)
+       write(1050,*)zc(iR),iZ !,fAmin(ic,iR,iZ)  LEO
    enddo
 enddo
 close(1050)
@@ -190,7 +190,7 @@ write(fracBHplus,'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionBHplus',ic,'.',coun
 open(unit=1050, file=fracBHplus)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(1050,*)zc(iR),iZ,fBHplus(ic,iR,iZ)
+      ! write(1050,*)zc(iR),iZ,fBHplus(ic,iR,iZ)   LEO
    enddo
 enddo
 close(1050)

@@ -51,6 +51,10 @@ do i=1,ntot
 pp(i+ntot*npoorsv+ntot)=1.0
 enddo
 
+do i =  (Npoorsv+2)*ntot+1, (Npoorsv+4)*ntot  !LEO
+pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+enddo
+
 ier = 0
 return
 end
@@ -69,9 +73,9 @@ implicit none
 
 integer*4 ier
 
-real*8 x1_old((Npoorsv+2)*ntot)
-real*8 x1((Npoorsv+2)*ntot)
-real*8 f((Npoorsv+2)*ntot)
+real*8 x1_old((Npoorsv+4)*ntot) !LEO
+real*8 x1((Npoorsv+4)*ntot)  !LEO
+real*8 f((Npoorsv+4)*ntot)  !Leo
 
 ! MPI
 
@@ -86,7 +90,7 @@ x1 = x1_old
 !call flush()
 !call MPI_BARRIER(MPI_COMM_WORLD,err)
 
-CALL MPI_BCAST(x1, (Npoorsv+2)*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
+CALL MPI_BCAST(x1, (Npoorsv+4)*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)  ! LEO
 
 !print*,"kinsol ok"
 
@@ -106,14 +110,14 @@ use globals
 use mkai
 implicit none
 integer i
-real*8 x1((Npoorsv+2)*ntot), xg1((Npoorsv+2)*ntot)
-real*8 x1_old((Npoorsv+2)*ntot), xg1_old((Npoorsv+2)*ntot)
+real*8 x1((Npoorsv+4)*ntot), xg1((Npoorsv+4)*ntot)  !LEO
+real*8 x1_old((Npoorsv+2)*ntot), xg1_old((Npoorsv+4)*ntot)  !LEO
 integer*8 iout(15) ! Kinsol additional output information
 real*8 rout(2) ! Kinsol additional out information
 integer*8 msbpre
 real*8 fnormtol, scsteptol
-real*8 scale((Npoorsv+2)*ntot)
-real*8 constr((Npoorsv+2)*ntot)
+real*8 scale((Npoorsv+4)*ntot) !LEO
+real*8 constr((Npoorsv+4)*ntot) !LEO
 integer*4  globalstrat, maxl, maxlrst
 integer*4 ier ! Kinsol error flag
 integer*8 neq ! Kinsol number of equations
@@ -123,7 +127,7 @@ integer ierr
 
 
 ! INICIA KINSOL
-neq = (Npoorsv+2)*ntot
+neq = (Npoorsv+4)*ntot !LEO
 msbpre  = 10 ! maximum number of iterations without prec. setup (?)
 fnormtol = 1.0d-6 ! Function-norm stopping tolerance
 scsteptol = 1.0d-6 ! Function-norm stopping tolerance
@@ -164,6 +168,11 @@ enddo
 
 do i = (Npoorsv+1)*ntot+1,ntot*(Npoorsv+2)
     constr(i)=0.0
+enddo
+
+
+do i = (Npoorsv+2)*ntot+1,ntot*(Npoorsv+4)  !LEO
+    constr(i)=1.0
 enddo
 
 call fkinsetvin('CONSTR_VEC', constr, ier) ! constraint vector
