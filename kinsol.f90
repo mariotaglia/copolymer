@@ -53,6 +53,7 @@ enddo
 
 do i =  (Npoorsv+2)*ntot+1, (Npoorsv+4)*ntot  !LEO
 pp(i) = 0.1 / (1.0+exp(1.0-udata(i)))
+!pp(i) = 1.0
 enddo
 
 ier = 0
@@ -83,6 +84,8 @@ integer tag
 parameter(tag = 0)
 integer err
 
+
+
 x1 = 0.0
 x1 = x1_old
 
@@ -111,7 +114,7 @@ use mkai
 implicit none
 integer i
 real*8 x1((Npoorsv+4)*ntot), xg1((Npoorsv+4)*ntot)  !LEO
-real*8 x1_old((Npoorsv+2)*ntot), xg1_old((Npoorsv+4)*ntot)  !LEO
+real*8 x1_old((Npoorsv+4)*ntot), xg1_old((Npoorsv+4)*ntot)  !LEO
 integer*8 iout(15) ! Kinsol additional output information
 real*8 rout(2) ! Kinsol additional out information
 integer*8 msbpre
@@ -126,6 +129,8 @@ common /psize/ neq ! Kinsol
 integer ierr
 
 
+
+print*, "entre call_kinsol" !LEO
 ! INICIA KINSOL
 neq = (Npoorsv+4)*ntot !LEO
 msbpre  = 10 ! maximum number of iterations without prec. setup (?)
@@ -163,16 +168,15 @@ do i = 1, ntot  !constraint vector
 enddo
 
 do i = ntot+1, (Npoorsv+1)*ntot
-   constr(i) = 1.0 ! xtotal > 0
+   constr(i) = 1.0 ! xtotal >= 0
 enddo
 
 do i = (Npoorsv+1)*ntot+1,ntot*(Npoorsv+2)
     constr(i)=0.0
 enddo
 
-
 do i = (Npoorsv+2)*ntot+1,ntot*(Npoorsv+4)  !LEO
-    constr(i)=1.0
+    constr(i)=1.0 
 enddo
 
 call fkinsetvin('CONSTR_VEC', constr, ier) ! constraint vector

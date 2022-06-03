@@ -24,6 +24,8 @@ real*8 ndr ! undetermined real
 integer NC
 character*16 filename2
 
+
+print*, "LEO ARCHVIO" !LEO
 ! not defined variables, change if any variable can take the value
 ndi = -10000
 ndr = -1.0d10

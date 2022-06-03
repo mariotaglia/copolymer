@@ -19,7 +19,7 @@ implicit none
 
 integer is
 integer *4 ier ! Kinsol error flag
-real*8 x1((npoorsv+2)*ntot),xg1((npoorsv+2)*ntot),x1ini((npoorsv+2)*ntot)   ! density solvent iteration vector
+real*8 x1((npoorsv+4)*ntot),xg1((npoorsv+4)*ntot),x1ini((npoorsv+4)*ntot)   ! density solvent iteration vector
 
 real*8 trash, trash2
 
@@ -28,7 +28,7 @@ integer n                 ! number of lattice sites
 external fcnelect         ! function containing the SCMFT eqs for solver
 integer i,iR,iZ ! dummy indices
 
-REAL*8 xfile((npoorsv+2)*ntot)                        
+REAL*8 xfile((npoorsv+4)*ntot)                        
 
 integer countfile         ! enumerates the outputfiles 
 
@@ -57,6 +57,13 @@ do iZ=1,dimZ
       xg1(n*is+dimR*(iZ-1)+iR)=0.0001
       x1(n*is+dimR*(iZ-1)+iR)=0.0001
    enddo
+   
+   xg1(n*(npoorsv+2)+dimR*(iZ-1)+iR)=0.0001 !0.0001   !LEO
+   x1(n*(npoorsv+2)+dimR*(iZ-1)+iR)=0.0001 ! 0.0001   !LEO
+   xg1(n*(npoorsv+3)+dimR*(iZ-1)+iR)= 0.0001 !0.0001  !LEO
+   x1(n*(npoorsv+3)+dimR*(iZ-1)+iR)=0.0001 !0.0001   !LEO
+
+
 
 enddo
 enddo
@@ -84,6 +91,17 @@ if (infile.eq.1) then
      read(200,*)trash,trash2,xfile(n*(Npoorsv+1)+dimR*(iZ-1)+iR)
      x1(n*(npoorsv+1)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+1)+dimR*(iZ-1)+iR)
      xg1(n*(npoorsv+1)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+1)+dimR*(iZ-1)+iR)
+
+
+      read(300,*)trash,trash2,xfile(n*(Npoorsv+2)+dimR*(iZ-1)+iR)
+     x1(n*(npoorsv+2)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+2)+dimR*(iZ-1)+iR)
+     xg1(n*(npoorsv+2)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+2)+dimR*(iZ-1)+iR)
+
+      read(400,*)trash,trash2,xfile(n*(Npoorsv+3)+dimR*(iZ-1)+iR)
+     x1(n*(npoorsv+3)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+3)+dimR*(iZ-1)+iR)
+     xg1(n*(npoorsv+3)+dimR*(iZ-1)+iR)=xfile(n*(npoorsv+3)+dimR*(iZ-1)+iR)
+
+
 
    enddo !iR
    enddo !iZ
@@ -120,13 +138,13 @@ npol = npolini
 do while (actionflag.lt.3)
    if(rank.eq.0)print*, ' npol:', npol, 'maxntotR:', maxntotcounterR, 'maxntotZ:', maxntotcounterZ
 
-   do i=1,(npoorsv+2)*n             ! initial guess for x1
+   do i=1,(npoorsv+4)*n    !LEO         ! initial guess for x1
       xg1(i)=x1(i)
    enddo
 
 ! JEFE
    if(rank.eq.0) then ! solo el jefe llama al solver
-      print*, 'solve: Enter solver ', (npoorsv+2)*ntot, ' eqs'
+      print*, 'solve: Enter solver ', (npoorsv+4)*ntot, ' eqs'
    endif   
 
    iter=0
@@ -140,7 +158,7 @@ do while (actionflag.lt.3)
 
    if((norma.gt.error).or.(ier.lt.0).or.(isnan(norma))) then
       if(actionflag.gt.0) then
-         print*, " I am ", rank, " I stopped the work"
+         print*, " I am ", rank, " I stopped the work", 'ier:',ier,'norma',norma,'error:',error
          stop
       endif
    endif

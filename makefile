@@ -15,7 +15,7 @@ $(info USER is ${USER})
 SHELL = /bin/bash
 
 # FFLAGS= -Wall 
- FFLAGS= -O3 
+FLAGS= -O3 -fbounds-check
 # FFLAGS=-g -fbacktrace -fbounds-check # -ffpe-trap=zero,overflow,underflow 
 
 LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib

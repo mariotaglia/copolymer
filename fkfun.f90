@@ -12,10 +12,10 @@ use mkai
 use transgauche
 implicit none
 integer NC
-real*8 all_tosend(4*ntot), all_toreceive(4*ntot)
+!real*8 all_tosend(4*ntot), all_toreceive(4*ntot)
 integer*4 ier2
 real*8 protemp
-real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
+real*8 x((Npoorsv+4)*ntot),f((Npoorsv+4)*ntot)
 real*8 xh(dimR+1,dimZ) 
 real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
 real*8 pro(cuantas)
@@ -86,10 +86,8 @@ enddo
 
 do iR=1,dimR
 do iZ=1,dimZ
-
     xNcopA(iR,iZ) = x(n*(Npoorsv+2) + dimR*(iZ-1)+iR) !LEO
     xNmol(iR,iZ) = x(n*(Npoorsv+3) + dimR*(iZ-1)+iR) ! LEO
-
 enddo
 enddo
 
@@ -127,27 +125,37 @@ do iZ=1,dimZ
    quadPlus=(- auxB + discriminant)/(2.0*auxA)
    quadMinus=(- auxB - discriminant)/(2.0*auxA)
    
-   if((quadPlus.gt.0.0).and.(quadPlus.lt.1.0))then
+   if((quadPlus.ge.0.0).and.(quadPlus.le.1.0))then
       fASmol(iR,iZ)=quadPlus
    endif
-   if((quadMinus.gt.0.0).and.(quadMinus.lt.1.0))then
+   if((quadMinus.ge.0.0).and.(quadMinus.le.1.0))then
       fASmol(iR,iZ)=quadMinus
    endif
-   if(((quadMinus.gt.0.0).and.(quadMinus.lt.1.0)).and.((quadPlus.gt.0.0).and.(quadPlus.lt.1.0)))then
+   if(((quadMinus.ge.0.0).and.(quadMinus.le.1.0)).and.((quadPlus.ge.0.0).and.(quadPlus.le.1.0)))then
       print*, 'Both quadratic solutions are between 0 and 1!!!'
       stop
    endif
 
+ 
    ! Fraction calculation
-   fcopANC(iR,iZ)  = (1.0 + fASmol(iR,iZ))/deltaCopA
-   fcopAC(iR,iZ) = fcopANC(iR,iZ) * betaCopA
-   fcopAion(iR,iZ) = gammaCopA/(1.0 + gammaCopA)*(1.0 - fAsmol(iR,iZ))
-   fmolNC(iR,iZ) = omegaMol + kappaMol*fASmol(iR,iZ)
-   fmolC(iR,iZ) = fmolNC(iR,iZ) * betaMol
-   fmolion(iR,iZ)  = (1.0 - (xNcopA(iR,iZ)/xNmol(iR,iZ))*fAsmol(iR,iZ))*gammaMol/(1.0 + gammaMol)
+   !fASmol = 0.0
+   fcopANC(iR,iZ)  = 1.0!(1.0 + fASmol(iR,iZ))/deltaCopA
+   fcopAC(iR,iZ) = 1.0/(avHplus(iR,iZ)/(Ka(1)*xh(iR,iZ))+1.0)!fcopANC(iR,iZ) * betaCopA
+   fcopAion(iR,iZ) = 1.0!gammaCopA/(1.0 + gammaCopA)*(1.0 - fAsmol(iR,iZ))
+   fmolNC(iR,iZ) = 1.0!omegaMol + kappaMol*fASmol(iR,iZ)
+   fmolC(iR,iZ) = 1.0/(avOHmin(iR,iZ)/(Kb(1)*xh(iR,iZ))+1.0)!fmolNC(iR,iZ) * betaMol
+   fmolion(iR,iZ)  = 1.0!(1.0 - (xNcopA(iR,iZ)/xNmol(iR,iZ))*fAsmol(iR,iZ))*gammaMol/(1.0 + gammaMol)
    
+!   print*, 'fcopAion:', fcopAion, ' fmolion:', fmolion
+  
+   !print*, 'fcopANC:', fcopANC(iR,iZ),'fcopAC',fcopAC(iR,iZ)
+   !print*,
+!   print*, 'xNcopA',xNcopA(iR,iZ), 'xNmol',xNmol(iR,iZ)
+ !  print*,
+  ! print*, 'xtotal',xtotal(1,iR,iZ),xtotal(2,iR,iZ)
+
    !do is=1,Nacids
-   !  fAmin(is,iR,iZ)=1.0/(avHplus(iR,iZ)/(Ka(is)*xh(iR,iZ))+1.0)
+    ! fAmin(is,iR,iZ)=1.0/(avHplus(iR,iZ)/(Ka(is)*xh(iR,iZ))+1.0)
    !enddo
 
    !do is=1,Nbasics
@@ -250,10 +258,8 @@ enddo
 
 do iR = 1, dimR
 do iZ = 1, dimZ
-  
-    xpot_a(1,iR,iZ) = 1.0/fcopANC(iR,iZ)*exp(phi(iR,iZ))
-  
-    xpot_b(1,iR,iZ)= 1.0/fmolNC(iR,iZ)*exp(-phi(iR,iZ))
+    xpot_a(1,iR,iZ) = 1.0/fcopAC(iR,iZ)*exp(phi(iR,iZ)) ! LEO
+    xpot_b(1,iR,iZ)= 1.0/fmolC(iR,iZ)*exp(-phi(iR,iZ)) ! LEO
 enddo
 enddo
 
@@ -270,7 +276,7 @@ sumprolnpro = 0.0
 sumprouchain=0.0
 sumtrans_tosend = 0.0
 sumtrans = 0.0
-all_toreceive = 0.0
+!all_toreceive = 0.0
 xpot_a(0,:,:)=1.0
 xpot_b(0,:,:)=1.0
 
@@ -283,7 +289,7 @@ avpol_tosend = 0.0
 xpol_tosend = 0.0
 sumprolnpro_tosend = 0.0
 sumprouchain_tosend=0.0
-all_tosend = 0.0
+!all_tosend = 0.0
 avpola_tmp = 0.0
 avpolb_tmp = 0.0
 avpol_tmp = 0.0
@@ -304,10 +310,15 @@ do iiZ=1, maxntotcounterZ
          is = segpoorsv(k,NC)
          ia = acidtype(k,NC)
          ib = basictype(k,NC) 
-         
+   
+         if((ia.gt.1).or.(ib.gt.1))then
+            print*,'You cannot put more than 1 acid or base!!!'
+            stop
+         endif
+
          pro(i)= pro(i) * xpot(is,aR,aZ)
 
-         pro(i)= pro(i) * xpot_a(ia,aR,aZ) 
+         pro(i)= pro(i) * xpot_a(ia,aR,aZ)
      
          pro(i)= pro(i) * xpot_b(ib,aR,aZ)
 
@@ -446,15 +457,15 @@ xcharge(:,:) = avpos(:,:)/(vpos*vsol)-avneg(:,:)/(vneg*vsol)+avHplus(:,:)/vsol-a
 do iR = 1, dimR
 do iZ = 1, dimZ
 
-   do NC = 1, Ncomp
-!   do ic= 1,Nacids
-     xcharge(iR,iZ)=xcharge(iR,iZ)-avpola(ic,iR,iZ,NC)*fcopANC(iR,iZ)/(vpol_a(ic)*vsol)  !LEO
-!   enddo
+  ! do NC = 1, Ncomp !LEO
+!   do ic= 1,Nacids !LEO
+     xcharge(iR,iZ)=xcharge(iR,iZ)-avpola(1,iR,iZ,1)*fcopAC(iR,iZ)/(vpol_a(1)*vsol)  !LEO
+!   enddo !LEO
 
- !  do ic= 1,Nbasics
-     xcharge(iR,iZ)=xcharge(iR,iZ)+avpolb(ic,iR,iZ,NC)*fmolNC(iR,iZ)/(vpol_b(ic)*vsol) !LEO
-!   enddo
-   enddo ! NC
+ !  do ic= 1,Nbasics!LEO
+     xcharge(iR,iZ)=xcharge(iR,iZ)+avpolb(1,iR,iZ,2)*fmolC(iR,iZ)/(vpol_b(1)*vsol) !LEO
+!   enddo!LEO
+ !  enddo ! NC LEO
 
    iZp=iZ+1
    iZm=iZ-1
@@ -509,15 +520,18 @@ do is=1,Npoorsv
    enddo
 enddo ! is
 
+
  do iR=1,dimR
-   do iZ=1,dimZ ! xtotal
-
-    f(n*(Npoorsv+2)+dimR*(iZ-1)+iR)= -avpola(1,iR,iZ,1)  +   f(n*(Npoorsv+2)+dimR*(iZ-1)+iR)
-    f(n*(Npoorsv+3)+dimR*(iZ-1)+iR)= -avpolb(1,iR,iZ,2)  +   f(n*(Npoorsv+3)+dimR*(iZ-1)+iR)
-
+   do iZ=1,dimZ 
+    f(n*(Npoorsv+2)+dimR*(iZ-1)+iR) = xNcopA(iR,iZ) !LEO        
+    f(n*(Npoorsv+3)+dimR*(iZ-1)+iR) = xNmol(iR,iZ) ! LEO
+    f(n*(Npoorsv+2)+dimR*(iZ-1)+iR)= -avpola(1,iR,iZ,1)  +   f(n*(Npoorsv+2)+dimR*(iZ-1)+iR) ! LEO
+    f(n*(Npoorsv+3)+dimR*(iZ-1)+iR)= -avpolb(1,iR,iZ,2)  +   f(n*(Npoorsv+3)+dimR*(iZ-1)+iR) ! LEO
+    !print*,'avpola',avpola(1,iR,iZ,1), 'avpolb', avpolb(1,iR,iZ,2),'avpol',avpol(1,iR,iZ,1),avpol(1,iR,iZ,2)
    enddo
   enddo
 
+   
 
 iter=iter+1
 
@@ -525,7 +539,7 @@ algo = 0.0
 algo1 = 0.0
 algo2 = 0.0
 
-do i = 1, n*(Npoorsv+2)
+do i = 1, n*(Npoorsv+4)
    algo = algo + f(i)**2
 end do
 
