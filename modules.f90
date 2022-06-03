@@ -78,6 +78,7 @@ endmodule
 module volume
 real*8, allocatable :: vchain(:)
 real*8 vsol, vpos, vneg, r_neg, r_pos
+real*8 vcopmol !LEO
 real*8, allocatable :: vpol(:), vpol_a(:), vpol_b(:)
 endmodule
 
@@ -90,7 +91,7 @@ real*8 Kcopmol, Kcopion, Kmolion ! LEO
 integer, allocatable :: acidtype(:,:), basictype(:,:)
 real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
 real*8, allocatable :: phi(:,:), avpos(:,:), avneg(:,:), avHplus(:,:), avOHmin(:,:), xcharge(:,:)! fAmin(:,:,:), fBHplus(:,:,:)
-real*8, allocatable :: fcopANC(:,:), fcopAC(:,:), fcopAion(:,:), fASmol(:,:), fmolNC(:,:), fmolC(:,:), fmolion(:,:)
+real*8, allocatable :: fcopANC(:,:), fcopAC(:,:), fcopAion(:,:), fASmol(:,:), fmolNC(:,:), fmolC(:,:), fmolion(:,:),fAScopA(:,:)
 real*8 Csalt, wperm, rhosalt, expmupos, expmuneg, xposbulk, xnegbulk
 real*8 cHplus, cOHmin, pHbulk, pOHbulk, pKw, xHplusbulk, xOHminbulk, expmuHplus, expmuOHmin
 endmodule

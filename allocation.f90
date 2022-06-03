@@ -13,7 +13,7 @@ allocate (phi(0:dimR+1,dimZ))
 !allocate (fAmin(Nacids,dimR,dimZ), fBHplus(Nbasics,dimR,dimZ), avpos(dimR,dimZ), avneg(dimR,dimZ)) !LEO
 allocate (avpos(dimR,dimZ), avneg(dimR,dimZ)) ! LEO
 allocate (avHplus(dimR,dimZ),avOHmin(dimR,dimZ), xcharge(dimR,dimZ))
-allocate (fcopANC(dimR,dimZ), fcopAC(dimR,dimZ), fcopAion(dimR,dimZ), fASmol(dimR,dimZ)) !LEO
+allocate (fcopANC(dimR,dimZ), fcopAC(dimR,dimZ), fcopAion(dimR,dimZ), fASmol(dimR,dimZ),fAScopA(dimR,dimZ))!LEO
 allocate (fmolNC(dimR,dimZ), fmolC(dimR,dimZ), fmolion(dimR,dimZ)) !LEO
 allocate (xNcopA(dimR,dimZ), xNmol(dimR,dimZ)) ! LEO
 allocate (Ntrans(maxlong,cuantas,Ncomp))

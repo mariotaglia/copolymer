@@ -38,7 +38,7 @@ real*8 gradphi2
 ! LEO definitions for fraction calculation
 real*8 auxA, auxB, auxC
 real*8 quadPlus, quadMinus, discriminant
-real*8 vcopmol
+!real*8 vcopmol
 real*8 betaCopA, gammaCopA, deltaCopA, alphaCopA
 real*8 betaMol, gammaMol, deltaMol, alphaMol
 real*8 kappaMol, omegaMol, Omega
@@ -95,9 +95,9 @@ enddo
 avpos=0.0
 avneg=0.0
 
-
-do iR=1,dimR
-do iZ=1,dimZ
+!modificar dps para que calcule si ambos son diferentes de cero
+do iR=1,dimR !maxntotcounterR !dimR
+do iZ=1, dimZ !maxntotcounterZ !dimZ
 
    avpos(iR,iZ)=vpos*expmupos*xh(iR,iZ)**vpos*dexp(-phi(iR,iZ)) ! volume fraction of cations
    avneg(iR,iZ)=vneg*expmuneg*xh(iR,iZ)**vneg*dexp(phi(iR,iZ)) ! volume fraction of anions
@@ -115,6 +115,9 @@ do iZ=1,dimZ
    deltaCopA=(1.0 + betaCopA)*(1.0 + gammaCopA)
    deltaMol=(1.0 + betaMol)*(1.0 + gammaMol)
    omegaMol=1.0/(1.0 + betaMol) - gammaMol/deltaMol
+
+   if((xNCopA(iR,iZ).ne.0.0).AND.(xNmol(iR,iZ).ne.0.0)) then
+
    kappaMol=gammaMol/deltaMol*(xNcopA(iR,iZ)/xNmol(iR,iZ)) - 1.0/(1.0 + betaMol)
    Omega=deltaCopA/(Kcopmol*betaCopA*betaMol*vcopmol*xNmol(iR,iZ))
    ! Quadratic equation
@@ -125,27 +128,58 @@ do iZ=1,dimZ
    quadPlus=(- auxB + discriminant)/(2.0*auxA)
    quadMinus=(- auxB - discriminant)/(2.0*auxA)
    
+ !  print*,'betaCopA',betaCopA,'betaMol',betaMol
+ !  print*,'alphaCopA,',alphaCopA,'alphaMol',alphaMol
+ !  print*,'gammaCopA',gammaCopA,'gammaMol', gammaMol
+ !  print*, 'deltaCopaA',deltaCopA,'deltaMol',deltaMol
+ !  print*,'omegaMol',omegaMol,'kappaMol',kappaMol,'Omega',Omega
+ !  print*, 'auxB',auxB,'auxC',auxC 
+  ! print*, 'quadPlus',quadPlus,'quadMinus',quadMinus
+   
+
    if((quadPlus.ge.0.0).and.(quadPlus.le.1.0))then
       fASmol(iR,iZ)=quadPlus
+  !    print*,'QUADPLUS',iR,iZ
    endif
    if((quadMinus.ge.0.0).and.(quadMinus.le.1.0))then
       fASmol(iR,iZ)=quadMinus
+   !   print*,'QUADMINUS',iR,iZ
    endif
    if(((quadMinus.ge.0.0).and.(quadMinus.le.1.0)).and.((quadPlus.ge.0.0).and.(quadPlus.le.1.0)))then
       print*, 'Both quadratic solutions are between 0 and 1!!!'
       stop
    endif
 
- 
+   else
+    fASmol(iR,iZ) = 0.0
+   endif  ! Chequeo que ninguna fraccion sea cero    
    ! Fraction calculation
    !fASmol = 0.0
-   fcopANC(iR,iZ)  = 1.0!(1.0 + fASmol(iR,iZ))/deltaCopA
-   fcopAC(iR,iZ) = 1.0/(avHplus(iR,iZ)/(Ka(1)*xh(iR,iZ))+1.0)!fcopANC(iR,iZ) * betaCopA
-   fcopAion(iR,iZ) = 1.0!gammaCopA/(1.0 + gammaCopA)*(1.0 - fAsmol(iR,iZ))
-   fmolNC(iR,iZ) = 1.0!omegaMol + kappaMol*fASmol(iR,iZ)
-   fmolC(iR,iZ) = 1.0/(avOHmin(iR,iZ)/(Kb(1)*xh(iR,iZ))+1.0)!fmolNC(iR,iZ) * betaMol
-   fmolion(iR,iZ)  = 1.0!(1.0 - (xNcopA(iR,iZ)/xNmol(iR,iZ))*fAsmol(iR,iZ))*gammaMol/(1.0 + gammaMol)
-   
+   fcopANC(iR,iZ)  = (1.0 + fASmol(iR,iZ))/deltaCopA
+   fcopAC(iR,iZ) =fcopANC(iR,iZ) * betaCopA
+   fcopAion(iR,iZ) = gammaCopA/(1.0 + gammaCopA)*(1.0 - fAsmol(iR,iZ))
+   fmolNC(iR,iZ) = omegaMol + kappaMol*fASmol(iR,iZ)
+   fmolC(iR,iZ) = fmolNC(iR,iZ) * betaMol
+ 
+   if(xNmol(iR,iZ).ne.0) then
+    fmolion(iR,iZ)  = (1.0 - (xNcopA(iR,iZ)/xNmol(iR,iZ))*fAsmol(iR,iZ))*gammaMol/(1.0 + gammaMol)
+   else
+    fmolion(iR,iZ)  = 0.0
+   endif        
+
+   fAScopA(iR,iZ) = 1 -    fmolNC(iR,iZ) - fmolC(iR,iZ)  - fmolion(iR,iZ)
+
+   ! print*,'iR=',iR,'iZ=',iZ, 'HOLA LEO!'
+  ! print*,'fASmol',fASmol(iR,iZ)
+  ! print*,'fcopANC',fcopANC(iR,iZ)
+  ! print*,'fcopAC',fcopAC(iR,iZ)
+  ! print*,'fcopion',fcopAion(iR,iZ)
+  ! print*,'fmolNC',fmolNC(iR,iZ)
+  ! print*,'fmolC',fmolC(iR,iZ)
+  ! print*,'fmolion',fmolion(iR,iZ)
+
+  ! stop
+
 !   print*, 'fcopAion:', fcopAion, ' fmolion:', fmolion
   
    !print*, 'fcopANC:', fcopANC(iR,iZ),'fcopAC',fcopAC(iR,iZ)
@@ -161,7 +195,6 @@ do iZ=1,dimZ
    !do is=1,Nbasics
    !  fBHplus(is,iR,iZ)=1.0/(avOHmin(iR,iZ)/(Kb(is)*xh(iR,iZ))+1.0)
    !enddo
-
 enddo
 enddo
 
@@ -525,8 +558,10 @@ enddo ! is
    do iZ=1,dimZ 
     f(n*(Npoorsv+2)+dimR*(iZ-1)+iR) = xNcopA(iR,iZ) !LEO        
     f(n*(Npoorsv+3)+dimR*(iZ-1)+iR) = xNmol(iR,iZ) ! LEO
-    f(n*(Npoorsv+2)+dimR*(iZ-1)+iR)= -avpola(1,iR,iZ,1)  +   f(n*(Npoorsv+2)+dimR*(iZ-1)+iR) ! LEO
-    f(n*(Npoorsv+3)+dimR*(iZ-1)+iR)= -avpolb(1,iR,iZ,2)  +   f(n*(Npoorsv+3)+dimR*(iZ-1)+iR) ! LEO
+    f(n*(Npoorsv+2)+dimR*(iZ-1)+iR)= - avpola(1,iR,iZ,1) + f(n*(Npoorsv+2)+dimR*(iZ-1)+iR) ! LEO
+    f(n*(Npoorsv+3)+dimR*(iZ-1)+iR)= - avpolb(1,iR,iZ,2) + f(n*(Npoorsv+3)+dimR*(iZ-1)+iR) ! LEO
+!     f(n*(Npoorsv+2)+dimR*(iZ-1)+iR) = 0! xNcopA(iR,iZ) !LEO        
+!    f(n*(Npoorsv+3)+dimR*(iZ-1)+iR) =  0!
     !print*,'avpola',avpola(1,iR,iZ,1), 'avpolb', avpolb(1,iR,iZ,2),'avpol',avpol(1,iR,iZ,1),avpol(1,iR,iZ,2)
    enddo
   enddo
