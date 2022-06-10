@@ -76,6 +76,7 @@ do while (conf.lt.cuantas)
 
    do is=0,Npoorsv+1
       sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr)
+      !print*,'test Rgyr',is, Rgyr(is),Ugyr  !yamila
    enddo
 
    sumUgyr=sumUgyr+exp(-Ugyr)

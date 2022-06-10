@@ -315,6 +315,8 @@ enddo
 Rgyr(Npoorsv+1)=sqrt(Rgyr(Npoorsv+1)/2.0)
 Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)/float(long(NC))
 
+
+!print*,'from CADENAS', Rgyr(Npoorsv+1), long(NC), seglength(1),seglength(2) !yamila
 ncha=0
 
 do i=1,12

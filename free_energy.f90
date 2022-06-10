@@ -15,6 +15,7 @@ real*8 gradphi2
 real*8 Free_energy, F_Mix_s, F_Mix_pos, F_mix_p        
 real*8 F_Mix_neg, F_Mix_Hplus                 
 real*8 Free_energy2, sumpi, sumrho, sumel,sumpol, mupol, sumdiel
+real*8 sumeq ! LEO
 real*8 F_Mix_OHmin, F_Conf, F_Uchain     
 real*8  F_Eq,F_vdW(Npoorsv,Npoorsv), F_electro                            
 integer is, js, iR, iZ, jR, jZ, kZ, kkZ, jZp, iZp, iZm, jZm
@@ -176,41 +177,48 @@ cteAc = jacobian(iR)*deltaR*deltaZ/(vpol_a(1)*vsol)
 cteBasic = jacobian(iR)*deltaR*deltaZ/(vpol_b(1)*vsol)
 do iZ=1,dimZ
 !LEO
-!eq acido base del acido:
-if(fcopAC(iR,iZ).ne.0.0) F_Eq = F_Eq + fcopAC(iR,iZ)*dlog(fcopAC(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
-if(fcopANC(iR,iZ).ne.0.0) F_Eq = F_Eq + fcopANC(iR,iZ)*dlog(fcopANC(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
 
+!eq acido base del acido:
+
+!if(fcopAC(iR,iZ).ne.0.0) F_Eq = F_Eq + fcopAC(iR,iZ)*dlog(fcopAC(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
+!if(fcopANC(iR,iZ).ne.0.0) F_Eq = F_Eq + fcopANC(iR,iZ)*dlog(fcopANC(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
+F_Eq = F_Eq + fcopAC(iR,iZ)*dlog(fcopAC(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
+F_Eq = F_Eq + fcopANC(iR,iZ)*dlog(fcopANC(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
 F_Eq = F_Eq - fcopANC(iR,iZ)*dlog(expmuHplus)*avpola(1,iR,iZ,1)*cteAc
-F_eq = F_eq - fcopANC(iR,iZ)*dlog(ka(1))*avpola(1,iR,iZ,1)*cteAc
+F_eq = F_eq + fcopANC(iR,iZ)*dlog(Ka(1))*avpola(1,iR,iZ,1)*cteAc
 
 !eq acido base de la base
-if(fmolC(iR,iZ).ne.0.0) F_Eq = F_Eq + fmolC(iR,iZ)*dlog(fmolC(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
-if(fmolNC(iR,iZ).ne.0.0) F_Eq = F_Eq + fmolNC(iR,iZ)*dlog(fmolNC(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
 
-F_Eq = F_Eq - fmolNC(iR,iZ)*dlog(expmuHplus)*avpolb(1,iR,iZ,2)*cteBasic
-F_Eq = F_Eq - fmolNC(iR,iZ)*dlog(Kb(1))*avpolb(1,iR,iZ,2)*cteBasic
+!if(fmolC(iR,iZ).ne.0.0) F_Eq = F_Eq + fmolC(iR,iZ)*dlog(fmolC(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
+!if(fmolC(iR,iZ).ne.0.0) F_Eq = F_Eq + fmolC(iR,iZ)*dlog(fmolC(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
+F_Eq = F_Eq + fmolC(iR,iZ)*dlog(fmolC(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
+F_Eq = F_Eq + fmolNC(iR,iZ)*dlog(fmolNC(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
+F_Eq = F_Eq - fmolNC(iR,iZ)*dlog(expmuOHmin)*avpolb(1,iR,iZ,2)*cteBasic
+F_Eq = F_Eq + fmolNC(iR,iZ)*dlog(Kb(1))*avpolb(1,iR,iZ,2)*cteBasic
 
 !eq par ionico
 
-if(fcopAion(iR,iZ).ne.0.0) F_Eq = F_Eq + fcopAion(iR,iZ)*dlog(fcopAion(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
-F_eq = F_eq - fcopAion(iR,iZ)*dlog(Kcopion)*avpola(1,iR,iZ,1)*cteAc
+!if(fcopAion(iR,iZ).ne.0.0) F_Eq = F_Eq + fcopAion(iR,iZ)*dlog(fcopAion(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
 F_Eq = F_Eq - fcopAion(iR,iZ)*dlog(expmupos)*avpola(1,iR,iZ,1)*cteAc
+F_eq = F_eq + fcopAion(iR,iZ)*dlog(Kcopion/vpos)*avpola(1,iR,iZ,1)*cteAc
+F_Eq = F_Eq + fcopAion(iR,iZ)*dlog(fcopAion(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
 
-if(fmolion(iR,iZ).ne.0.0) F_Eq = F_Eq + fmolion(iR,iZ)*dlog(fmolion(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
-F_eq = F_eq - fmolion(iR,iZ)*dlog(Kmolion)*avpolb(1,iR,iZ,2)*cteBasic
+!if(fmolion(iR,iZ).ne.0.0) F_Eq = F_Eq + fmolion(iR,iZ)*dlog(fmolion(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
 F_Eq = F_Eq - fmolion(iR,iZ)*dlog(expmuneg)*avpolb(1,iR,iZ,2)*cteBasic
+F_eq = F_eq + fmolion(iR,iZ)*dlog(Kmolion/vneg)*avpolb(1,iR,iZ,2)*cteBasic
+F_Eq = F_Eq + fmolion(iR,iZ)*dlog(fmolion(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
 
 !print*,iR,iZ,'pos',dlog(expmupos),avpos(iR,iZ)/(vpos*vsol),cteAc,(vpol_a(1)*vsol)
 !print*,iR,iZ,'neg',dlog(expmuneg),avneg(iR,iZ)/(vneg*vsol),cteBasic,(vpol_b(1)*vsol)
-
-
 ! eq de as CopA-mol
-if(fASmol(iR,iZ).ne.0.0) F_Eq = F_Eq + fASmol(iR,iZ)*dlog(fASmol(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
-if(fASmol(iR,iZ).ne.0.0) F_Eq = F_Eq + fASmol(iR,iZ)*dlog(fASmol(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
-F_eq = F_eq - dlog(Kcopmol)*(fASmol(iR,iZ)*avpola(1,iR,iZ,1)*cteAc+fAScopA(iR,iZ)*avpolb(1,iR,iZ,2)*cteBasic)
 
-if((avpola(1,iR,iZ,1).ne.0).AND.(fASmol(iR,iZ).ne.0)) F_eq = F_eq - & 
-        &fASmol(iR,iZ)*avpola(1,iR,iZ,1)*(dlog(avpola(1,iR,iZ,1)*fASmol(iR,iZ)*vcopmol*vsol)-1)*cteAc
+F_eq = F_eq - dlog(Kcopmol)*fASmol(iR,iZ)*avpola(1,iR,iZ,1)*cteAc
+if(fASmol(iR,iZ).gt.1.0d-10) F_Eq = F_Eq + fASmol(iR,iZ)*dlog(fASmol(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
+if(fAScopA(iR,iZ).gt.1.0d-10) F_Eq = F_Eq + fAScopA(iR,iZ)*dlog(fAScopA(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
+!F_eq = F_eq - dlog(Kcopmol)*(fASmol(iR,iZ)*avpola(1,iR,iZ,1)*cteAc+fAScopA(iR,iZ)*avpolb(1,iR,iZ,2)*cteBasic)
+
+if((avpola(1,iR,iZ,1).gt.1.0d-10).and.(fASmol(iR,iZ).gt.1.0d-10)) F_eq = F_eq - & 
+        &fASmol(iR,iZ)*avpola(1,iR,iZ,1)*(dlog(avpola(1,iR,iZ,1)*fASmol(iR,iZ)/vpol_a(1)/vsol) - 1.0)*cteAc
 !print*, 'vcopmol', vcopmol
 !do is=1, Nacids
 !F_Eq = F_Eq + fAmin(is,iR,iZ)*dlog(fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
@@ -334,6 +342,7 @@ sumrho=0.0
 sumel=0.0                                                     
 sumdiel=0.0                                                     
 sumpol = 0.0
+sumeq = 0.0
 
 do iR= 1, dimR                                                
 do iZ= 1, dimZ
@@ -359,6 +368,14 @@ do iR=1,maxntotcounterR
 do iZ=1,maxntotcounterZ
   sumrho = sumrho + (-xpol(iR,iZ,NC)*vsol*jacobian(iR)) ! sum over  rho_i i=+,-,si
 enddo
+enddo
+enddo
+
+! Chemical equilibrium LEO
+do iR=1,dimR
+do iZ=1,dimZ
+ !test = test + (avpola(is,iR,iZ,Nc)*fboundA(is,ir,iz))-(avpolb(is,iR,iZ,Nc)*fboundB(is,ir,iz))
+   sumeq = sumeq + avpola(1,iR,iZ,1)*fASmol(iR,iZ)/(vpol_a(1))*jacobian(iR) ! sum over  rho_i i=+,-,si
 enddo
 enddo
 
@@ -408,7 +425,7 @@ enddo
 
 enddo
 
-Free_Energy2 = (sumpi + sumrho + sumdiel)/vsol*deltaR*deltaZ + sumel                      
+Free_Energy2 = (sumpi + sumrho + sumdiel + sumeq)/vsol*deltaR*deltaZ + sumel                      
 
 do is=1,Npoorsv
   do js=1,Npoorsv

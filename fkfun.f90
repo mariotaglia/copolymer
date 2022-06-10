@@ -36,6 +36,7 @@ real*8 sumtrans_tosend(dimR,dimZ,maxlong)
 real*8 sumtrans(dimR,dimZ,maxlong)
 real*8 gradphi2
 ! LEO definitions for fraction calculation
+real*8 packing, packing2
 real*8 auxA, auxB, auxC
 real*8 quadPlus, quadMinus, discriminant
 !real*8 vcopmol
@@ -44,6 +45,10 @@ real*8 betaMol, gammaMol, deltaMol, alphaMol
 real*8 kappaMol, omegaMol, Omega
 integer, external :: PBCSYMI
 integer, external :: PBCREFI
+real*8 KK0check(dimR,dimZ), KKaAcheckplus(dimR,dimZ), KKaANa(dimR,dimZ) ! LEO
+real*8 KKaBcheckmin(dimR,dimZ), KKaBCl(dimR,dimZ) ! LEO
+real*8 testeOk ! LEO
+real*8 lim
 ! Jefe
 !flagsolver=1
 
@@ -86,8 +91,8 @@ enddo
 
 do iR=1,dimR
 do iZ=1,dimZ
-    xNcopA(iR,iZ) = x(n*(Npoorsv+2) + dimR*(iZ-1)+iR) !LEO
-    xNmol(iR,iZ) = x(n*(Npoorsv+3) + dimR*(iZ-1)+iR) ! LEO
+    xNcopA(iR,iZ) = x(n*(Npoorsv+2) + dimR*(iZ-1) + iR) !LEO
+    xNmol(iR,iZ) = x(n*(Npoorsv+3) + dimR*(iZ-1) + iR) ! LEO
 enddo
 enddo
 
@@ -98,108 +103,116 @@ avneg=0.0
 !modificar dps para que calcule si ambos son diferentes de cero
 do iR=1,dimR !maxntotcounterR !dimR
 do iZ=1, dimZ !maxntotcounterZ !dimZ
-
+   fAScopA(iR,iZ) = 0.0
+   fASmol(iR,iZ) = 0.0
+   auxB = 0.0
+   auxC = 0.0
+   
    avpos(iR,iZ)=vpos*expmupos*xh(iR,iZ)**vpos*dexp(-phi(iR,iZ)) ! volume fraction of cations
    avneg(iR,iZ)=vneg*expmuneg*xh(iR,iZ)**vneg*dexp(phi(iR,iZ)) ! volume fraction of anions
    avHplus(iR,iZ)=expmuHplus*xh(iR,iZ)*dexp(-phi(iR,iZ)) ! volume fraction of H+
    avOHmin(iR,iZ)=expmuOHmin*xh(iR,iZ)*dexp(phi(iR,iZ)) ! volume fraction of OH-
-   
-   ! Par ionic LEO
+
    vcopmol = 1.0 ! redefine la Kcopmol para que sea igual a lo de Gaby
    betaCopA=Ka(1)*xh(iR,iZ)/avHplus(iR,iZ)
    betaMol=Kb(1)*xh(iR,iZ)/avOHmin(iR,iZ)
-   alphaCopA=Kcopion*avpos(iR,iZ)/(vpos*xh(iR,iZ)**(vpos))
-   alphaMol=Kmolion*avneg(iR,iZ)/(vneg*xh(iR,iZ)**(vneg))
-   gammaCopA=betaCopA*alphaCopA/(1.0 + betaCopA)
-   gammaMol=betaMol*alphaMol/(1.0 + betaMol)
-   deltaCopA=(1.0 + betaCopA)*(1.0 + gammaCopA)
-   deltaMol=(1.0 + betaMol)*(1.0 + gammaMol)
-   omegaMol=1.0/(1.0 + betaMol) - gammaMol/deltaMol
+   alphaCopA=(vpos*xh(iR,iZ)**vpos)/(Kcopion*avpos(iR,iZ))
+   alphaMol=(vneg*xh(iR,iZ)**vneg)/(Kmolion*avneg(iR,iZ))
+   deltaCopA= 1/(alphaCopA+alphaCopA/betaCopA+1)
+   deltaMol = 1/(alphaMol+alphaMol/betaMol+1)
+   Omega = 1/(alphaMol*deltaMol*alphaCopA*deltaCopA*vsol*vcopmol*Kcopmol*xNmol(iR,iZ))
 
-   if((xNCopA(iR,iZ).ne.0.0).AND.(xNmol(iR,iZ).ne.0.0)) then
+lim = 1e-6
+if((xNCopA(iR,iZ).ge.lim).and.(xNmol(iR,iZ).ge.lim)) then
+!print*, 'omega', Omega
+!print*, 'alphaMol', alphaMol
+!print*, 'alphaCopA', alphaCopA
+!print*, 'betaMol', betaMol
+!print*, 'betaCopA', betaCopA
+!print*, 'deltaCopA', deltaCopA
+!print*, 'xNmol', xNmol(iR,iZ)
 
-   kappaMol=gammaMol/deltaMol*(xNcopA(iR,iZ)/xNmol(iR,iZ)) - 1.0/(1.0 + betaMol)
-   Omega=deltaCopA/(Kcopmol*betaCopA*betaMol*vcopmol*xNmol(iR,iZ))
-   ! Quadratic equation
-   auxA=1.0
-   auxB=(kappaMol + omegaMol - Omega)/kappaMol
-   auxC=omegaMol/kappaMol
+   AuxA = 1.0
+   AuxB = - (1+Omega+(xNcopA(iR,iZ)/xNmol(iR,iZ)))*(xNmol(iR,iZ)/xNcopA(iR,iZ))
+   AuxC = xNmol(iR,iZ)/xNcopA(iR,iZ)
    discriminant = sqrt(auxB**2 - 4.0*auxA*auxC)
    quadPlus=(- auxB + discriminant)/(2.0*auxA)
    quadMinus=(- auxB - discriminant)/(2.0*auxA)
-   
- !  print*,'betaCopA',betaCopA,'betaMol',betaMol
- !  print*,'alphaCopA,',alphaCopA,'alphaMol',alphaMol
- !  print*,'gammaCopA',gammaCopA,'gammaMol', gammaMol
- !  print*, 'deltaCopaA',deltaCopA,'deltaMol',deltaMol
- !  print*,'omegaMol',omegaMol,'kappaMol',kappaMol,'Omega',Omega
- !  print*, 'auxB',auxB,'auxC',auxC 
-  ! print*, 'quadPlus',quadPlus,'quadMinus',quadMinus
-   
 
-   if((quadPlus.ge.0.0).and.(quadPlus.le.1.0))then
+    if((quadPlus.ge.0.0).and.(quadPlus.le.1.0))then
       fASmol(iR,iZ)=quadPlus
-  !    print*,'QUADPLUS',iR,iZ
+      print*, 'Positive discriminant used in the fraction calculation!!!'
+      stop
+      !print*,'QUADPLUS',iR,iZ
    endif
    if((quadMinus.ge.0.0).and.(quadMinus.le.1.0))then
       fASmol(iR,iZ)=quadMinus
-   !   print*,'QUADMINUS',iR,iZ
+      !print*,'QUADMINUS',quadMinus,iR,iZ
    endif
    if(((quadMinus.ge.0.0).and.(quadMinus.le.1.0)).and.((quadPlus.ge.0.0).and.(quadPlus.le.1.0)))then
       print*, 'Both quadratic solutions are between 0 and 1!!!'
       stop
    endif
+   
+   fAScopA(iR,iZ) = fASmol(iR,iZ)*(xNcopA(iR,iZ)/xNmol(iR,iZ))
 
-   else
-    fASmol(iR,iZ) = 0.0
-   endif  ! Chequeo que ninguna fraccion sea cero    
-   ! Fraction calculation
-   !fASmol = 0.0
-   fcopANC(iR,iZ)  = (1.0 + fASmol(iR,iZ))/deltaCopA
-   fcopAC(iR,iZ) =fcopANC(iR,iZ) * betaCopA
-   fcopAion(iR,iZ) = gammaCopA/(1.0 + gammaCopA)*(1.0 - fAsmol(iR,iZ))
-   fmolNC(iR,iZ) = omegaMol + kappaMol*fASmol(iR,iZ)
-   fmolC(iR,iZ) = fmolNC(iR,iZ) * betaMol
- 
-   if(xNmol(iR,iZ).ne.0) then
-    fmolion(iR,iZ)  = (1.0 - (xNcopA(iR,iZ)/xNmol(iR,iZ))*fAsmol(iR,iZ))*gammaMol/(1.0 + gammaMol)
-   else
-    fmolion(iR,iZ)  = 0.0
-   endif        
-
-   fAScopA(iR,iZ) = 1 -    fmolNC(iR,iZ) - fmolC(iR,iZ)  - fmolion(iR,iZ)
-
-   ! print*,'iR=',iR,'iZ=',iZ, 'HOLA LEO!'
-  ! print*,'fASmol',fASmol(iR,iZ)
-  ! print*,'fcopANC',fcopANC(iR,iZ)
-  ! print*,'fcopAC',fcopAC(iR,iZ)
-  ! print*,'fcopion',fcopAion(iR,iZ)
-  ! print*,'fmolNC',fmolNC(iR,iZ)
-  ! print*,'fmolC',fmolC(iR,iZ)
-  ! print*,'fmolion',fmolion(iR,iZ)
-
-  ! stop
-
-!   print*, 'fcopAion:', fcopAion, ' fmolion:', fmolion
-  
-   !print*, 'fcopANC:', fcopANC(iR,iZ),'fcopAC',fcopAC(iR,iZ)
-   !print*,
-!   print*, 'xNcopA',xNcopA(iR,iZ), 'xNmol',xNmol(iR,iZ)
- !  print*,
-  ! print*, 'xtotal',xtotal(1,iR,iZ),xtotal(2,iR,iZ)
-
-   !do is=1,Nacids
-    ! fAmin(is,iR,iZ)=1.0/(avHplus(iR,iZ)/(Ka(is)*xh(iR,iZ))+1.0)
-   !enddo
-
-   !do is=1,Nbasics
-   !  fBHplus(is,iR,iZ)=1.0/(avOHmin(iR,iZ)/(Kb(is)*xh(iR,iZ))+1.0)
-   !enddo
+endif  ! Chequeo que ninguna fraccion sea cero    
+!Calculo fracciones
+   fcopAion(iR,iZ )= (1-fASmol(iR,iZ))*deltaCopA
+   fcopAC(iR,iZ) = fcopAion(iR,iZ)*alphaCopA
+   fcopANC(iR,iZ) = fcopAC(iR,iZ)/betaCopA
+   fmolion(iR,iZ) = (1 - fAScopA(iR,iZ))*deltaMol
+   fmolC(iR,iZ) = fmolion(iR,iZ)*alphaMol
+   fmolNC(iR,iZ) = fmolC(iR,iZ)/betaMol
+!esto es lo que esta mal...una da 1 y otra cero..hay q pensar un poco cual es lo correcto
+   !print*, iR, iZ, fcopAC(iR,iZ), fmolC(iR,iZ)
 enddo
 enddo
 
+!print*, 'iR', iR, 'iZ', iZ
+!print*, 'fCop', fASmol(iR,iZ)+ fcopAion(iR,iZ )+fcopAC(iR,iZ)+ fcopANC(iR,iZ)
+!print*,'fMOL', fAScopA(iR,iZ) +fmolion(iR,iZ)+ fmolC(iR,iZ) +  fmolNC(iR,iZ)
+! testeo constantes GABY-LEO
+do iR=1,dimR
+do iZ=1,dimZ
 
-! Caculation of dielectric function
+if((xNCopA(iR,iZ).ge.lim).and.(xNmol(iR,iZ).ge.lim).and.(fAScopA(iR,iz).gt.lim))then
+!if ((1.0d-6 .lt. fASmol(iR,iZ)) .and.(1.0d-6 .lt. xNcopA(iR,iZ)))then
+       KK0check(ir,iz)=-log10((1.0e24/Na)*fAScopA(iR,iZ)/(fcopAC(iR,iZ)*fmolC(iR,iZ)*xNcopA(iR,iZ)*vsol*vcopmol)) - pKcopmol
+       KKaAcheckplus(ir,iz)= -log10( (avHplus(ir,iz)/xh(ir,iz))*(&             !!
+       fcopAC(ir,iz))/fcopANC(ir,iz)*xsolbulk*1.0d24/(Na*vsol)) - pKa(1)              !! esto era para chequear pkaA
+
+       KKaANa(ir,iz)= -log10((xh(ir,iz)**vneg)/(avpos(ir,iz)/vneg)*fcopAion(ir,iz)/(&
+fcopAC(ir,iz))*(xsolbulk*1.0d24/(Na*vsol))) - pKcopion
+
+         kkaBcheckmin(ir,iz)=-log10((xsolbulk*1.0d24/(Na*vsol))*(avOhmin(ir,iz)/xh(ir,iz))&
+*(fmolC(ir,iz)/fmolNC(ir,iz))) - pKb(1) !!
+
+       KKaBCl(ir,iz)=-log10( ((xh(ir,iz)**vneg)/(avneg(ir,iz)/vneg))/((fmolC(ir,iz))&
+/fmolion(ir,iz))*(xsolbulk*1.0d24/(Na*vsol))) - pKmolion
+
+!if (testeoK>1.0d-5)then
+!print*, 'iR', iR, 'iZ', iZ
+!print*, 'xNmol', xNmol(iR,iZ), 'xNcopA', xNcopA(iR,iZ)
+!print*, 'CTE ACIDEZ ', KKaAcheckplus(ir,iz), fcopAC(iR,iZ), fcopANC(iR,iZ)
+!print*, 'CTE ASOC ion para COPA', KKaANa(ir,iz), fcopAion(iR,iZ)
+!print*, 'CTE ACIDEZ MOL', kkaBcheckmin(ir,iz),fmolC(iR,iZ),fmolNC(iR,iZ)
+!print*, 'CTE ASOC ion para MOL', KKaBCl(ir,iz),fmolion(iR,iZ)
+!print*, 'CTE copA-mol', KK0check(ir,iz), pKcopmol,fAScopA(iR,iZ),fASmol(iR,iZ) 
+!packing = xh(iR,iZ) + xNmol(iR,iZ) + xNcopA(iR,iZ) + avpos(iR,iZ)
+!packing = packing + avneg(iR,iZ) + avHplus(iR,iZ) + avOHmin(iR,iZ)
+!packing2 = xh(iR,iZ) + xtotal(1,iR,iZ) + xtotal(2,iR,iZ) + avpos(iR,iZ)
+!packing2 = packing2 + avneg(iR,iZ) + avHplus(iR,iZ) + avOHmin(iR,iZ) + xtotal(3,iR,iZ)
+!print*, 'packing', packing
+!print*, 'packing2', packing2
+!print*,'testeoK',testeoK 
+!print*,'testeoK',testeoK 
+endif
+
+enddo
+enddo
+
+! Calculation of dielectric function
 ! Everything that it is not water or ions has dielectric dielP
 
 do iR = 1, dimR
@@ -291,8 +304,8 @@ enddo
 
 do iR = 1, dimR
 do iZ = 1, dimZ
-    xpot_a(1,iR,iZ) = 1.0/fcopAC(iR,iZ)*exp(phi(iR,iZ)) ! LEO
-    xpot_b(1,iR,iZ)= 1.0/fmolC(iR,iZ)*exp(-phi(iR,iZ)) ! LEO
+   xpot_a(1,iR,iZ) = 1.0/fcopAC(iR,iZ)*exp(phi(iR,iZ)) ! LEO
+   xpot_b(1,iR,iZ) = 1.0/fmolC(iR,iZ)*exp(-phi(iR,iZ)) ! LEO
 enddo
 enddo
 
@@ -492,11 +505,11 @@ do iZ = 1, dimZ
 
   ! do NC = 1, Ncomp !LEO
 !   do ic= 1,Nacids !LEO
-     xcharge(iR,iZ)=xcharge(iR,iZ)-avpola(1,iR,iZ,1)*fcopAC(iR,iZ)/(vpol_a(1)*vsol)  !LEO
+   xcharge(iR,iZ)=xcharge(iR,iZ)-avpola(1,iR,iZ,1)*fcopAC(iR,iZ)/(vpol_a(1)*vsol)  !LEO
 !   enddo !LEO
 
  !  do ic= 1,Nbasics!LEO
-     xcharge(iR,iZ)=xcharge(iR,iZ)+avpolb(1,iR,iZ,2)*fmolC(iR,iZ)/(vpol_b(1)*vsol) !LEO
+   xcharge(iR,iZ)=xcharge(iR,iZ)+avpolb(1,iR,iZ,2)*fmolC(iR,iZ)/(vpol_b(1)*vsol) !LEO
 !   enddo!LEO
  !  enddo ! NC LEO
 
@@ -540,7 +553,6 @@ do iZ = 1, dimZ
 
 enddo
 enddo
-
 
 do is=1,Npoorsv
    do iR=1,dimR
