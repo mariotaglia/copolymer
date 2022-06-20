@@ -65,6 +65,11 @@ npol 0.4 0.1 1.4 0.01
 
 #Xulimit is the interaction cutoff in terms of layers#
 Xulimit 5
+
+# lsegkai is the segment length used for LJ interactions
+lsegkai 0.5
+
+# lseg is the segment length used to build the conformations
 lseg 0.5
 
 #Energy penalization of trans and gauche configurations. After Utg indicate again npoorsv #
