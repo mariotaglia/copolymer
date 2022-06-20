@@ -31,6 +31,7 @@ parameter (Na=6.02d23)
 integer Ncomp
 integer, parameter :: base = 80
 real*8 lseg
+real*8 lsegkai
 INTEGER actionflag
 real*8 npolini, npolfirst, npollast, npolstep
 real*8, allocatable :: npolratio(:) 
