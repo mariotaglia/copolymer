@@ -113,7 +113,6 @@ do iZ=1, dimZ !maxntotcounterZ !dimZ
    avHplus(iR,iZ)=expmuHplus*xh(iR,iZ)*dexp(-phi(iR,iZ)) ! volume fraction of H+
    avOHmin(iR,iZ)=expmuOHmin*xh(iR,iZ)*dexp(phi(iR,iZ)) ! volume fraction of OH-
 
-   vcopmol = 1.0 ! redefine la Kcopmol para que sea igual a lo de Gaby
    betaCopA=Ka(1)*xh(iR,iZ)/avHplus(iR,iZ)
    betaMol=Kb(1)*xh(iR,iZ)/avOHmin(iR,iZ)
    alphaCopA=(vpos*xh(iR,iZ)**vpos)/(Kcopion*avpos(iR,iZ))
@@ -199,6 +198,7 @@ fcopAC(ir,iz))*(xsolbulk*1.0d24/(Na*vsol))) - pKcopion
 !print*, 'CTE ACIDEZ MOL', kkaBcheckmin(ir,iz),fmolC(iR,iZ),fmolNC(iR,iZ)
 !print*, 'CTE ASOC ion para MOL', KKaBCl(ir,iz),fmolion(iR,iZ)
 !print*, 'CTE copA-mol', KK0check(ir,iz), pKcopmol,fAScopA(iR,iZ),fASmol(iR,iZ) 
+!stop
 !packing = xh(iR,iZ) + xNmol(iR,iZ) + xNcopA(iR,iZ) + avpos(iR,iZ)
 !packing = packing + avneg(iR,iZ) + avHplus(iR,iZ) + avOHmin(iR,iZ)
 !packing2 = xh(iR,iZ) + xtotal(1,iR,iZ) + xtotal(2,iR,iZ) + avpos(iR,iZ)
