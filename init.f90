@@ -86,11 +86,11 @@ endif
 
 ! LEO
 Kcopmol=10**(-pKcopmol)
-Kcopmol=Kcopmol*(1.0d24/Na)
+Kcopmol = Kcopmol/vcopmol*(1.0d24/Na)
 Kcopion=10**(-pKcopion)
-Kcopion=(Kcopion*vsol/xsolbulk)*(Na/1.0d24)
+Kcopion = Kcopion*xsolbulk**vpos/vsol*(1.0d24/Na)
 Kmolion=10**(-pKmolion)
-Kmolion=(Kmolion*vsol/xsolbulk)*(Na/1.0d24)
+Kmolion = Kmolion*xsolbulk**vneg/vsol*(1.0d24/Na)
 
 expmupos=xposbulk/vpos/xsolbulk**vpos  
 expmuneg=xnegbulk/vneg/xsolbulk**vneg           

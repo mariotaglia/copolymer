@@ -196,14 +196,16 @@ F_Eq = F_Eq + fmolNC(iR,iZ)*dlog(Kb(1))*avpolb(1,iR,iZ,2)*cteBasic
 !eq par ionico
 F_parCopA = 0.0
 F_parCopA = F_parCopA - fcopAion(iR,iZ)*dlog(expmupos)*avpola(1,iR,iZ,1)*cteAc
-F_parCopA = F_parCopA + fcopAion(iR,iZ)*dlog(Kcopion/vpos)*avpola(1,iR,iZ,1)*cteAc
+!F_parCopA = F_parCopA + fcopAion(iR,iZ)*dlog(Kcopion/vpos)*avpola(1,iR,iZ,1)*cteAc
+F_parCopA = F_parCopA - fcopAion(iR,iZ)*dlog(Kcopion)*avpola(1,iR,iZ,1)*cteAc
 F_parCopA = F_parCopA + fcopAion(iR,iZ)*dlog(fcopAion(iR,iZ))*avpola(1,iR,iZ,1)*cteAc
 
 F_eq = F_eq + F_parCopA 
 
 F_parMol = 0.0
 F_parMol = F_parMol - fmolion(iR,iZ)*dlog(expmuneg)*avpolb(1,iR,iZ,2)*cteBasic
-F_parMol = F_parMol + fmolion(iR,iZ)*dlog(Kmolion/vneg)*avpolb(1,iR,iZ,2)*cteBasic
+!F_parMol = F_parMol + fmolion(iR,iZ)*dlog(Kmolion/vneg)*avpolb(1,iR,iZ,2)*cteBasic
+F_parMol = F_parMol - fmolion(iR,iZ)*dlog(Kmolion)*avpolb(1,iR,iZ,2)*cteBasic
 F_parMol = F_parMOl + fmolion(iR,iZ)*dlog(fmolion(iR,iZ))*avpolb(1,iR,iZ,2)*cteBasic
 
 F_eq = F_eq + F_parMol
@@ -219,6 +221,8 @@ if((avpola(1,iR,iZ,1).gt.1.0d-10).and.(fASmol(iR,iZ).gt.1.0d-10)) F_Asoc = F_Aso
         &fASmol(iR,iZ)*avpola(1,iR,iZ,1)*(dlog(avpola(1,iR,iZ,1)*fASmol(iR,iZ)*vcopmol*vsol) - 1.0)*cteAc
 
 F_eq = F_eq + F_Asoc
+
+print*, 'FMOLION', F_parMol, 'FCOPION', F_parCopA, 'FCOPMOL', F_Asoc
 
 enddo
 enddo
