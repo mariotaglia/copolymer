@@ -222,8 +222,6 @@ if((avpola(1,iR,iZ,1).gt.1.0d-10).and.(fASmol(iR,iZ).gt.1.0d-10)) F_Asoc = F_Aso
 
 F_eq = F_eq + F_Asoc
 
-print*, 'FMOLION', F_parMol, 'FCOPION', F_parCopA, 'FCOPMOL', F_Asoc
-
 enddo
 enddo
 
