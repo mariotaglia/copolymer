@@ -35,6 +35,14 @@ character*50 densOHminfilename
 character*50 denspolfilename
 character*50 fracBHplus
 character*50 fracAmin
+character*50 fracCopAC
+character*50 fracCopANC
+character*50 fracMolC
+character*50 fracMolNC
+character*50 fracCopion
+character*50 fracMolion
+character*50 fracASmol
+character*50 fracAScopA
 character*50 densAcidfilename
 character*50 densBasicfilename
 character*50 outfilename
@@ -157,19 +165,6 @@ close(311)
 if(vtkflag.eq.1)call savevtk(denstotfilename, tmp)
 enddo ! is
 
-
-! Frac A min
-do ic=1,Nacids
-write(fracAmin,'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionAmin',ic,'.',counter,'.',counter2,'.dat'
-open(unit=1050, file=fracAmin)
-do iR=1,dimR
-   do iZ=1,dimZ
-       write(1050,*)zc(iR),iZ !,fAmin(ic,iR,iZ)  LEO
-   enddo
-enddo
-close(1050)
-enddo
-
 ! Density acid
 do NC = 1, Ncomp
 do ic=1,Nacids
@@ -184,13 +179,97 @@ close(1780)
 enddo
 enddo ! NC
 
-! Frac B min
+! Frac CopAC
+do ic=1,Nacids
+write(fracAmin,'(A5,BZ,I3.3,A1,I3.3, A1, I3.3,A1,I3.3,A4)')'fAmin',NC,'.',ic,'.',counter,'.',counter2,'.dat'
+open(unit=1050, file=fracAmin)
+do iR=1,dimR
+   do iZ=1,dimZ
+       write(1050,*)zc(iR),iZ,fcopAC(iR,iZ) ! LEO
+   enddo
+enddo
+close(1050)
+enddo
+
+! Frac MolC
 do ic=1,NBasics
-write(fracBHplus,'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionBHplus',ic,'.',counter,'.',counter2,'.dat'
+write(fracBHplus,'(A7,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fBHplus',ic,'.',counter,'.',counter2,'.dat'
 open(unit=1050, file=fracBHplus)
 do iR=1,dimR
    do iZ=1,dimZ
-      ! write(1050,*)zc(iR),iZ,fBHplus(ic,iR,iZ)   LEO
+      write(1050,*)zc(iR),iZ,fMolC(iR,iZ)
+   enddo
+enddo
+close(1050)
+enddo
+
+! Frac CopANC
+do ic=1,Nacids
+write(fracCopANC,'(A7,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fCopANC',ic,'.',counter,'.',counter2,'.dat'
+open(unit=1050, file=fracCopANC)
+do iR=1,dimR
+   do iZ=1,dimZ
+       write(1050,*)zc(iR),iZ,fcopANC(iR,iZ) ! LEO
+   enddo
+enddo
+close(1050)
+enddo
+
+! Frac MolNC
+do ic=1,Nacids
+write(fracmolNC,'(A6,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fMolNC',ic,'.',counter,'.',counter2,'.dat'
+open(unit=1050, file=fracmolNC)
+do iR=1,dimR
+   do iZ=1,dimZ
+       write(1050,*)zc(iR),iZ,fmolNC(iR,iZ) ! LEO
+   enddo
+enddo
+close(1050)
+enddo
+
+! Frac CopA-Ion
+do ic=1,Nacids
+write(fracCopion,'(A8,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fCopAion',ic,'.',counter,'.',counter2,'.dat'
+open(unit=1050, file=fracCopion)
+do iR=1,dimR
+   do iZ=1,dimZ
+       write(1050,*)zc(iR),iZ,fcopAion(iR,iZ) ! LEO
+   enddo
+enddo
+close(1050)
+enddo
+
+! Frac Mol-Ion
+do ic=1,Nacids
+write(fracMolion,'(A7,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fMolion',ic,'.',counter,'.',counter2,'.dat'
+open(unit=1050, file=fracMolion)
+do iR=1,dimR
+   do iZ=1,dimZ
+       write(1050,*)zc(iR),iZ,fmolion(iR,iZ) ! LEO
+   enddo
+enddo
+close(1050)
+enddo
+
+! Frac CopA asociacted with Mol
+do ic=1,Nacids
+write(fracASmol,'(A6,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fASmol',ic,'.',counter,'.',counter2,'.dat'
+open(unit=1050, file=fracASmol)
+do iR=1,dimR
+   do iZ=1,dimZ
+       write(1050,*)zc(iR),iZ,fASmol(iR,iZ) ! LEO
+   enddo
+enddo
+close(1050)
+enddo
+
+! Frac Mol asociated with CopA
+do ic=1,Nacids
+write(fracAScopA,'(A7,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fAScopA',ic,'.',counter,'.',counter2,'.dat'
+open(unit=1050, file=fracAScopA)
+do iR=1,dimR
+   do iZ=1,dimZ
+       write(1050,*)zc(iR),iZ,fAScopA(iR,iZ) ! LEO
    enddo
 enddo
 close(1050)
