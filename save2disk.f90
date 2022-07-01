@@ -181,7 +181,7 @@ enddo ! NC
 
 ! Frac CopAC
 do ic=1,Nacids
-write(fracAmin,'(A5,BZ,I3.3,A1,I3.3, A1, I3.3,A1,I3.3,A4)')'fAmin',NC,'.',ic,'.',counter,'.',counter2,'.dat'
+write(fracAmin,'(A5,BZ,I3.3,A1,I3.3, A1, I3.3,A1,I3.3,A4)')'fAmin',ic,'.',counter,'.',counter2,'.dat'
 open(unit=1050, file=fracAmin)
 do iR=1,dimR
    do iZ=1,dimZ
