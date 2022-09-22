@@ -101,11 +101,12 @@ do while (conf.lt.cuantas)
                   tempr_R=abs(chains(1,k,j)+(float(ii)-0.5)*deltaR)
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                endselect
-             
+             if(maxntotR.lt.dimR) then
                if(temp_R.gt.dimR) then
                   if(rank.eq.0)print*, 'main.f90: increase dimR'
                   stop
                endif
+            endif  
               innR(k,conf,ii,NC)=temp_R ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
             enddo ! ii
          tempr_Z=chains(3,k,j)

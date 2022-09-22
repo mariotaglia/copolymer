@@ -84,7 +84,9 @@ F_Mix_p = 0.0
 do NC = 1, Ncomp
 do iR = 1, maxntotcounterR                                                
 do iZ = 1, maxntotcounterZ
+if(xpol(iR,iZ,NC).ne.0.0)then
    F_Mix_p = F_Mix_p + xpol(iR,iZ,NC)*(dlog(xpol(iR,iZ,NC))-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0) 
+endif
 enddo                                                            
 enddo
 enddo
@@ -150,7 +152,9 @@ F_conf = 0
 
 do iR = 1, maxntotcounterR
 do iZ = 1, maxntotcounterZ
+if(q(iR,iZ,NC).gt.1e-20)then
   F_Conf = F_conf + (sumprolnpro(iR,iZ,NC)/q(iR,iZ,NC)-dlog(q(iR,iZ,NC)))*jacobian(iR)*deltaR*deltaZ*xpol(iR,iZ,NC)
+endif
 enddo 
 enddo
 
@@ -160,7 +164,9 @@ F_Uchain = 0.0
 
 do iR=1, maxntotcounterR
 do iZ=1, maxntotcounterZ
+if(q(iR,iZ,NC).gt.1e-20)then
   F_Uchain = F_Uchain + deltaR*deltaZ*xpol(iR,iZ,NC)*jacobian(iR)*(sumprouchain(iR,iZ,NC)/q(iR,iZ,NC))
+endif
 enddo
 enddo
 
@@ -227,35 +233,6 @@ enddo
 
 Free_Energy = Free_Energy + F_Eq     
 
-!do im = 1, N_monomer                                                                       
-!do iC  = 1, ncells                                               
-!if(zpol(im).ne.0) then
-!F_Eq = F_Eq + fdis(im, iC)*dlog(fdis(im, iC))
-!& *avpol_monom(im, iC)/vpol     
-!& *(dfloat(indexa(iC,1))-0.5)                                     
-!F_Eq = F_Eq + (1.0-fdis(im, iC))                                     
-!& *dlog(1.0-fdis(im, iC))*avpol_monom(im, iC)/vpol                      
-!& *(dfloat(indexa(iC,1))-0.5)                                     
-
-!F_Eq = F_Eq + (1.0-fdis(im, iC))*
-!& dlog(K0(im))*avpol_monom(im, iC)/vpol     
-!& *(dfloat(indexa(iC,1))-0.5)                                     
-
-!select case (zpol(im))
-!case (-1) ! acid
-!F_Eq = F_Eq + (1.0-fdis(im, iC))                                     
-!& *(-dlog(expmuHplus))*avpol_monom(im, iC)/vpol                     
-!& *(dfloat(indexa(iC,1))-0.5)
-!case (1) ! base
-!F_Eq = F_Eq + (1.0-fdis(im, iC))                                     
-!& *(-dlog(expmuOHmin))*avpol_monom(im, iC)/vpol                     
-!& *(dfloat(indexa(iC,1))-0.5)
-!end select
-!endif
-!enddo                                                            
-!enddo                                                            
-!F_eq = F_eq *delta**3/vsol*2*pi                                  
-!Free_Energy = Free_Energy + F_Eq                                 
 
 ! 8.vdW ! Ojo, los  son negativos => atraccion                         
 

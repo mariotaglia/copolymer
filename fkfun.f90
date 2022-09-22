@@ -17,7 +17,7 @@ integer*4 ier2
 real*8 protemp
 real*8 x((Npoorsv+4)*ntot),f((Npoorsv+4)*ntot)
 real*8 xh(dimR+1,dimZ) 
-real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
+real*8 xpot(0:Npoorsv,2*dimR,dimZ), xpot_a(0:Nacids,2*dimR,dimZ), xpot_b(0:Nbasics,2*dimR,dimZ)
 real*8 pro(cuantas)
 !real*8 time1, time2, duration, looptime1, looptime2, loopduration
 integer iR,iZ,kZ,kkZ,k,i,j,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
@@ -26,13 +26,13 @@ integer err
 integer n
 real*8 avpol_tmp(0:Npoorsv,2*dimR,dimZ), avpola_tmp(0:Nacids,2*dimR,dimZ), avpolb_tmp(0:Nbasics,2*dimR,dimZ) ! overdim R coordinate just in case
 real*8 avpol_tosend(0:Npoorsv,dimR,dimZ), avpola_tosend(0:Nacids,dimR,dimZ), avpolb_tosend(0:Nbasics,dimR,dimZ)
-real*8 xpol_tosend(dimR,dimZ)
+real*8 xpol_tosend(2*dimR,dimZ)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
 real*8 sumpol
-real*8 q_tosend(dimR,dimZ)
-real*8 sumprolnpro_tosend(dimR,dimZ), sumprouchain_tosend(dimR,dimZ)
-real*8 sumtrans_tosend(dimR,dimZ,maxlong)
+real*8 q_tosend(2*dimR,dimZ)
+real*8 sumprolnpro_tosend(2*dimR,dimZ), sumprouchain_tosend(2*dimR,dimZ)
+real*8 sumtrans_tosend(2*dimR,dimZ,maxlong)
 real*8 sumtrans(dimR,dimZ,maxlong)
 real*8 gradphi2
 ! LEO definitions for fraction calculation
@@ -224,6 +224,9 @@ enddo
 call dielectfcn(dielpol,epsfcn,Depsfcn)
 
 ! Calculation of xpot
+xpot = 0.0
+xpot_a = 0.0
+xpot_b = 0.0
 
 do iZ = 1, dimZ
 do iR = 1, dimR
@@ -340,7 +343,7 @@ avpola_tmp = 0.0
 avpolb_tmp = 0.0
 avpol_tmp = 0.0
 
-do iiR=1, maxntotcounterR ! position of center of mass 
+do iiR=1, 2*maxntotcounterR ! position of center of mass 
 do iiZ=1, maxntotcounterZ
    do i=1, cuantas ! loop over conformations
  
@@ -369,9 +372,10 @@ do iiZ=1, maxntotcounterZ
          pro(i)= pro(i) * xpot_b(ib,aR,aZ)
 
      enddo !k
+      
+     q_tosend(iiR,iiZ) = q_tosend(iiR,iiZ) + pro(i) ! all_tosend(ii) = all_tosend(ii) + pro(i)
 
-      q_tosend(iiR,iiZ) = q_tosend(iiR,iiZ) + pro(i) ! all_tosend(ii) = all_tosend(ii) + pro(i) 
-      sumprolnpro_tosend(iiR,iiZ) = sumprolnpro_tosend(iiR,iiZ) + pro(i)*dlog(pro(i)) ! all_tosend(ntot+ii) = all_tosend(ntot+ii) + pro(i)*dlog(pro(i))
+     if(pro(i).ne.0.0)sumprolnpro_tosend(iiR,iiZ) = sumprolnpro_tosend(iiR,iiZ) + pro(i)*dlog(pro(i)) ! all_tosend(ntot+ii) = all_tosend(ntot+ii) + pro(i)*dlog(pro(i))
       sumprouchain_tosend(iiR,iiZ) = sumprouchain_tosend(iiR,iiZ) + pro(i)*Uchain(i,NC) !all_tosend(ntot*2+ii) = all_tosend(ntot*2+ii) + pro(i)*Uchain(i) 
 
       xpol_tosend(iiR,iiZ) = xpol_tosend(iiR,iiZ)+pro(i) ! all_tosend(ntot*3+ii) = all_tosend(ntot*3+ii) + pro(i)
