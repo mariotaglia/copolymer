@@ -315,13 +315,14 @@ endif
 allocate(segpoorsv(maxlong,Ncomp))
 allocate(acidtype(maxlong,Ncomp))
 allocate(basictype(maxlong,Ncomp))
+allocate(torsionstate(maxlong,Ncomp))
 
 do NC = 1, Ncomp
 
 write(filename2,'(A10,I3.3,A3)')'structure.',NC,'.in'
 open(file=filename2, unit = 9)
 do i = 1, long(NC)
-read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC)
+read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC), torsionstate(i,NC)
 enddo
 close(9)
 enddo ! NC

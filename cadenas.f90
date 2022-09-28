@@ -179,7 +179,17 @@ xend(3,2)=xend(3,1)+x(3)
 do i=3,long(NC)-long_branches(NC)          ! loop over remaining positions!
 
 rn=rands(seed)
-state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
+
+if (torsionstate(i,NC).eq.0) then 
+  state=0                ! fix the state to trans
+elseif (torsionstate(i,NC).eq.1) then
+  state=1                ! fix the state to gauche+
+elseif (torsionstate(i,NC).eq.2) then 
+  state=2                ! fix the state to guache-
+else
+  state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
+endif
+
 
   if (state.eq.3) then 
     state=2

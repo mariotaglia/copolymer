@@ -150,10 +150,12 @@ open(file='structure.in', unit = 9)
 allocate(segpoorsv(long))
 allocate(acidtype(long))
 allocate(basictype(long))
+allocate(torsionstate(long))
 do i = 1, long
-read(9,*),segpoorsv(i), acidtype(i), basictype(i) 
+read(9,*),segpoorsv(i), acidtype(i), basictype(i), torsionstate(i) 
+print torsionstate(i)
 enddo
-
+stop
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Read st(i,j) from epsilon.in
 
