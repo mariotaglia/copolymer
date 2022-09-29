@@ -50,6 +50,7 @@ npollast = ndi
 npolstep = ndi
 Xulimit = ndi
 lseg = ndr
+lsegkai = ndr
 Csalt = ndr
 pHbulk = ndr
 PBCflag = 1 ! flag for PBC in z direction
@@ -133,6 +134,10 @@ select case (label)
 
   case ('lseg')
    read(buffer, *, iostat=ios) lseg
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+  case ('lsegkai')
+   read(buffer, *, iostat=ios) lsegkai
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case ('dielP')
@@ -296,6 +301,7 @@ if(npollast.eq.ndi)call stopundef('npollast')
 if(npolstep.eq.ndi)call stopundef('npolstep')
 if(Xulimit.eq.ndi)call stopundef('Xulimit')
 if(lseg.eq.ndr)call stopundef('lseg')
+if(lsegkai.eq.ndr)call stopundef('lsegkai')
 if(pHbulk.eq.ndi)call stopundef('pHbulk')
 
 if (rank.eq.0) then

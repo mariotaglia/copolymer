@@ -391,6 +391,7 @@ if(rank.eq.0)print*, 'Free Energy, method II: ', Free_Energy2
 
 if(rank.eq.0) then                                                                 
   write(301,*) npol, Free_energy/npol                       
+  flush(301)
   write(302,*) npol, F_Mix_s/npol                           
   write(303,*) npol, F_Mix_pos/npol                       
   write(304,*) npol, F_Mix_neg/npol                         
@@ -406,6 +407,7 @@ if(rank.eq.0) then
   enddo
   write(3110,*) npol, F_electro/npol                         
   write(312,*) npol, Free_energy2/npol                      
+  flush(312)
   write(313,*) npol, F_Mix_p/npol                          
   write(314,*) npol, F_Uchain/npol
 endif                           

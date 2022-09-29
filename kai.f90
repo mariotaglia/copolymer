@@ -90,10 +90,10 @@ do ii = 1, dimR ! loop sobre cada posicion del segmento
 
 
          if(vect.le.(cutoff)) then ! esta dentro de la esfera del cut-off   
-         if(vect.ge.lseg) then ! esta dentro de la esfera del segmento
+         if(vect.ge.lsegkai) then ! esta dentro de la esfera del segmento
            do is=1,Npoorsv
            do js=1,Npoorsv
-              Xu(ii, jR, jZ, is, js) = Xu(ii, jR, jZ, is, js) + ((lseg/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
+              Xu(ii, jR, jZ, is, js) = Xu(ii, jR, jZ, is, js) + ((lsegkai/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
            enddo
            enddo
          endif
