@@ -232,8 +232,8 @@ avpola_tmp = 0.0
 avpolb_tmp = 0.0
 avpol_tmp = 0.0
 
-do iiR=1, maxntotcounterR ! position of center of mass 
-do iiZ=1, maxntotcounterZ
+do iiR=minntotR, maxntotR ! position of center of mass 
+do iiZ=minntotZ, maxntotZ
    do i=1, cuantas ! loop over conformations
  
       pro(i) = exp(-Uchain(i, NC))
@@ -345,8 +345,8 @@ xpol(:,:,NC) = xpol(:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fix
 
 trans(:,NC) = 0.0
 
-do iR = 1, maxntotcounterR
-do iZ = 1, maxntotcounterZ
+do iR = minntotR, maxntotR
+do iZ = minntotZ, maxntotZ
    select case (curvature)
     case (0)
      trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)

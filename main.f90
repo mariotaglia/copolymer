@@ -107,18 +107,18 @@ endif
 iter=0                    ! iteration counter
 countfile=1
 
-actionflag = 0 ! Actionflag controls the current action of loop
+actionflag = 1 ! Actionflag controls the current action of loop
                ! = 0 loop maxntotcounter from 2 to maxntot
                ! = 1 increases npol from npolini to npollast
                ! = 2 decreases npol from npolini to npolfirst
                ! = 3 finalize
 
-maxntotcounterR = maxntotR
-maxntotcounterZ = maxntotZ
+!maxntotcounterR = maxntotR
+!maxntotcounterZ = maxntotZ
 npol = npolini
 
 do while (actionflag.lt.3)
-   if(rank.eq.0)print*, ' npol:', npol, 'maxntotR:', maxntotcounterR, 'maxntotZ:', maxntotcounterZ
+   if(rank.eq.0)print*, ' npol:', npol, 'minntotR',minntotR, 'maxntotR:', maxntotR, 'minntotZ',minntotZ, 'maxntotZ:', maxntotZ
 
    do i=1,(npoorsv+2)*n             ! initial guess for x1
       xg1(i)=x1(i)
@@ -169,15 +169,15 @@ do while (actionflag.lt.3)
 
    select case (actionflag)
 
-     case(0) ! maxntot loop
-      if (maxntotcounterR.lt.maxntotR) then
-        maxntotcounterR=maxntotcounterR+1
-      endif
-
-      if(maxntotcounterR.eq.maxntotR) then
-        actionflag=1 
-        countfile = 1
-      endif
+!     case(0) ! maxntot loop
+!      if (maxntotcounterR.lt.maxntotR) then
+!        maxntotcounterR=maxntotcounterR+1
+!      endif
+!
+!      if(maxntotcounterR.eq.maxntotR) then
+!        actionflag=1 
+!        countfile = 1
+!      endif
 
      case(1)  ! increases from npolini to npollast
 
@@ -191,7 +191,7 @@ do while (actionflag.lt.3)
 
       endif       
 
-     case(2)
+     case(2) ! decreases from npolini to npolfirst
       npol = npol - npolstep
       if(npol.lt.npolfirst)actionflag = 3
 

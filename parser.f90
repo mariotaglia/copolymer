@@ -32,6 +32,8 @@ ndr = -1.0d10
 dielP = 78.54
 curvature = ndi
 ntot = ndi
+minntotR = ndi
+minntotZ = ndi
 maxntotR = ndi
 maxntotZ = ndi
 dimR = ndi
@@ -149,7 +151,7 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case ('dimensions')
-   read(buffer, *, iostat=ios) dimR, dimZ, maxntotR, maxntotZ
+   read(buffer, *, iostat=ios) dimR, dimZ, minntotR, maxntotR, minntotZ,  maxntotZ
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    ntot=dimR*dimZ
   
@@ -291,6 +293,8 @@ enddo
 
 if(curvature.eq.ndr)call stopundef('curvature')
 if(ntot.eq.ndi)call stopundef('ntot')
+if(minntotR.eq.ndi)call stopundef('minntotR')
+if(minntotZ.eq.ndi)call stopundef('minntotZ')
 if(maxntotR.eq.ndi)call stopundef('maxntotR')
 if(maxntotZ.eq.ndi)call stopundef('maxntotZ')
 if(totalcuantas.eq.ndi)call stopundef('cuantas')

@@ -87,7 +87,7 @@ do while (conf.lt.cuantas)
          Uchain(conf,NC)=Uconf
          Ntrans(:,conf,NC) = Ntconf(:)
          do k=1,long(NC)
-            do ii = 1,maxntotR ! position of first segment (or Center of mass?)
+            do ii = minntotR,maxntotR ! position of first segment (or Center of mass?)
 
                select case (abs(curvature))
                  case (2)

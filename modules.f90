@@ -41,7 +41,7 @@ real*8 infile             ! inputfile control variable for reading input files  
 CHARACTER nada
 real*8 norma
 INTEGER adsmax
-integer ntot, dimR,dimZ, maxntotR, maxntotZ, maxntotcounter_ini, maxntotcounterR, maxntotcounterZ ! lattice sites
+integer ntot, dimR,dimZ, maxntotR, maxntotZ, maxntotcounterR, maxntotcounterZ, minntotR, minntotZ ! lattice sites
 real*8, allocatable :: avpol(:,:,:,:) ! volume fraction of chains 
 real*8, allocatable :: avpola(:,:,:,:), avpolb(:,:,:,:) ! volume fraction of acid and basic segments 
 real*8, allocatable :: xpol(:,:,:) ! volume fraction polymers already adsorbed

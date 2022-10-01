@@ -79,8 +79,8 @@ Free_Energy = Free_Energy + F_Mix_s
 F_Mix_p = 0.0                                                    
 
 do NC = 1, Ncomp
-do iR = 1, maxntotcounterR                                                
-do iZ = 1, maxntotcounterZ
+do iR = minntotR, maxntotR                                                
+do iZ = minntotZ, maxntotZ
    F_Mix_p = F_Mix_p + xpol(iR,iZ,NC)*(dlog(xpol(iR,iZ,NC))-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0) 
 enddo                                                            
 enddo
@@ -145,8 +145,8 @@ Free_Energy = Free_Energy + F_Mix_OHmin
 do NC = 1, Ncomp
 F_conf = 0 
 
-do iR = 1, maxntotcounterR
-do iZ = 1, maxntotcounterZ
+do iR = minntotR, maxntotR
+do iZ = minntotZ, maxntotZ
   F_Conf = F_conf + (sumprolnpro(iR,iZ,NC)/q(iR,iZ,NC)-dlog(q(iR,iZ,NC)))*jacobian(iR)*deltaR*deltaZ*xpol(iR,iZ,NC)
 enddo 
 enddo
@@ -155,8 +155,8 @@ Free_Energy = Free_Energy + F_Conf
 
 F_Uchain = 0.0
 
-do iR=1, maxntotcounterR
-do iZ=1, maxntotcounterZ
+do iR=minntotR, maxntotR
+do iZ=minntotZ, maxntotZ
   F_Uchain = F_Uchain + deltaR*deltaZ*xpol(iR,iZ,NC)*jacobian(iR)*(sumprouchain(iR,iZ,NC)/q(iR,iZ,NC))
 enddo
 enddo
@@ -315,8 +315,8 @@ enddo
 enddo
 
 do NC = 1, NComp
-do iR=1,maxntotcounterR
-do iZ=1,maxntotcounterZ
+do iR=minntotR,maxntotR
+do iZ=minntotZ,maxntotZ
   sumrho = sumrho + (-xpol(iR,iZ,NC)*vsol*jacobian(iR)) ! sum over  rho_i i=+,-,si
 enddo
 enddo
@@ -378,8 +378,8 @@ enddo
 
 do NC = 1,Ncomp
 mupol = dlog(xpol(1,1,NC))-dlog(q(1,1,NC))
-do iR = 1, maxntotcounterR
-do iZ = 1, maxntotcounterZ
+do iR = minntotR, maxntotR
+do iZ = minntotZ, maxntotZ
   sumpol = sumpol + xpol(iR,iZ,NC)*mupol*jacobian(iR)*deltaR*deltaZ
 enddo
 enddo
