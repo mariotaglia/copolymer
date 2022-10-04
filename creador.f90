@@ -100,7 +100,6 @@ do while (conf.lt.cuantas)
                   tempr_R=abs(chains(1,k,j)+(float(ii)-0.5)*deltaR)
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                endselect
-             
                if(temp_R.gt.dimR) then
                   if(rank.eq.0)print*, 'main.f90: increase dimR'
                   stop
