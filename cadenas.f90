@@ -356,7 +356,7 @@ do k = 1, long
   enddo
 enddo
 
-cm = cm/float(k)
+cm = cm/float(long)
 
 do k = 1, long
   do i = 1,3
