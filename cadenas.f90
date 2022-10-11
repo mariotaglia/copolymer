@@ -24,7 +24,9 @@ use matrices
 use senos
 implicit none
 
-ta=112
+!ta=112 ! RIS angle
+ta=109.47122 ! tetrahedral angle
+
 
 pi=acos(-1.0000000e0)
 sitheta=sin((180-ta)*pi/180.0)
