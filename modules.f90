@@ -123,7 +123,7 @@ real*8 tt(3,3),tp(3,3),tm(3,3)
 endmodule
 
 module senos
-real*8 sitheta,cotheta,siphip,cophip
+real*8 ta,sitheta,cotheta,siphip,cophip
 endmodule
 
 module MPI

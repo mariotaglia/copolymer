@@ -24,9 +24,11 @@ use matrices
 use senos
 implicit none
 
+ta=112
+
 pi=acos(-1.0000000e0)
-sitheta=sin(68.0*pi/180.0)
-cotheta=cos(68.0*pi/180.0)
+sitheta=sin((180-ta)*pi/180.0)
+cotheta=cos((180-ta)*pi/180.0)
 siphip=sin(120.0*pi/180.0)
 cophip=cos(120.0*pi/180.0)
 
