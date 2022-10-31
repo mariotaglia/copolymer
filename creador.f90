@@ -34,6 +34,8 @@ character*80 line
 integer tag
 parameter(tag = 0)
 integer NC
+character*9 filename2
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! CHAIN GENERATION
@@ -61,7 +63,8 @@ conf=0                    ! counter of number of conformations
 lineposMD = 0 
 
 if (flagMD.eq.1) then
-    open(7777,file='MD.in')
+    write(filename2,'(A3,I3.3,A3)')'MD.',NC,'.in'
+    open(7777,file=filename2)
     if (rank.gt.0) then
        call MPI_RECV(seed, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
        print*, "rank", rank, "received from rank", rank-1,"linepos =", lineposMD
@@ -140,6 +143,7 @@ endif
 enddo ! while
 
 if(flagMD.eq.1) then
+  close(7777)
   if (rank.lt.size-1) then
      call MPI_SEND(seed, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
      print*, "rank", rank, "sent to rank", rank+1,"linepos=", lineposMD

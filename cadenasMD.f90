@@ -50,7 +50,7 @@ read (7777, '(A)') line
 print*,line
 enddo
 
-j = 1 ! counts non-H atoms
+j = 0 ! counts non-H atoms
 do i = 1, natoms
 
   read(7777,*) MDid, MDmol, MDtype, MDx,MDy,MDz
@@ -61,15 +61,15 @@ do i = 1, natoms
   enddo
 
   if(isH.eq.0) then ! store atom
+  j = j + 1
    xend(1,j) = MDx/10.0
    xend(2,j) = MDy/10.0
    xend(3,j) = MDz/10.0
-  j = j + 1
   endif 
 enddo
 
 if(j.ne.long(NC)) then
-  if(rank.eq.0)print*,'Error in MD input file, check long in DEFINITIONS' 
+  if(rank.eq.0)print*,'Error in MD input file, check long in DEFINITIONS', j
   stop
 endif
 
