@@ -1,3 +1,10 @@
+module cadenaMD
+integer flagMD ! flag que indica si lee cadenas desde MD, 1: lee md, 0: no lee MD 
+integer nMDH, MDHs(100) ! numero atomos y codigo de atomos que son H
+integer lineposMD
+endmodule
+
+
 module transgauche
 real*8, allocatable :: trans(:,:)
 integer*1, allocatable :: Ntrans(:,:,:)
@@ -49,20 +56,13 @@ real*8, allocatable :: xsol(:,:)
 INTEGER totalcuantas, cuantas
 integer curvature
 real*8, allocatable :: Ug(:), Ut(:)
-
 real*8, allocatable :: epsfcn(:,:)
 real*8, allocatable :: dielpol(:,:)
 real*8, allocatable :: Depsfcn(:,:)
-
 integer first, last
-
 integer*2, allocatable :: innR(:,:,:,:), innZ(:,:,:)
-
 integer iter              ! counts number of iterations
-
 integer, parameter :: ncha_max = 700
-
-
 endmodule
 
 module partfunc

@@ -8,6 +8,7 @@ use longs
 use MPI
 use transgauche
 use mkai
+use cadenaMD
 implicit none
 
 integer is
@@ -25,6 +26,9 @@ integer*1 Ntconf(maxlong)
 real*8 sumUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
 
 integer conf              ! counts number of conformations
+
+
+character*80 line
 
 ! MPI
 integer tag
@@ -54,15 +58,33 @@ Ntconf=0.
 
 conf=0                    ! counter of number of conformations
 
-if (rank.gt.0) then
-   call MPI_RECV(seed, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
-   print*, "rank", rank, "received from rank", rank-1,"seed =", seed
-endif
+lineposMD = 0 
 
+if (flagMD.eq.1) then
+    open(7777,file='MD.in')
+    if (rank.gt.0) then
+       call MPI_RECV(seed, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
+       print*, "rank", rank, "received from rank", rank-1,"linepos =", lineposMD
+
+! Discard first linepos lines
+       do i = 1, lineposMD
+        read (7777, '(A)') line
+       enddo
+    endif
+else
+    if (rank.gt.0) then
+       call MPI_RECV(seed, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
+       print*, "rank", rank, "received from rank", rank-1,"seed =", seed
+    endif
+endif
 
 do while (conf.lt.cuantas)
 
+if(flagMD.eq.1) then
+   call cadenasMD(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
+else 
    call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
+endif
 
 !   open(unit=100000,file='chains.dat')
 !   do i=1,3
@@ -117,9 +139,16 @@ do while (conf.lt.cuantas)
 
 enddo ! while
 
-if (rank.lt.size-1) then
-   call MPI_SEND(seed, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
-   print*, "rank", rank, "sent to rank", rank+1,"seed=", seed
+if(flagMD.eq.1) then
+  if (rank.lt.size-1) then
+     call MPI_SEND(seed, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
+     print*, "rank", rank, "sent to rank", rank+1,"linepos=", lineposMD
+  endif
+else
+  if (rank.lt.size-1) then
+     call MPI_SEND(seed, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
+     print*, "rank", rank, "sent to rank", rank+1,"seed=", seed
+  endif
 endif
 
 do is=0,Npoorsv+1
@@ -129,14 +158,12 @@ enddo
 call MPI_BARRIER(MPI_COMM_WORLD, ierr)
 
 if(rank.eq.0) then
-
-   print*," chains component ", NC, " out of ", Ncomp, " ready"
-
-   do is=0,Npoorsv+1
-      print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr
-   enddo
-
+     print*," chains component ", NC, " out of ", Ncomp, " ready"
+     do is=0,Npoorsv+1
+       print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr
+     enddo
 endif
+
 
 ! print Rgyr 
 

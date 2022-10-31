@@ -7,6 +7,7 @@ use MPI
 use mkai
 use volume
 use layer
+use cadenaMD
 implicit none
 integer block_cuantas, restcuantas
 
@@ -57,6 +58,9 @@ PBCflag = 1 ! flag for PBC in z direction
 vtkflag = 0
 entflag = 0
 maxT = 1
+flagMD = 0
+nMDH = 0
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Control file variables
@@ -99,6 +103,10 @@ do while (ios == 0)
 
 
 select case (label)
+ 
+  case('flagMD')
+   read(buffer, *, iostat=ios) flagMD
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case('PBCflag')
    read(buffer, *, iostat=ios) PBCflag
@@ -278,6 +286,11 @@ select case (label)
         long_branches(NC) = long_branches(NC) + branch_long(j,NC)
      enddo
    enddo ! NC
+
+  case ('nMDH')
+   read(buffer, *, iostat=ios) nMDH
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   read(fh,*)(MDHs(j), j = 1, nMDH)
  
 endselect
 
