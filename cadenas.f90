@@ -350,7 +350,7 @@ real*8 cm(3)
 
 cm = 0.0
 
-do k = 1, long
+do k = 1,long
   do i = 1,3
     cm(i) = cm(i) + xend(i,k)
   enddo

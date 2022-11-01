@@ -29,6 +29,8 @@ integer natoms
 integer MDid, MDmol, MDtype
 real*8 MDx, MDy, MDz
 integer isH
+integer timestep
+
 
 Uconf = 0.0
 Ntconf = 0
@@ -36,18 +38,29 @@ Ugyr = 0.0
 Rgyr = 0.0
 
 ! read one conformation
+!ITEM: TIMESTEP
+!300000
+!ITEM: NUMBER OF ATOMS
+!93
+!ITEM: BOX BOUNDS pp pp pp
+!-1.5000000000000000e+02 1.5000000000000000e+02
+!-1.5000000000000000e+02 1.5000000000000000e+02
+!-1.5000000000000000e+02 1.5000000000000000e+02
+!ITEM: ATOMS id mol type x y z
 
-do i = 1, 3
+
 read (7777, '(A)') line
-print*,line
-enddo
+read (7777, *) timestep
+read (7777, '(A)') line
+
+print*,'Rank', rank, 'TSTEP', timestep, 'LINEPOS', lineposMD
 
 read (7777,*) natoms
-print*, natoms
+!print*, natoms
 
 do i = 1, 5
 read (7777, '(A)') line
-print*,line
+!print*,line
 enddo
 
 j = 0 ! counts non-H atoms

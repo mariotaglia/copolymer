@@ -13,7 +13,7 @@ implicit none
 
 integer is
 
-integer i,j,k,ii ! dummy indice0s
+integer jj,i,j,k,ii ! dummy indice0s
 
 INTEGER temp_R
 real*8 tempr_R, tempr_Z
@@ -66,13 +66,17 @@ if (flagMD.eq.1) then
     write(filename2,'(A3,I3.3,A3)')'MD.',NC,'.in'
     open(7777,file=filename2)
     if (rank.gt.0) then
-       call MPI_RECV(seed, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
+       call MPI_RECV(lineposMD, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
        print*, "rank", rank, "received from rank", rank-1,"linepos =", lineposMD
 
 ! Discard first linepos lines
        do i = 1, lineposMD
         read (7777, '(A)') line
        enddo
+
+       call MPI_RECV(seed, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
+       print*, "rank", rank, "received from rank", rank-1,"seed =", seed
+ 
     endif
 else
     if (rank.gt.0) then
@@ -127,8 +131,11 @@ endif
                endselect
              
                if(temp_R.gt.dimR) then
-                  if(rank.eq.0)print*, 'main.f90: increase dimR'
-                  stop
+                     print*, 'creador.f90: increase dimR', temp_R, chains(1,k,j), ii, j
+                     do jj = 1, long(NC)
+                        print*, jj, chains(:,jj,j)
+                     enddo
+                     stop
                endif
               innR(k,conf,ii,NC)=temp_R ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
             enddo ! ii
@@ -145,8 +152,12 @@ enddo ! while
 if(flagMD.eq.1) then
   close(7777)
   if (rank.lt.size-1) then
-     call MPI_SEND(seed, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
+     call MPI_SEND(lineposMD, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
      print*, "rank", rank, "sent to rank", rank+1,"linepos=", lineposMD
+
+     call MPI_SEND(seed, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)
+     print*, "rank", rank, "sent to rank", rank+1,"seed=", seed
+
   endif
 else
   if (rank.lt.size-1) then
