@@ -365,7 +365,7 @@ enddo
 
 cm = cm/float(long)
 
-do k = 1, long
+do k = 1,long
   do i = 1,3
      xendcom(i,k) = xend(i,k) - cm(i)
   enddo

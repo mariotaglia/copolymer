@@ -13,18 +13,18 @@ implicit none
 
 integer is
 
-integer jj,i,j,k,ii ! dummy indice0s
+integer kk, jj,i,j,k,ii ! dummy indice0s
 
 INTEGER temp_R
 real*8 tempr_R, tempr_Z
 
 integer ncha
-
+!character*20 filename
 real*8 chains(3,maxlong,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
 real*8 Uconf
 integer*1 Ntconf(maxlong)
 real*8 sumUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
-
+!real*8 rog
 integer conf              ! counts number of conformations
 
 
@@ -182,6 +182,13 @@ endif
          Uchain(conf,NC)=Uconf
          Ntrans(:,conf,NC) = Ntconf(:)
          do k=1,long(NC)
+! DEBUG
+!          write(9500+k,*)sqrt(chains(1,k,j)**2+chains(2,k,j)**2+chains(3,k,j)**2)
+!          write(9600+k,*)chains(1,k,j)
+!          write(9700+k,*)chains(2,k,j)
+!          write(9800+k,*)chains(3,k,j)
+
+
             do ii = 1,maxntotR ! position of first segment (or Center of mass?)
 
                select case (abs(curvature))
@@ -254,5 +261,5 @@ enddo
 close(2533+NC)
 
 enddo ! NC
-
+stop
 end
