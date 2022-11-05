@@ -237,15 +237,22 @@ xendt(:) = xend_branch(:,j)
 do k1=1, branch_long(j,NC)       
 i = i + 1
 
-state = state_branch(j)
-
-do while (state.eq.state_branch(j)) ! choose a state different to that of the backbone
-rn=rands(seed)
-state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
-if (state.eq.3) then 
-  state=2
+if (k1.eq.1) then ! only first segment of branch
+  state = state_branch(j)
+  do while (state.eq.state_branch(j)) ! choose a state different to that of the backbone
+  rn=rands(seed)
+  state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
+  if (state.eq.3) then
+    state=2
+  endif
+  enddo
+else
+  rn=rands(seed)
+  state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
+  if (state.eq.3) then
+    state=2
+  endif
 endif
-enddo
 
   if (state.eq.0) then
     call mrrrr(m,tt,mm)
