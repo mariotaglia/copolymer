@@ -41,6 +41,26 @@ character*9 filename2
 ! CHAIN GENERATION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+! DEBUG
+!do i = 1, long(1)
+!write(filename,'(A4,I2.2,A4)')'seg.',i,'.dat'
+!open(unit=9500+i,file=filename)
+!write(filename,'(A4,I2.2,A4)')'sxg.',i,'.dat'
+!open(unit=9600+i,file=filename)
+!write(filename,'(A4,I2.2,A4)')'syg.',i,'.dat'
+!open(unit=9700+i,file=filename)
+!write(filename,'(A4,I2.2,A4)')'szg.',i,'.dat'
+!open(unit=9800+i,file=filename)
+!enddo
+
+!open(unit=9900,file='rog.dat')
+!open(unit=9917,file='e17.dat')
+!open(unit=9957,file='e57.dat')
+!open(unit=9915,file='e15.dat')
+!open(unit=9927,file='e27.dat')
+!open(unit=9947,file='e47.dat')
+
+
 
 
 call initcha              ! init matrices for chain generation
@@ -111,7 +131,53 @@ endif
 
    do j=1,ncha
 
+
+
+
+
       if(conf.lt.cuantas) then
+
+
+
+! DEBUG
+!      rog = 0.0
+!      do k = 1, long(NC)
+!      do kk = 1,long(NC)
+!      rog = rog +(chains(1,k,j)-chains(1,kk,j))**2   &
+!                +(chains(2,k,j)-chains(2,kk,j))**2   &
+!                +(chains(3,k,j)-chains(3,kk,j))**2
+!      enddo
+!      enddo
+!      rog = rog / float(long(NC)**2)/2.
+
+!      write(9900,*)rog
+!      write(9917,*)sqrt((chains(1,1,j)-chains(1,7,j))**2   &
+!                +(chains(2,1,j)-chains(2,7,j))**2   &
+!                +(chains(3,1,j)-chains(3,7,j))**2)
+
+!      write(9957,*)sqrt((chains(1,5,j)-chains(1,7,j))**2   &
+!                +(chains(2,5,j)-chains(2,7,j))**2   &
+!                +(chains(3,5,j)-chains(3,7,j))**2)
+
+!      write(9915,*)sqrt((chains(1,1,j)-chains(1,5,j))**2   &
+!                +(chains(2,1,j)-chains(2,5,j))**2   &
+!                +(chains(3,1,j)-chains(3,5,j))**2)
+
+!      write(9927,*)sqrt((chains(1,2,j)-chains(1,7,j))**2   &
+!                +(chains(2,2,j)-chains(2,7,j))**2   &
+!                +(chains(3,2,j)-chains(3,7,j))**2)
+
+!      write(9947,*)sqrt((chains(1,4,j)-chains(1,7,j))**2   &
+!                +(chains(2,4,j)-chains(2,7,j))**2   &
+!                +(chains(3,4,j)-chains(3,7,j))**2)
+
+
+
+
+
+
+
+
          conf=conf+1
          Uchain(conf,NC)=Uconf
          Ntrans(:,conf,NC) = Ntconf(:)

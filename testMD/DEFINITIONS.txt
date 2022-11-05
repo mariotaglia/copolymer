@@ -1,0 +1,72 @@
+Ncomp 1
+
+npolratio
+1.
+
+flagMD 1
+nMDH 3
+2 6 7
+
+
+curvature 0
+dimensions 100 1 10 1
+cuantas 50000
+long 
+36
+
+layersize 0.15 1
+
+Npoorsv 3 
+vpol 3 
+0.025
+0.025
+0.025
+0.025
+
+rsalt 0.3 0.3
+
+dimf 3
+6
+6 6
+6 6 6
+
+Nacids 1
+7
+Nbasics 1
+3.46
+
+vpol_a 1 
+0.025
+vpol_b 1
+0.025
+
+PBCflag 1
+infile 	0
+flagkai 0
+
+npol 0.2 0.8 2.5 0.01
+
+Xulimit 8
+lseg 0.15
+lsegkai 0.5
+
+Utg 3
+-0.84195 0.0
+-0.84195 0.0
+-0.84195 0.0
+-0.84195 0.0
+
+csalt 0.1
+pHbulk 7
+dielP 3.0
+
+nbranches
+5
+16 1
+18 5
+19 1
+21 5
+22 1
+
+
+entflag 0
