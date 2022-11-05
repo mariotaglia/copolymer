@@ -261,5 +261,5 @@ enddo
 close(2533+NC)
 
 enddo ! NC
-stop
+!stop
 end
