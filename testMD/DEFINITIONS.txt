@@ -44,7 +44,7 @@ PBCflag 1
 infile 	2
 flagkai 0
 
-npol 1.69 0.8 2.5 0.01
+npol 1.69 0.8 2.1 0.01
 
 Xulimit 8
 lseg 0.15

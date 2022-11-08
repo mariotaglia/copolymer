@@ -29,7 +29,7 @@ integer natoms
 integer MDid, MDmol, MDtype
 real*8 MDx, MDy, MDz
 integer isH
-integer timestep
+integer*8 timestep
 
 
 Uconf = 0.0
@@ -89,7 +89,7 @@ endif
 
 ncha=0
 
-do i=1,12
+do i=1,36
 
   call com(xend,xendcom,long(NC))       ! substracts center of mass
   call rota(xendcom,xendr,long(NC))   ! rotate chain conformation ncha time
