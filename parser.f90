@@ -59,7 +59,7 @@ vtkflag = 0
 entflag = 0
 maxT = 1
 flagMD = 0
-
+nrot = 12 ! default number of rotations
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Control file variables
@@ -105,6 +105,10 @@ select case (label)
  
   case('flagMD')
    read(buffer, *, iostat=ios) flagMD
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+  case('nrot')
+   read(buffer, *, iostat=ios) nrot
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case('PBCflag')
@@ -167,11 +171,6 @@ select case (label)
   case ('cuantas')
    read(buffer, *, iostat=ios) totalcuantas
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-  ! Auxiliary calculations
-   block_cuantas=int(totalcuantas/size/12)
-   cuantas=block_cuantas*12
-   restcuantas=totalcuantas-size*12*block_cuantas
-   if(rank.eq.(size-1))cuantas=cuantas+restcuantas
 
    case ('long')
    allocate(long(NComp))
@@ -311,6 +310,15 @@ if(lseg.eq.ndr)call stopundef('lseg')
 if(lsegkai.eq.ndr)call stopundef('lsegkai')
 if(pHbulk.eq.ndi)call stopundef('pHbulk')
 
+
+! Auxiliary calculations
+   block_cuantas=int(totalcuantas/size/nrot)
+   cuantas=block_cuantas*nrot
+   restcuantas=totalcuantas-size*nrot*block_cuantas
+   if(rank.eq.(size-1))cuantas=cuantas+restcuantas
+
+! write output
+
 if (rank.eq.0) then
  print*, 'pKa = ', pka
  print*, 'pKb = ', pKb
@@ -321,6 +329,7 @@ if (rank.eq.0) then
  print*, 'r_neg = ', r_neg
  print*, 'dimf = ', dimf
 endif
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Read chain structure from structure.in

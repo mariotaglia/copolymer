@@ -53,7 +53,7 @@ real*8, allocatable :: avpol(:,:,:,:) ! volume fraction of chains
 real*8, allocatable :: avpola(:,:,:,:), avpolb(:,:,:,:) ! volume fraction of acid and basic segments 
 real*8, allocatable :: xpol(:,:,:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xsol(:,:)
-INTEGER totalcuantas, cuantas
+INTEGER totalcuantas, cuantas, nrot
 integer curvature
 real*8, allocatable :: Ug(:), Ut(:)
 real*8, allocatable :: epsfcn(:,:)

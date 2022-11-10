@@ -101,7 +101,7 @@ endif
 
 ncha=0
 
-do i=1,12
+do i=1,nrot
 
   call com(xend,xendcom,long(NC))       ! substracts center of mass
   call rota(xendcom,xendr,long(NC))   ! rotate chain conformation ncha time
