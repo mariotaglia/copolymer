@@ -8,7 +8,6 @@ use bulk
 use longs
 use MPI
 use pis
-use mkai, only : segpoorsv 
 implicit none
 
 
@@ -37,13 +36,6 @@ vpol(:)=vpol(:)/vsol  ! volume polymer segment in units of vsol
 vpol_a(:)=vpol_a(:)/vsol
 vpol_b(:)=vpol_b(:)/vsol
 
-
-vchain=0.0
-do NC = 1, Ncomp
-do i=1,long(NC)
-  vchain(NC)=vchain(NC)+vpol(segpoorsv(i,NC))
-enddo
-enddo
 
 vneg=4/3*pi*r_neg**3/vsol !volume of anion in units of vsol
 vpos=4/3*pi*r_pos**3/vsol !volume of cation in units of vsol 

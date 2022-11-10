@@ -96,7 +96,6 @@ if (flagMD.eq.1) then
 
        call MPI_RECV(seed, 1, MPI_INTEGER, rank-1, rank-1, MPI_COMM_WORLD, status, ierr)
        print*, "rank", rank, "received from rank", rank-1,"seed =", seed
- 
     endif
 else
     if (rank.gt.0) then
@@ -104,6 +103,7 @@ else
        print*, "rank", rank, "received from rank", rank-1,"seed =", seed
     endif
 endif
+
 
 do while (conf.lt.cuantas)
 
@@ -130,11 +130,6 @@ endif
    sumUgyr=sumUgyr+exp(-Ugyr)
 
    do j=1,ncha
-
-
-
-
-
       if(conf.lt.cuantas) then
 
 
@@ -170,13 +165,6 @@ endif
 !      write(9947,*)sqrt((chains(1,4,j)-chains(1,7,j))**2   &
 !                +(chains(2,4,j)-chains(2,7,j))**2   &
 !                +(chains(3,4,j)-chains(3,7,j))**2)
-
-
-
-
-
-
-
 
          conf=conf+1
          Uchain(conf,NC)=Uconf
@@ -216,8 +204,6 @@ endif
          innZ(k,conf,NC)=-int(anint(tempr_Z/deltaZ)) ! mirror conformation in Z
          enddo ! k
       endif
-
-
    enddo ! j
 
 enddo ! while
@@ -243,7 +229,9 @@ do is=0,Npoorsv+1
    Rgyrprom(is)=sumRgyr(is)/sumUgyr
 enddo
 
+
 call MPI_BARRIER(MPI_COMM_WORLD, ierr)
+
 
 if(rank.eq.0) then
      print*," chains component ", NC, " out of ", Ncomp, " ready"
@@ -261,5 +249,15 @@ enddo
 close(2533+NC)
 
 enddo ! NC
+
+! calc vchain, moved here because need segpoorsv
+
+vchain=0.0
+do NC = 1,Ncomp
+do i=1,long(NC)
+  vchain(NC)=vchain(NC)+vpol(segpoorsv(i,NC))
+enddo
+enddo
+
 !stop
 end

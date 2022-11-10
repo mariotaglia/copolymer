@@ -1,6 +1,6 @@
 module cadenaMD
 integer flagMD ! flag que indica si lee cadenas desde MD, 1: lee md, 0: no lee MD 
-integer nMDH, MDHs(100) ! numero atomos y codigo de atomos que son H
+integer nMD, MDHs(100,100), MDsegpoorsv(100,100), MDacidtype(100,100), MDbasictype(100,100)  ! mapeo entre MD y MOLT, usar 0 para H
 integer lineposMD
 endmodule
 

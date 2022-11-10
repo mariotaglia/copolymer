@@ -59,7 +59,6 @@ vtkflag = 0
 entflag = 0
 maxT = 1
 flagMD = 0
-nMDH = 0
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -287,11 +286,6 @@ select case (label)
      enddo
    enddo ! NC
 
-  case ('nMDH')
-   read(buffer, *, iostat=ios) nMDH
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   read(fh,*)(MDHs(j), j = 1, nMDH)
- 
 endselect
 
 endif
@@ -339,9 +333,17 @@ do NC = 1, Ncomp
 
 write(filename2,'(A10,I3.3,A3)')'structure.',NC,'.in'
 open(file=filename2, unit = 9)
-do i = 1, long(NC)
-read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC)
-enddo
+
+if (flagMD.eq.0) then ! RIS conformation
+   do i = 1, long(NC)
+    read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC)
+   enddo
+else 
+   read(9,*) nMD ! number of MD beads
+   do i = 1, nMD
+    read(9,*) j, MDHs(i,NC), MDsegpoorsv(i,NC), MDacidtype(i,NC), MDbasictype(i,NC) ! properties of MD bead i, first column is 0 for H or 1 for heavy
+   enddo
+endif
 close(9)
 enddo ! NC
 

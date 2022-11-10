@@ -9,6 +9,8 @@ use mkai
 use longs
 use cadenaMD
 use MPI
+use mkai, only: segpoorsv
+use mcharge, only : acidtype, basictype
 implicit none
 integer i,state,j,k1,k2,ncha, is, jj
 real*8 rn,dista
@@ -26,8 +28,8 @@ integer NC
 logical itsopen 
 character(80) :: line
 integer natoms
-integer MDid, MDmol, MDtype
-real*8 MDx, MDy, MDz
+integer MDid(2000), MDmol(2000), MDtype(2000)
+real*8 MDx(2000), MDy(2000), MDz(2000)
 integer isH
 integer*8 timestep
 
@@ -53,7 +55,7 @@ read (7777, '(A)') line
 read (7777, *) timestep
 read (7777, '(A)') line
 
-print*,'Rank', rank, 'TSTEP', timestep, 'LINEPOS', lineposMD
+print*,'CADENASMD, rank', rank, 'TSTEP', timestep, 'LINEPOS', lineposMD
 
 read (7777,*) natoms
 !print*, natoms
@@ -63,33 +65,43 @@ read (7777, '(A)') line
 !print*,line
 enddo
 
-j = 0 ! counts non-H atoms
 do i = 1, natoms
-
-  read(7777,*) MDid, MDmol, MDtype, MDx,MDy,MDz
-
-  isH = 0 
-  do jj = 1, nMDH
-   if(MDHs(jj).eq.MDtype)isH = 1
-  enddo
-
-  if(isH.eq.0) then ! store atom
-  j = j + 1
-   xend(1,j) = MDx/10.0
-   xend(2,j) = MDy/10.0
-   xend(3,j) = MDz/10.0
-  endif 
+  read(7777,*) MDid(i), MDmol(i), MDtype(i), MDx(i),MDy(i),MDz(i)
 enddo
 
-if(j.ne.long(NC)) then
+
+jj = 0 ! current position in MOLT bead list 
+do j = 1, natoms ! current position in MD atom list
+ do i = 1, natoms
+   if (MDid(i).eq.j) then ! we found atom j
+     if(MDHs(MDtype(i),NC).eq.1) then ! atom j is a heavy atom
+       jj = jj + 1 ! advance one MOLT bead list
+       xend(1,jj) = MDx(i)/10.0
+       xend(2,jj) = MDy(i)/10.0
+       xend(3,jj) = MDz(i)/10.0
+       segpoorsv(jj,NC) = MDsegpoorsv(MDtype(i),NC)
+       acidtype(jj,NC) = MDacidtype(MDtype(i),NC)
+       basictype(jj,NC) = MDbasictype(MDtype(i),NC)
+     endif
+    endif
+ enddo ! i
+enddo ! j
+
+if(jj.ne.long(NC)) then
   if(rank.eq.0)print*,'Error in MD input file, check long in DEFINITIONS', j
   stop
 endif
 
+! DEBUG
+!do i = 1, long(NC)
+! print*, 'rank!', rank,i, segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC)
+!enddo
+
+
 
 ncha=0
 
-do i=1,36
+do i=1,12
 
   call com(xend,xendcom,long(NC))       ! substracts center of mass
   call rota(xendcom,xendr,long(NC))   ! rotate chain conformation ncha time
