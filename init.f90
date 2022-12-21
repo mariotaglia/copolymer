@@ -47,7 +47,6 @@ enddo
 
 vneg=4/3*pi*r_neg**3/vsol !volume of anion in units of vsol
 vpos=4/3*pi*r_pos**3/vsol !volume of cation in units of vsol 
-vcopmol = vpol_a(1) + vpol_b(1) ! volume of cop-mol pair LEO
 
 pKw=14.0
 

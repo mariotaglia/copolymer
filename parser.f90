@@ -135,6 +135,10 @@ select case (label)
    do i=1,Nbasics
      read(fh,*) vpol_b(i)
    enddo
+  
+  case ('vcopmol')
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   read(fh, *) vcopmol
 
   case ('lseg')
    read(buffer, *, iostat=ios) lseg

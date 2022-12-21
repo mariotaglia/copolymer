@@ -39,7 +39,6 @@ real*8 gradphi2
 real*8 packing, packing2
 real*8 auxA, auxB, auxC
 real*8 quadPlus, quadMinus, discriminant
-!real*8 vcopmol
 real*8 betaCopA, gammaCopA, deltaCopA, alphaCopA
 real*8 betaMol, gammaMol, deltaMol, alphaMol
 real*8 kappaMol, omegaMol, Omega
