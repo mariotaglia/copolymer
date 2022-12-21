@@ -41,7 +41,8 @@ real*8 infile             ! inputfile control variable for reading input files  
 CHARACTER nada
 real*8 norma
 INTEGER adsmax
-integer ntot, dimR,dimZ, maxntotR, maxntotZ, maxntotcounterR, maxntotcounterZ, minntot, minntotZ, Rini_kais, Rfin_kais ! lattice sites
+integer ntot, dimR,dimZ, maxntotR, maxntotZ, maxntotcounterR, maxntotcounterZ, minntotR, minntotZ !lattice sites
+integer Rini_kais, Rfin_kais, minntotRkais, maxntotRkais ! kai limits
 real*8, allocatable :: avpol(:,:,:,:) ! volume fraction of chains 
 real*8, allocatable :: avpola(:,:,:,:), avpolb(:,:,:,:) ! volume fraction of acid and basic segments 
 real*8, allocatable :: xpol(:,:,:) ! volume fraction polymers already adsorbed
@@ -123,7 +124,7 @@ real*8 tt(3,3),tp(3,3),tm(3,3)
 endmodule
 
 module senos
-real*8 sitheta,cotheta,siphip,cophip
+real*8 ta,sitheta,cotheta,siphip,cophip
 endmodule
 
 module MPI

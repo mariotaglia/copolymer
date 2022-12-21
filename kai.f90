@@ -170,8 +170,8 @@ do js=1,Npoorsv
 
   endif
 
-  do ii=Rini, Rfin
-  do jR=Rini, Rfin
+  do ii=Rini_kais, Rfin_kais
+  do jR=Rini_kais, Rfin_kais
   do jZ=-Xulimit,Xulimit
 
      if (flagkai.eq.1) then

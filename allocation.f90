@@ -24,8 +24,8 @@ allocate (xpol(dimR,dimZ,Ncomp))
 allocate (innZ(maxlong,cuantas,Ncomp),innR(maxlong,cuantas,maxntotR,Ncomp))
 allocate (xtotal(Npoorsv,dimR,dimZ))
 
-Rini_kais=minntotR-5
-Rfin_kais=maxntotR+5
+Rini_kais=minntotR-10
+Rfin_kais=maxntotR+10
 if(Rini_kais.lt.1)Rini_kais = 1
 if(Rfin_kais.gt.dimR)Rini_kais = dimR
 
