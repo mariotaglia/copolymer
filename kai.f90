@@ -44,11 +44,10 @@ sumaXu(:,:)=0.0
 
 if (flagkai.eq.1) then
 
-do ii = 1, dimR ! loop sobre cada posicion del segmento
+do ii = Rini_kais, Rfin_kais ! loop sobre cada posicion del segmento
 
       ymax = cutoff
       ymin = -cutoff
-
       zmax = cutoff
       zmin = -cutoff
 
@@ -105,7 +104,7 @@ do ii = 1, dimR ! loop sobre cada posicion del segmento
       enddo!iy
       enddo!ix
       
-      do jR = 1, dimR
+      do jR = Rini_kais, Rfin_kais
       do jZ = -Xulimit, Xulimit
          do is=1,Npoorsv
          do js=1,Npoorsv
@@ -128,25 +127,37 @@ do js=1,Npoorsv
   if (flagkai.eq.0) then
 
     read(is*110+js,*)nada
-    read(is*110+js,*)curvkais,dimRkais,Xulimitkais,dimfkais(is,js)
+    read(is*110+js,*)curvkais,dimRkais,minntotRkais,maxntotRkais,Xulimitkais,dimfkais(is,js)
   
     if (curvkais.ne.curvature) then
-      print*,"curvature of kais non equal curvature of fort.8"
+      print*,"curvature of kais non equal curvature of DEFINITIONS.txt"
       stop
     endif
 
     if (dimRkais.ne.dimR) then
-      print*,"box size of kais non equal box size of fort.8"
+      print*,"box size of kais non equal box size of DEFINITIONS.txt"
       stop
     endif
 
+    if (minntotRkais.ne.minntotR) then
+      print*,"minntotR of kais non equal mintotR of DEFINITIONS.txt"
+      stop
+    endif
+
+
+    if (maxntotRkais.ne.maxntotR) then
+      print*,"maxntotR of kais non equal mintotR of DEFINITIONS.txt"
+      stop
+    endif
+
+
     if (Xulimitkais.ne.Xulimit) then
-      print*,"Xulimit of kais non equal Xulimit of fort.8"
+      print*,"Xulimit of kais non equal Xulimit of DEFINITIONS.txt"
       stop
     endif
 
     if (dimfkais(is,js).ne.dimf(is,js)) then
-      print*,"dimf of kais non equal dimf of fort.8"
+      print*,"dimf of kais non equal dimf of DEFINITIONS.txt"
       stop
     endif
 
@@ -154,13 +165,13 @@ do js=1,Npoorsv
 
   if (flagkai.eq.1) then
 
-    write(is*110+js,*)'#curvature dimR Xulimit dimf#'
-    write(is*110+js,*)curvature,dimR,Xulimit,dimf(is,js)
+    write(is*110+js,*)'#curvature dimR minntotR maxntotR Xulimit dimf#'
+    write(is*110+js,*)curvature,dimR,minntotR,maxntotR,Xulimit,dimf(is,js)
 
   endif
 
-  do ii=1, dimR
-  do jR=1, dimR
+  do ii=Rini, Rfin
+  do jR=Rini, Rfin
   do jZ=-Xulimit,Xulimit
 
      if (flagkai.eq.1) then
@@ -192,7 +203,7 @@ do js=1,Npoorsv
   enddo
   enddo
 
-  do jR = dimR/2-Xulimit, dimR/2+Xulimit
+  do jR = (Rfin_kais-Rini_kais)/2-Xulimit, (Rfin_kais-Rini_kais)/2+Xulimit
   do jZ = -Xulimit,Xulimit
     sumaXu(is,js) = sumaXu(is,js) + Xu(dimR/2,jR,jZ,is,js)
   enddo
