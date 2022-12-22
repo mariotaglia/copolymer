@@ -51,8 +51,8 @@ do ii = Rini_kais, Rfin_kais ! loop sobre cada posicion del segmento
       zmax = cutoff
       zmin = -cutoff
 
-      xmax = cutoff + (dfloat(ii) - 0.5)*deltaR
-      xmin = -cutoff + (dfloat(ii) - 0.5)*deltaR
+      xmax = cutoff + (dfloat(ii+dimRini) - 0.5)*deltaR
+      xmin = -cutoff + (dfloat(ii+dimRini) - 0.5)*deltaR
       
       do ix = 1, MCsteps
       do iy = 1, MCsteps
@@ -60,7 +60,7 @@ do ii = Rini_kais, Rfin_kais ! loop sobre cada posicion del segmento
 
 ! coordenadas del segmento (x1,y1,z1) y del punto a integrar (x2,y2,z2)
 
-         x1 = (dfloat(ii) - 0.5)*deltaR ! asume theta segmento = 0, z segmento = 0 y segmento en el centro de la layer
+         x1 = (dfloat(ii+dimRini) - 0.5)*deltaR ! asume theta segmento = 0, z segmento = 0 y segmento en el centro de la layer
          y1 = 0.0
          z1 = 0.0
 

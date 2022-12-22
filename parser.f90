@@ -37,6 +37,7 @@ minntotZ = ndi
 maxntotR = ndi
 maxntotZ = ndi
 dimR = ndi
+dimRini = 0
 dimZ = ndi
 totalcuantas = ndi
 Npoorsv = ndi ! zero by default
@@ -154,7 +155,12 @@ select case (label)
    read(buffer, *, iostat=ios) dimR, dimZ, minntotR, maxntotR, minntotZ,  maxntotZ
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    ntot=dimR*dimZ
-  
+ 
+  case ('dimRini')
+   read(buffer, *, iostat=ios) dimRini
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+
   case ('layersize')
    read(buffer, *, iostat=ios) deltaR, deltaZ
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),'= ',trim(buffer)
