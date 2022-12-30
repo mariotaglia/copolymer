@@ -51,7 +51,7 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 do NC = 1, Ncomp
-write(1533+NC,*) npol, dlog(xpol(1,1,NC))-dlog(q(1,1,NC))
+write(1533+NC,*) npol, dlog(xpol(minntotR,minntotZ,NC))-dlog(q(minntotR,minntotZ,NC))
 flush(1533+NC)
 enddo
 

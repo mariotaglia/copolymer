@@ -162,11 +162,11 @@ do iR = 1, dimR
 
     xpot(is,iR,iZ) = xh(iR,iZ)**vpol(is) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
     xpot(is,iR,iZ) = xpot(is,iR,iZ)*dexp(protemp) 
-
   enddo
 
 enddo
 enddo
+
 
 do is= 1, Npoorsv
   do iZ= 1, dimZ
@@ -248,21 +248,18 @@ do iiZ=minntotZ, maxntotZ
          is = segpoorsv(k,NC)
          ia = acidtype(k,NC)
          ib = basictype(k,NC) 
-         
+                  
          pro(i)= pro(i) * xpot(is,aR,aZ)
-
          pro(i)= pro(i) * xpot_a(ia,aR,aZ) 
-     
          pro(i)= pro(i) * xpot_b(ib,aR,aZ)
 
-     enddo !k
+      enddo !k
 
       q_tosend(iiR,iiZ) = q_tosend(iiR,iiZ) + pro(i) ! all_tosend(ii) = all_tosend(ii) + pro(i) 
       sumprolnpro_tosend(iiR,iiZ) = sumprolnpro_tosend(iiR,iiZ) + pro(i)*dlog(pro(i)) ! all_tosend(ntot+ii) = all_tosend(ntot+ii) + pro(i)*dlog(pro(i))
       sumprouchain_tosend(iiR,iiZ) = sumprouchain_tosend(iiR,iiZ) + pro(i)*Uchain(i,NC) !all_tosend(ntot*2+ii) = all_tosend(ntot*2+ii) + pro(i)*Uchain(i) 
-
       xpol_tosend(iiR,iiZ) = xpol_tosend(iiR,iiZ)+pro(i) ! all_tosend(ntot*3+ii) = all_tosend(ntot*3+ii) + pro(i)
-
+      
       do j = 1, long(NC) ! loop over number of segments
 
          iZ = innZ(j,i,NC)+iiZ
@@ -283,7 +280,6 @@ do iiZ=minntotZ, maxntotZ
 
 enddo ! iiR
 enddo ! iiZ
-
 
 avpol_tosend(:, 1:dimR, 1:dimZ)=avpol_tmp(:, 1:dimR, 1:dimZ) 
 avpola_tosend(:, 1:dimR, 1:dimZ)=avpola_tmp(:, 1:dimR, 1:dimZ)
@@ -342,9 +338,7 @@ enddo
 enddo
 
 xpol(:,:,NC) = xpol(:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fixed
-
 trans(:,NC) = 0.0
-
 do iR = minntotR, maxntotR
 do iZ = minntotZ, maxntotZ
    select case (curvature)

@@ -82,14 +82,16 @@ do ii = Rini_kais, Rfin_kais ! loop sobre cada posicion del segmento
          end select
 
          vect = sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2) ! vector diferencia
-         jR = int(R/deltaR)+1 ! jR tiene la celda donde cae el punto a integrar
+         jR = int(R/deltaR)-4999 ! jR tiene la celda donde cae el punto a integrar
          jZ = int(anint(Z/deltaZ)) ! OJO
 
-         if(jR.le.dimR) then
-
-
+         if((jR.le.Rfin_kais).and.(jR.ge.Rini_kais)) then
+         
          if(vect.le.(cutoff)) then ! esta dentro de la esfera del cut-off   
+         
+
          if(vect.ge.lsegkai) then ! esta dentro de la esfera del segmento
+
            do is=1,Npoorsv
            do js=1,Npoorsv
               Xu(ii, jR, jZ, is, js) = Xu(ii, jR, jZ, is, js) + ((lsegkai/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
@@ -203,9 +205,9 @@ do js=1,Npoorsv
   enddo
   enddo
 
-  do jR = (Rfin_kais-Rini_kais)/2-Xulimit, (Rfin_kais-Rini_kais)/2+Xulimit
+  do jR = (Rfin_kais+Rini_kais)/2-Xulimit, (Rfin_kais+Rini_kais)/2+Xulimit
   do jZ = -Xulimit,Xulimit
-    sumaXu(is,js) = sumaXu(is,js) + Xu(dimR/2,jR,jZ,is,js)
+    sumaXu(is,js) = sumaXu(is,js) + Xu((Rfin_kais+Rini_kais)/2,jR,jZ,is,js)
   enddo
   enddo
 

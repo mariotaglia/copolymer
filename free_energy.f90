@@ -377,12 +377,12 @@ do is=1,Npoorsv
 enddo
 
 do NC = 1,Ncomp
-mupol = dlog(xpol(1,1,NC))-dlog(q(1,1,NC))
-do iR = minntotR, maxntotR
-do iZ = minntotZ, maxntotZ
-  sumpol = sumpol + xpol(iR,iZ,NC)*mupol*jacobian(iR)*deltaR*deltaZ
-enddo
-enddo
+  mupol = dlog(xpol(minntotR,minntotZ,NC))-dlog(q(minntotR,minntotZ,NC))
+  do iR = minntotR, maxntotR
+  do iZ = minntotZ, maxntotZ
+    sumpol = sumpol + xpol(iR,iZ,NC)*mupol*jacobian(iR)*deltaR*deltaZ
+  enddo
+  enddo
 enddo
 
 Free_Energy2 = Free_Energy2 + sumpol 
