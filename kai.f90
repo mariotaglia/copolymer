@@ -82,7 +82,7 @@ do ii = Rini_kais, Rfin_kais ! loop sobre cada posicion del segmento
          end select
 
          vect = sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2) ! vector diferencia
-         jR = int(R/deltaR)-4999 ! jR tiene la celda donde cae el punto a integrar
+         jR = int(R/deltaR)-dimRini+1 ! jR tiene la celda donde cae el punto a integrar
          jZ = int(anint(Z/deltaZ)) ! OJO
 
          if((jR.le.Rfin_kais).and.(jR.ge.Rini_kais)) then
