@@ -22,10 +22,11 @@ for i, iteration in enumerate(sys.argv[1:]):
    dy, dx = np.gradient(xdensityPol1['density'] + xdensityPol2['density']), np.gradient(xdensityPol1['iR'])
    derivative = dy/dx
    sizeDeriv = derivative.size
-   criterio = 1e-5
+   criterio = 1e-3
+   argLimite = sizeDeriv - 1
    for i in range(sizeDeriv):
-       if np.abs(derivative[sizeDeriv - i - 16]) > criterio:
-           argLimite = sizeDeriv - i - 16
+       if np.abs(derivative[sizeDeriv - i - 31]) > criterio:
+           argLimite = sizeDeriv - i - 31
            break
    limite = xdensityPol1['iR'].iloc[argLimite]
    # Integro numericamente hasta o desde el limite hallado
