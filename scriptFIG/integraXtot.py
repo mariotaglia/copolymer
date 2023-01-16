@@ -18,19 +18,21 @@ for i, iteration in enumerate(sys.argv[1:]):
    xdensityPol1 = cargaDatos('xdensitytota.001.001.' + iterCode + '.dat')
    xdensityPol2 = cargaDatos('xdensitytota.002.001.' + iterCode + '.dat')
    # Encuentro el criterio de integracion
-   corte = 0.001
-   maxDensity1 = xdensityPol1['density'].max()*corte
-   maxDensity2 = xdensityPol2['density'].max()*corte
-   limite1 = xdensityPol1[xdensityPol1['density'] > maxDensity1]['iR'].max()
-   limite2 = xdensityPol2[xdensityPol2['density'] > maxDensity2]['iR'].max()
-   limite = np.max([limite1, limite2])
-   print('Limite Pol 1:', limite1)
-   print('Limite Pol 2:', limite2)
+   # Calculo de la derivada
+   dy, dx = np.gradient(xdensityPol1['density'] + xdensityPol2['density']), np.gradient(xdensityPol1['iR'])
+   derivative = dy/dx
+   sizeDeriv = derivative.size
+   criterio = 1e-5
+   for i in range(sizeDeriv):
+       if np.abs(derivative[sizeDeriv - i - 16]) > criterio:
+           argLimite = sizeDeriv - i - 16
+           break
+   limite = xdensityPol1['iR'].iloc[argLimite]
    # Integro numericamente hasta o desde el limite hallado
    integral1_bajo = 4*np.pi*np.trapz(xdensityPol1[xdensityPol1['iR'] <= limite]['r2*density'], xdensityPol1[xdensityPol1['iR'] <= limite]['iR'])
-   integral1_alto = 4*np.pi*np.trapz(xdensityPol1[xdensityPol1['iR'] > limite]['r2*density'], xdensityPol1[xdensityPol1['iR'] > limite]['iR'])
+   integral1_alto = 4*np.pi*np.trapz(xdensityPol1[xdensityPol1['iR'] >= limite]['r2*density'], xdensityPol1[xdensityPol1['iR'] >= limite]['iR'])
    integral2_bajo = 4*np.pi*np.trapz(xdensityPol2[xdensityPol2['iR'] <= limite]['r2*density'], xdensityPol2[xdensityPol2['iR'] <= limite]['iR'])
-   integral2_alto = 4*np.pi*np.trapz(xdensityPol2[xdensityPol2['iR'] > limite]['r2*density'], xdensityPol2[xdensityPol2['iR'] > limite]['iR'])
+   integral2_alto = 4*np.pi*np.trapz(xdensityPol2[xdensityPol2['iR'] >= limite]['r2*density'], xdensityPol2[xdensityPol2['iR'] >= limite]['iR'])
 
 print('Integral hasta', limite, ': Cop:', integral1_bajo, ', Mol:', integral2_bajo)
 print('Integral desde', limite, ': Cop:', integral1_alto, ', Mol:', integral2_alto)
