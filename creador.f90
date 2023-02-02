@@ -91,13 +91,13 @@ do while (conf.lt.cuantas)
 
                select case (abs(curvature))
                  case (2)
-                  tempr_R=((chains(1,k,j)+(float(ii)-0.5+dimRini)*deltaR)**2 + chains(2,k,j)**2 + chains(3,k,j)**2 )**(0.5)
+                  tempr_R=((chains(1,k,j)+(float(ii+dimRini)-0.5)*deltaR)**2 + chains(2,k,j)**2 + chains(3,k,j)**2 )**(0.5)
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                  case (1)
-                  tempr_R=((chains(1,k,j)+(float(ii)-0.5+dimRini)*deltaR)**2+chains(2,k,j)**2)**(0.5)
+                  tempr_R=((chains(1,k,j)+(float(ii+dimRini)-0.5)*deltaR)**2+chains(2,k,j)**2)**(0.5)
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                  case (0) 
-                  tempr_R=abs(chains(1,k,j)+(float(ii)-0.5+dimRini)*deltaR)
+                  tempr_R=abs(chains(1,k,j)+(float(ii+dimRini)-0.5)*deltaR)
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                endselect
                if(temp_R.gt.(dimR+dimRini)) then

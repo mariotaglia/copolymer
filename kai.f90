@@ -39,7 +39,7 @@ pi=dacos(-1.0d0)          ! pi = arccos(-1)
 
 Xu = 0.0 ! vector Xu
 
-MCsteps = 60*Xulimit
+MCsteps = 120*Xulimit
 sumaXu(:,:)=0.0
 
 if (flagkai.eq.1) then
@@ -148,7 +148,7 @@ do js=1,Npoorsv
 
 
     if (maxntotRkais.ne.maxntotR) then
-      print*,"maxntotR of kais non equal mintotR of DEFINITIONS.txt"
+      print*,"maxntotR of kais non equal maxntotR of DEFINITIONS.txt"
       stop
     endif
 
