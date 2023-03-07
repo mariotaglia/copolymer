@@ -60,6 +60,7 @@ PBCflag = 1 ! flag for PBC in z direction
 vtkflag = 0
 entflag = 0
 maxT = 1
+ncha_max=12
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Control file variables
@@ -168,7 +169,12 @@ select case (label)
   case ('cuantas')
    read(buffer, *, iostat=ios) totalcuantas
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-  ! Auxiliary calculations
+
+  case('nrota')
+   read(buffer, *, iostat=ios) ncha_max
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ', trim(buffer)
+
+   ! Auxiliary calculations
    block_cuantas=int(totalcuantas/size/12)
    cuantas=block_cuantas*12
    restcuantas=totalcuantas-size*12*block_cuantas
