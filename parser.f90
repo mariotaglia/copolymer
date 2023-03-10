@@ -175,9 +175,9 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ', trim(buffer)
 
    ! Auxiliary calculations
-   block_cuantas=int(totalcuantas/size/12)
-   cuantas=block_cuantas*12
-   restcuantas=totalcuantas-size*12*block_cuantas
+   block_cuantas=int(totalcuantas/size/ncha_max)
+   cuantas=block_cuantas*ncha_max
+   restcuantas=totalcuantas-size*ncha_max*block_cuantas
    if(rank.eq.(size-1))cuantas=cuantas+restcuantas
 
    case ('long')
