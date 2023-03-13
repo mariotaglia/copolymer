@@ -19,7 +19,7 @@ real*8 tempr_R, tempr_Z
 
 integer ncha
 
-real*8 chains(3,maxlong,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
+real*8 chains(3,maxlong,2*ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
 real*8 Uconf
 integer*1 Ntconf(maxlong)
 real*8 sumUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
