@@ -47,6 +47,7 @@ infile = ndi
 flagkai = 0 ! zero by default
 r_pos = 0.3
 r_neg = 0.3
+MCfactor = 60
 npolini = ndi
 npolfirst = ndi
 npollast = ndi
@@ -247,6 +248,10 @@ select case (label)
 
   case ('Xulimit')
    read(buffer, *, iostat=ios) Xulimit
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+  
+  case('MCsteps')
+   read(buffer, *, iostat=ios) MCfactor
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case ('Utg')
