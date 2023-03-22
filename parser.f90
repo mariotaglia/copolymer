@@ -7,6 +7,7 @@ use MPI
 use mkai
 use volume
 use layer
+use senos
 implicit none
 integer block_cuantas, restcuantas
 
@@ -61,6 +62,7 @@ PBCflag = 1 ! flag for PBC in z direction
 vtkflag = 0
 entflag = 0
 maxT = 1
+ta = 120
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Control file variables
@@ -275,7 +277,7 @@ select case (label)
    case ('nbranches')
    allocate(nbranches(NComp))
    allocate(long_branches(NComp))
-
+   
    do NC = 1, NComp
      read(fh, *)nbranches(NC)
    enddo
@@ -291,7 +293,11 @@ select case (label)
         long_branches(NC) = long_branches(NC) + branch_long(j,NC)
      enddo
    enddo ! NC
- 
+   
+  case('torsion angle')
+   read(buffer, *, iostat=ios) ta
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
 endselect
 
 endif
