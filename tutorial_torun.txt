@@ -6,23 +6,27 @@ Description: see example in main directory. Mandatory.
 
 File name: kais.001.001.dat kais.001.002.dat etc
 Description: geometric dependency of 1-1 interactions, 1-2 interactions, etc.
-Depends on curvature, dimR, Xulimit and dimf. If any of those parameteres
-changes, it has to be recalculated. Should be added if flagkai is 0.
+Depends on curvature, dimR,dimRini, minntot, maxntot, Xulimit, dimf and MCsteps. 
+If any of those parameteres changes, it has to be recalculated. Mandatory if flagkai is 0.
 
 File name: fort.100 
-Description: initial guess for solvent volume fraction. Should be added if infile is 1.
+Description: initial guess for solvent volume fraction. Mandatory if infile is 1.
 
 File name: fort.101 fort.102 etc
 Description: initial guess for volume fraction of bead 1, 2, etc. If Ncomp > 1,
 fort.101 is the sum of the volume fraction of bead 1 from all the compounds.
-Shold be added if infile is 1.
+Mandatory if infile is 1.
 
 File name: fort.200
 Description: initial guess for electrostatic potential. Should be added if
 infile is 1.
 
+File name: in.in
+Description: contains all the information of fort.* files if copied from the
+output file out.XXX.XXX.dat. Must be added if infile is 2.
+
 File: epsilon.in
-Description: matrix with inter bead interactions. It can be generated
+Description: matrix with inter bead interaction parameters. It can be generated
 automatically by the martini_to_theory python script from martini parameters.
 Mandatory.
 
@@ -36,21 +40,22 @@ Example:
 
 File name: structure.001.in structure.002.in etc
 Description: these files indicate the structure of compounds 1, 2, etc. The
-file contains three columns. Each line of the file indicates poorsv type,
-acid type and basic type of each bead. The number of lines should coincide
-with long. Branches go at the end ordered as in DEFINITINOS.txt (see example
-in main directory). Mandatory.
+file contains four columns. Each line of the file indicates poorsv type,
+acid type and basic type, and torsion state of each bead. The number of lines
+must coincide with long. Branches go at the end ordered as in DEFINITIONS.txt 
+(see example in main directory). Mandatory.
+Torsion states (4th column): 0 = trans. 1 = gauche+. 2 = gauche-. 3 = random.
 
 Example (long=8, npoorsv=2, Nacids=1, Nbasics=0):
 
-1	0	0
-1	0	0
-1	0	0
-1	0	0
-2	0	0
-2	0	0
-0	0	0
-0	1	0
+1	0	0	3
+1	0	0	3
+1	0	0	3
+1	0	0	3
+2	0	0	3
+2	0	0	3
+0	0	0	3
+0	1	0	3
 
 ##            OUTPUTS             ##
 
