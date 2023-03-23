@@ -165,14 +165,20 @@ do js=1,Npoorsv
 
     if (MCfactorkais.ne.MCfactor) then
       print*,"MCsteps prefactor of kais.XXX.XXX.in non equal to MCsteps prefactor defined in kai.f90"
+      stop
+    endif
+
+    if (dimRinikais.ne.dimRini) then
+      print*,"dimRini of kais non equal to dimRini of DEFINITIONS.txt"
+      stop
     endif
 
   endif
 
   if (flagkai.eq.1) then
 
-    write(is*110+js,*)'#curvature dimR minntotR maxntotR Xulimit dimf factorMCsteps#'
-    write(is*110+js,*)curvature,dimR,minntotR,maxntotR,Xulimit,dimf(is,js),MCfactor
+    write(is*110+js,*)'#curvature dimR dimRini minntotR maxntotR Xulimit dimf factorMCsteps#'
+    write(is*110+js,*)curvature,dimR,dimRini,minntotR,maxntotR,Xulimit,dimf(is,js),MCfactor
 
   endif
 
