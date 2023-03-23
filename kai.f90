@@ -39,21 +39,20 @@ pi=dacos(-1.0d0)          ! pi = arccos(-1)
 
 Xu = 0.0 ! vector Xu
 
-MCsteps = 60*Xulimit
+MCsteps = MCfactor*Xulimit
 sumaXu(:,:)=0.0
 
 if (flagkai.eq.1) then
 
-do ii = 1, dimR ! loop sobre cada posicion del segmento
+do ii = Rini_kais, Rfin_kais ! loop sobre cada posicion del segmento
 
       ymax = cutoff
       ymin = -cutoff
-
       zmax = cutoff
       zmin = -cutoff
 
-      xmax = cutoff + (dfloat(ii) - 0.5)*deltaR
-      xmin = -cutoff + (dfloat(ii) - 0.5)*deltaR
+      xmax = cutoff + (dfloat(ii+dimRini) - 0.5)*deltaR
+      xmin = -cutoff + (dfloat(ii+dimRini) - 0.5)*deltaR
       
       do ix = 1, MCsteps
       do iy = 1, MCsteps
@@ -61,7 +60,7 @@ do ii = 1, dimR ! loop sobre cada posicion del segmento
 
 ! coordenadas del segmento (x1,y1,z1) y del punto a integrar (x2,y2,z2)
 
-         x1 = (dfloat(ii) - 0.5)*deltaR ! asume theta segmento = 0, z segmento = 0 y segmento en el centro de la layer
+         x1 = (dfloat(ii+dimRini) - 0.5)*deltaR ! asume theta segmento = 0, z segmento = 0 y segmento en el centro de la layer
          y1 = 0.0
          z1 = 0.0
 
@@ -83,14 +82,16 @@ do ii = 1, dimR ! loop sobre cada posicion del segmento
          end select
 
          vect = sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2) ! vector diferencia
-         jR = int(R/deltaR)+1 ! jR tiene la celda donde cae el punto a integrar
+         jR = int(R/deltaR)-dimRini+1 ! jR tiene la celda donde cae el punto a integrar
          jZ = int(anint(Z/deltaZ)) ! OJO
 
-         if(jR.le.dimR) then
-
-
+         if((jR.le.Rfin_kais).and.(jR.ge.Rini_kais)) then
+         
          if(vect.le.(cutoff)) then ! esta dentro de la esfera del cut-off   
+         
+
          if(vect.ge.lsegkai) then ! esta dentro de la esfera del segmento
+
            do is=1,Npoorsv
            do js=1,Npoorsv
               Xu(ii, jR, jZ, is, js) = Xu(ii, jR, jZ, is, js) + ((lsegkai/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
@@ -105,7 +106,7 @@ do ii = 1, dimR ! loop sobre cada posicion del segmento
       enddo!iy
       enddo!ix
       
-      do jR = 1, dimR
+      do jR = Rini_kais, Rfin_kais
       do jZ = -Xulimit, Xulimit
          do is=1,Npoorsv
          do js=1,Npoorsv
@@ -128,39 +129,55 @@ do js=1,Npoorsv
   if (flagkai.eq.0) then
 
     read(is*110+js,*)nada
-    read(is*110+js,*)curvkais,dimRkais,Xulimitkais,dimfkais(is,js)
+    read(is*110+js,*)curvkais,dimRkais,minntotRkais,maxntotRkais,Xulimitkais,dimfkais(is,js),MCfactorkais
   
     if (curvkais.ne.curvature) then
-      print*,"curvature of kais non equal curvature of fort.8"
+      print*,"curvature of kais non equal curvature of DEFINITIONS.txt"
       stop
     endif
 
     if (dimRkais.ne.dimR) then
-      print*,"box size of kais non equal box size of fort.8"
+      print*,"box size of kais non equal box size of DEFINITIONS.txt"
       stop
     endif
 
+    if (minntotRkais.ne.minntotR) then
+      print*,"minntotR of kais non equal mintotR of DEFINITIONS.txt"
+      stop
+    endif
+
+
+    if (maxntotRkais.ne.maxntotR) then
+      print*,"maxntotR of kais non equal maxntotR of DEFINITIONS.txt"
+      stop
+    endif
+
+
     if (Xulimitkais.ne.Xulimit) then
-      print*,"Xulimit of kais non equal Xulimit of fort.8"
+      print*,"Xulimit of kais non equal Xulimit of DEFINITIONS.txt"
       stop
     endif
 
     if (dimfkais(is,js).ne.dimf(is,js)) then
-      print*,"dimf of kais non equal dimf of fort.8"
+      print*,"dimf of kais non equal dimf of DEFINITIONS.txt"
       stop
+    endif
+
+    if (MCfactorkais.ne.MCfactor) then
+      print*,"MCsteps prefactor of kais.XXX.XXX.in non equal to MCsteps prefactor defined in kai.f90"
     endif
 
   endif
 
   if (flagkai.eq.1) then
 
-    write(is*110+js,*)'#curvature dimR Xulimit dimf#'
-    write(is*110+js,*)curvature,dimR,Xulimit,dimf(is,js)
+    write(is*110+js,*)'#curvature dimR minntotR maxntotR Xulimit dimf factorMCsteps#'
+    write(is*110+js,*)curvature,dimR,minntotR,maxntotR,Xulimit,dimf(is,js),MCfactor
 
   endif
 
-  do ii=1, dimR
-  do jR=1, dimR
+  do ii=Rini_kais, Rfin_kais
+  do jR=Rini_kais, Rfin_kais
   do jZ=-Xulimit,Xulimit
 
      if (flagkai.eq.1) then
@@ -192,9 +209,9 @@ do js=1,Npoorsv
   enddo
   enddo
 
-  do jR = dimR/2-Xulimit, dimR/2+Xulimit
+  do jR = (Rfin_kais+Rini_kais)/2-Xulimit, (Rfin_kais+Rini_kais)/2+Xulimit
   do jZ = -Xulimit,Xulimit
-    sumaXu(is,js) = sumaXu(is,js) + Xu(dimR/2,jR,jZ,is,js)
+    sumaXu(is,js) = sumaXu(is,js) + Xu((Rfin_kais+Rini_kais)/2,jR,jZ,is,js)
   enddo
   enddo
 

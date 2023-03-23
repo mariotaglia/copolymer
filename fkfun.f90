@@ -134,7 +134,7 @@ do iZ = 1,dimZ
    endif
 
 do iR = 1,dimR
-   gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
+   gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/2.0/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
    xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
 enddo 
 enddo
@@ -148,7 +148,7 @@ do iR = 1, dimR
     protemp = 0.0
     
       do js = 1, Npoorsv 
-         do jR = 1, dimR
+         do jR = Rini_kais, Rfin_kais
          do jZ = -Xulimit, Xulimit
             kZ=jZ+iZ
 
@@ -162,11 +162,11 @@ do iR = 1, dimR
 
     xpot(is,iR,iZ) = xh(iR,iZ)**vpol(is) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
     xpot(is,iR,iZ) = xpot(is,iR,iZ)*dexp(protemp) 
-
   enddo
 
 enddo
 enddo
+
 
 do is= 1, Npoorsv
   do iZ= 1, dimZ
@@ -184,7 +184,7 @@ do is= 1, Npoorsv
 
 
     do iR= 1, dimR
-      gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
+      gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/2.0/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
       xpot(is,iR,iZ) = xpot(is,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(is)*vsol*wperm/2.0)
     enddo
   enddo
@@ -232,8 +232,8 @@ avpola_tmp = 0.0
 avpolb_tmp = 0.0
 avpol_tmp = 0.0
 
-do iiR=1, maxntotcounterR ! position of center of mass 
-do iiZ=1, maxntotcounterZ
+do iiR=minntotR, maxntotR ! position of center of mass 
+do iiZ=minntotZ, maxntotZ
    do i=1, cuantas ! loop over conformations
  
       pro(i) = exp(-Uchain(i, NC))
@@ -248,21 +248,18 @@ do iiZ=1, maxntotcounterZ
          is = segpoorsv(k,NC)
          ia = acidtype(k,NC)
          ib = basictype(k,NC) 
-         
+                  
          pro(i)= pro(i) * xpot(is,aR,aZ)
-
          pro(i)= pro(i) * xpot_a(ia,aR,aZ) 
-     
          pro(i)= pro(i) * xpot_b(ib,aR,aZ)
 
-     enddo !k
+      enddo !k
 
       q_tosend(iiR,iiZ) = q_tosend(iiR,iiZ) + pro(i) ! all_tosend(ii) = all_tosend(ii) + pro(i) 
       sumprolnpro_tosend(iiR,iiZ) = sumprolnpro_tosend(iiR,iiZ) + pro(i)*dlog(pro(i)) ! all_tosend(ntot+ii) = all_tosend(ntot+ii) + pro(i)*dlog(pro(i))
       sumprouchain_tosend(iiR,iiZ) = sumprouchain_tosend(iiR,iiZ) + pro(i)*Uchain(i,NC) !all_tosend(ntot*2+ii) = all_tosend(ntot*2+ii) + pro(i)*Uchain(i) 
-
       xpol_tosend(iiR,iiZ) = xpol_tosend(iiR,iiZ)+pro(i) ! all_tosend(ntot*3+ii) = all_tosend(ntot*3+ii) + pro(i)
-
+      
       do j = 1, long(NC) ! loop over number of segments
 
          iZ = innZ(j,i,NC)+iiZ
@@ -283,7 +280,6 @@ do iiZ=1, maxntotcounterZ
 
 enddo ! iiR
 enddo ! iiZ
-
 
 avpol_tosend(:, 1:dimR, 1:dimZ)=avpol_tmp(:, 1:dimR, 1:dimZ) 
 avpola_tosend(:, 1:dimR, 1:dimZ)=avpola_tmp(:, 1:dimR, 1:dimZ)
@@ -313,9 +309,9 @@ do iZ = 1, dimZ
        case (0)
         sumpol = sumpol + avpol(is,iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or in units of chains/nm of belt (2D)
        case(1)
-        sumpol = sumpol + avpol(is,iR,iZ,NC)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm of fiber (1D) or chains/fiber (2D)
+        sumpol = sumpol + avpol(is,iR,iZ,NC)*deltaZ*(float(iR+dimRini)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm of fiber (1D) or chains/fiber (2D)
        case(2)
-        sumpol = sumpol + avpol(is,iR,iZ,NC)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
+        sumpol = sumpol + avpol(is,iR,iZ,NC)*(((float(iR+dimRini)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
       end select
    enddo
 enddo
@@ -334,26 +330,24 @@ do iZ = 1, dimZ
     case (0)
      sumpol = sumpol + xpol(iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
     case (1)
-     sumpol = sumpol + xpol(iR,iZ,NC)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
+     sumpol = sumpol + xpol(iR,iZ,NC)*deltaZ*(float(iR+dimRini)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
     case (2)
-     sumpol = sumpol + xpol(iR,iZ,NC)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
+     sumpol = sumpol + xpol(iR,iZ,NC)*(((float(iR+dimRini)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
    end select
 enddo
 enddo
 
 xpol(:,:,NC) = xpol(:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fixed
-
 trans(:,NC) = 0.0
-
-do iR = 1, maxntotcounterR
-do iZ = 1, maxntotcounterZ
+do iR = minntotR, maxntotR
+do iZ = minntotZ, maxntotZ
    select case (curvature)
     case (0)
      trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
     case(1)
-     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaZ*(float(iR)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
+     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaZ*(float(iR+dimRini)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
     case(2)
-     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*(((float(iR)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
+     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*(((float(iR+dimRini)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
    end select
 enddo
 enddo
@@ -417,12 +411,12 @@ do iZ = 1, dimZ
      f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) &
      +wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-2.0*phi(iR,iZ)+phi(iR-1,iZ))*deltaR**(-2) &
      +wperm*epsfcn(iR,iZ)*(phi(iR,jZp)-2.0*phi(iR,iZ)+phi(iR,jZm))*deltaZ**(-2) &
-     +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR,iZ))*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2) &
+     +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR-1,iZ))/2.0*(phi(iR+1,iZ)-phi(iR-1,iZ))/2.0*deltaR**(-2) &
      +wperm*(epsfcn(iR,jZp)-epsfcn(iR,jZm))*(phi(iR,jZp)-phi(iR,jZm))/4.0*deltaZ**(-2) 
 
     case(1)
      f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) &
-     + wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)/(float(iR)-0.5) &
+     + wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)/(float(iR+dimRini)-0.5) &
      +wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-2.0*phi(iR,iZ)+phi(iR-1,iZ))*deltaR**(-2) &
      +wperm*epsfcn(iR,iZ)*(phi(iR,jZp)-2.0*phi(iR,iZ)+phi(iR,jZm))*deltaZ**(-2) &
      +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR,iZ))*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2) &
@@ -430,17 +424,16 @@ do iZ = 1, dimZ
 
     case(2)
      f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) &
-     + 2.0*wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)/(float(iR)-0.5) &
+     + 2.0*wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)/(float(iR+dimRini)-0.5) &
      +wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-2.0*phi(iR,iZ)+phi(iR-1,iZ))*deltaR**(-2) &
      +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR,iZ))*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)
 
     end select
-
+   
    f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)/(-2.0)
 
 enddo
 enddo
-
 
 do is=1,Npoorsv
    do iR=1,dimR

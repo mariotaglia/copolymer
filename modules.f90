@@ -25,6 +25,7 @@ real*8, allocatable :: st(:,:)
 real*8, allocatable :: dimf(:,:), dimfkais(:,:)
 real*8, allocatable :: Xu(:,:,:,:,:)
 integer Xulimit, Xulimitkais
+integer MCfactor, MCfactorkais
 integer flagkai, curvkais
 real*8 dimRkais
 endmodule
@@ -48,7 +49,8 @@ real*8 infile             ! inputfile control variable for reading input files  
 CHARACTER nada
 real*8 norma
 INTEGER adsmax
-integer ntot, dimR,dimZ, maxntotR, maxntotZ, maxntotcounter_ini, maxntotcounterR, maxntotcounterZ ! lattice sites
+integer ntot, dimRini, dimR, dimZ, maxntotR, maxntotZ, maxntotcounterR, maxntotcounterZ, minntotR, minntotZ !lattice sites
+integer Rini_kais, Rfin_kais, minntotRkais, maxntotRkais ! kai limits
 real*8, allocatable :: avpol(:,:,:,:) ! volume fraction of chains 
 real*8, allocatable :: avpola(:,:,:,:), avpolb(:,:,:,:) ! volume fraction of acid and basic segments 
 real*8, allocatable :: xpol(:,:,:) ! volume fraction polymers already adsorbed
@@ -111,6 +113,7 @@ integer, allocatable :: nbranches(:)
 integer maxnbranches
 integer, allocatable :: long_branches(:)
 integer, allocatable :: branch_pos(:,:), branch_long(:,:) ! position and lenght of branches read from input
+integer, allocatable :: torsionstate(:,:)
 endmodule
 
 module pis
@@ -122,7 +125,7 @@ real*8 tt(3,3),tp(3,3),tm(3,3)
 endmodule
 
 module senos
-real*8 sitheta,cotheta,siphip,cophip
+real*8 ta,sitheta,cotheta,siphip,cophip
 endmodule
 
 module MPI

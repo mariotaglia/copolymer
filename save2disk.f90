@@ -51,7 +51,7 @@ enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 do NC = 1, Ncomp
-write(1533+NC,*) npol, dlog(xpol(1,1,NC))-dlog(q(1,1,NC))
+write(1533+NC,*) npol, dlog(xpol(minntotR,minntotZ,NC))-dlog(q(minntotR,minntotZ,NC))
 flush(1533+NC)
 enddo
 
@@ -304,8 +304,8 @@ enddo ! NC
 do NC = 1,Ncomp
 write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'chemical_potent.',NC,'.',counter,'.',counter2,'.dat'
 open(unit=324,file=lnqfilename)
-do iR = 1, maxntotR
-   do iZ = 1, maxntotZ
+do iR = minntotR, maxntotR
+   do iZ = minntotZ, maxntotZ
        write(324,*)zc(iR),iZ,dlog(xpol(iR,iZ,NC))-dlog(q(iR,iZ,NC))
     enddo
 enddo

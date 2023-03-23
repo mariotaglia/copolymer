@@ -79,8 +79,8 @@ Free_Energy = Free_Energy + F_Mix_s
 F_Mix_p = 0.0                                                    
 
 do NC = 1, Ncomp
-do iR = 1, maxntotcounterR                                                
-do iZ = 1, maxntotcounterZ
+do iR = minntotR, maxntotR                                                
+do iZ = minntotZ, maxntotZ
    F_Mix_p = F_Mix_p + xpol(iR,iZ,NC)*(dlog(xpol(iR,iZ,NC))-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0) 
 enddo                                                            
 enddo
@@ -145,8 +145,8 @@ Free_Energy = Free_Energy + F_Mix_OHmin
 do NC = 1, Ncomp
 F_conf = 0 
 
-do iR = 1, maxntotcounterR
-do iZ = 1, maxntotcounterZ
+do iR = minntotR, maxntotR
+do iZ = minntotZ, maxntotZ
   F_Conf = F_conf + (sumprolnpro(iR,iZ,NC)/q(iR,iZ,NC)-dlog(q(iR,iZ,NC)))*jacobian(iR)*deltaR*deltaZ*xpol(iR,iZ,NC)
 enddo 
 enddo
@@ -155,8 +155,8 @@ Free_Energy = Free_Energy + F_Conf
 
 F_Uchain = 0.0
 
-do iR=1, maxntotcounterR
-do iZ=1, maxntotcounterZ
+do iR=minntotR, maxntotR
+do iZ=minntotZ, maxntotZ
   F_Uchain = F_Uchain + deltaR*deltaZ*xpol(iR,iZ,NC)*jacobian(iR)*(sumprouchain(iR,iZ,NC)/q(iR,iZ,NC))
 enddo
 enddo
@@ -232,7 +232,7 @@ do iR = 1, dimR
 do iZ = 1, dimZ
   do is = 1, Npoorsv
   do js = 1, Npoorsv
-    do jR= 1, dimR
+    do jR= Rini_kais, Rfin_kais
     do jZ= -Xulimit, Xulimit    
 kZ = jZ + iZ
 if(PBCflag.eq.1)kkZ = PBCSYMI (kZ,dimZ)
@@ -276,7 +276,7 @@ else if(PBCflag.eq.2) then
  iZm= PBCREFI(jZm,dimZ)
 endif
 
-  gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
+  gradphi2=((phi(iR+1,iZ)-phi(iR-1,iZ))/deltaR/2)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
   F_electro = F_electro + (xcharge(iR,iZ)*phi(iR,iZ) - wperm*epsfcn(iR,iZ)/2.0*gradphi2)*jacobian(iR)*deltaR*deltaZ
 enddo
 enddo
@@ -315,8 +315,8 @@ enddo
 enddo
 
 do NC = 1, NComp
-do iR=1,maxntotcounterR
-do iZ=1,maxntotcounterZ
+do iR=minntotR,maxntotR
+do iZ=minntotZ,maxntotZ
   sumrho = sumrho + (-xpol(iR,iZ,NC)*vsol*jacobian(iR)) ! sum over  rho_i i=+,-,si
 enddo
 enddo
@@ -338,7 +338,7 @@ else if(PBCflag.eq.2) then
  iZm= PBCREFI(jZm,dimZ)
 endif
 
-  gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
+  gradphi2=((phi(iR+1,iZ)-phi(iR-1,iZ))/deltaR/2)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
   sumel = sumel - wperm*epsfcn(iR,iZ)/2.0*gradphi2*jacobian(iR)*deltaR*deltaZ
 
 enddo ! iZ
@@ -361,7 +361,7 @@ else if(PBCflag.eq.2) then
  iZm= PBCREFI(jZm,dimZ)
 endif
 
-  gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
+  gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/deltaR/2)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
   sumdiel = sumdiel + 0.5*wperm*dielpol(iR,iZ)*Depsfcn(iR,iZ)*gradphi2*jacobian(iR)*vsol
 
 enddo
@@ -377,12 +377,12 @@ do is=1,Npoorsv
 enddo
 
 do NC = 1,Ncomp
-mupol = dlog(xpol(1,1,NC))-dlog(q(1,1,NC))
-do iR = 1, maxntotcounterR
-do iZ = 1, maxntotcounterZ
-  sumpol = sumpol + xpol(iR,iZ,NC)*mupol*jacobian(iR)*deltaR*deltaZ
-enddo
-enddo
+  mupol = dlog(xpol(minntotR,minntotZ,NC))-dlog(q(minntotR,minntotZ,NC))
+  do iR = minntotR, maxntotR
+  do iZ = minntotZ, maxntotZ
+    sumpol = sumpol + xpol(iR,iZ,NC)*mupol*jacobian(iR)*deltaR*deltaZ
+  enddo
+  enddo
 enddo
 
 Free_Energy2 = Free_Energy2 + sumpol 

@@ -23,7 +23,12 @@ allocate (avpola(0:Nacids,dimR,dimZ,Ncomp), avpolb(0:Nbasics,dimR,dimZ,Ncomp))
 allocate (xpol(dimR,dimZ,Ncomp))
 allocate (innZ(maxlong,cuantas,Ncomp),innR(maxlong,cuantas,maxntotR,Ncomp))
 allocate (xtotal(Npoorsv,dimR,dimZ))
-allocate (Xu(dimR,dimR,-Xulimit:Xulimit,Npoorsv, Npoorsv))
+
+Rini_kais=minntotR-10
+Rfin_kais=maxntotR+10
+if(Rini_kais.lt.1)Rini_kais = 1
+if(Rfin_kais.gt.dimR)Rfin_kais = dimR
+allocate (Xu(dimR,Rini_kais:Rfin_kais,-Xulimit:Xulimit,Npoorsv, Npoorsv))
 allocate (xsol(dimR,dimZ))
 allocate (pp((npoorsv+2)*ntot))
 ALLOCATE (epsfcn(0:dimR+1,dimZ))

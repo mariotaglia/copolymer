@@ -8,8 +8,8 @@ npolratio
 
 curvature 0
 
-#DimR DimZ maxntotR maxntotZ #
-dimensions 140 1 18 1
+#DimR DimZ minntotR maxntotR minntotZ maxntotZ #
+dimensions 140 1   1 18   1 1
 
 #Size of layer R and Z#
 layersize 0.2 1
@@ -90,3 +90,4 @@ nbranches
 6 1
 9 2
 2 1
+

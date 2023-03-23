@@ -24,9 +24,14 @@ use matrices
 use senos
 implicit none
 
+! ta=112 ! RIS angle
+! ta=109.47122 ! tetrahedral angle
+
+!!! ta is read from DEFINITIONS; default value = 120 (RIS angle)
+
 pi=acos(-1.0000000e0)
-sitheta=sin(68.0*pi/180.0)
-cotheta=cos(68.0*pi/180.0)
+sitheta=sin((180-ta)*pi/180.0)
+cotheta=cos((180-ta)*pi/180.0)
 siphip=sin(120.0*pi/180.0)
 cophip=cos(120.0*pi/180.0)
 
@@ -125,7 +130,7 @@ use globals
 use mkai
 use longs
 implicit none
-integer i,state,j,k1,k2,ncha, is, jj
+integer i,state,j,k1,k2,ncha, is, jj, k, kk
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3), m_branch(3,3,50)
@@ -179,7 +184,17 @@ xend(3,2)=xend(3,1)+x(3)
 do i=3,long(NC)-long_branches(NC)          ! loop over remaining positions!
 
 rn=rands(seed)
-state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
+
+if (torsionstate(i,NC).eq.0) then 
+  state=0                ! fix the state to trans
+elseif (torsionstate(i,NC).eq.1) then
+  state=1                ! fix the state to gauche+
+elseif (torsionstate(i,NC).eq.2) then 
+  state=2                ! fix the state to guache-
+else
+  state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
+endif
+
 
   if (state.eq.3) then 
     state=2
@@ -231,28 +246,55 @@ i = long(NC)-long_branches(NC)
 
 do j = 1, nbranches(NC) 
 
-m(:,:) = m_branch(:,:,j)
-xendt(:) = xend_branch(:,j)
+  m(:,:) = m_branch(:,:,j)
+  xendt(:) = xend_branch(:,j)
 
-do k1=1, branch_long(j,NC)       
-i = i + 1
+  do k1=1, branch_long(j,NC)       
+    i = i + 1
 
-if (k1.eq.1) then ! only first segment of branch
-  state = state_branch(j)
-  do while (state.eq.state_branch(j)) ! choose a state different to that of the backbone
-  rn=rands(seed)
-  state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
-  if (state.eq.3) then
-    state=2
+  if (k1.eq.1) then ! only first segment of branch
+     
+    if (torsionstate(i,NC).eq.0) then
+      state=0                ! fix the state to trans
+      if (state.eq.state_branch(j)) then
+        print*,"Choose a different torsion state for segment",i,"of component",NC
+        stop
+      endif
+    elseif (torsionstate(i,NC).eq.1) then
+      state=1                ! fix the state to gauche+
+      if (state.eq.state_branch(j)) then
+        print*,"Choose a different torsion state for segment",i,"of component",NC
+        stop
+      endif
+    elseif (torsionstate(i,NC).eq.2) then 
+      state=2                ! fix the state to guache-
+      if (state.eq.state_branch(j)) then
+        print*,"Choose a different torsion state for segment",i,"of component",NC
+        stop
+      endif
+    else
+      state = state_branch(j)
+    endif
+
+    do while (state.eq.state_branch(j)) ! choose a state different to that of the backbone
+      rn=rands(seed)
+      state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
+      if(state.eq.3)state=2
+    enddo
+
+  else
+    if (torsionstate(i,NC).eq.0) then 
+      state=0                ! fix the state to trans
+    elseif (torsionstate(i,NC).eq.1) then
+      state=1                ! fix the state to gauche+
+    elseif (torsionstate(i,NC).eq.2) then 
+      state=2                ! fix the state to guache-
+    else
+      rn=rands(seed)
+      state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
+      if (state.eq.3)state=2
+    endif
   endif
-  enddo
-else
-  rn=rands(seed)
-  state=int(rn*3)        ! random select the state= {trans,gauch+,gauch-}
-  if (state.eq.3) then
-    state=2
-  endif
-endif
 
   if (state.eq.0) then
     call mrrrr(m,tt,mm)
@@ -328,15 +370,21 @@ do i=1,nrot
 
   call com(xend,xendcom,long(NC))       ! substracts center of mass
   call rota(xendcom,xendr,long(NC))   ! rotate chain conformation ncha time
-  ncha=ncha+1
+  
+!  do k=1,2  ! to reflect the chains in the R coordinate
 
-  if(entflag.eq.1)call print_ent2(xendr,ncha,NC)
+!    kk=2*(k-1)-1 ! kk = {-1,1} for k = {1,2} to reflect the chains in the R coordinate
 
-  do j=1,long(NC)
-    chains(1,j,ncha)=xendr(1,j)       ! output 
-    chains(2,j,ncha)=xendr(2,j)
-    chains(3,j,ncha)=xendr(3,j)
-  enddo
+    ncha=ncha+1
+
+    if(entflag.eq.1)call print_ent2(xendr,ncha,NC)
+
+    do j=1,long(NC)
+      chains(1,j,ncha)=xendr(1,j)   !kk*xendr(1,j)       ! to reflect the chains in the R coordinate 
+      chains(2,j,ncha)=xendr(2,j)
+      chains(3,j,ncha)=xendr(3,j)
+    enddo
+!  enddo
 enddo
 
 if(entflag.eq.1)stop

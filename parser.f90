@@ -8,6 +8,7 @@ use mkai
 use volume
 use layer
 use cadenaMD
+use senos
 implicit none
 integer block_cuantas, restcuantas
 
@@ -33,9 +34,12 @@ ndr = -1.0d10
 dielP = 78.54
 curvature = ndi
 ntot = ndi
+minntotR = ndi
+minntotZ = ndi
 maxntotR = ndi
 maxntotZ = ndi
 dimR = ndi
+dimRini = 0
 dimZ = ndi
 totalcuantas = ndi
 Npoorsv = ndi ! zero by default
@@ -45,6 +49,7 @@ infile = ndi
 flagkai = 0 ! zero by default
 r_pos = 0.3
 r_neg = 0.3
+MCfactor = 60
 npolini = ndi
 npolfirst = ndi
 npollast = ndi
@@ -60,6 +65,7 @@ entflag = 0
 maxT = 1
 flagMD = 0
 nrot = 12 ! default number of rotations
+ta = 112
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Control file variables
@@ -160,10 +166,15 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case ('dimensions')
-   read(buffer, *, iostat=ios) dimR, dimZ, maxntotR, maxntotZ
+   read(buffer, *, iostat=ios) dimR, dimZ, minntotR, maxntotR, minntotZ,  maxntotZ
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    ntot=dimR*dimZ
-  
+ 
+  case ('dimRini')
+   read(buffer, *, iostat=ios) dimRini
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+
   case ('layersize')
    read(buffer, *, iostat=ios) deltaR, deltaZ
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),'= ',trim(buffer)
@@ -246,6 +257,10 @@ select case (label)
   case ('Xulimit')
    read(buffer, *, iostat=ios) Xulimit
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+  
+  case('MCsteps')
+   read(buffer, *, iostat=ios) MCfactor
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case ('Utg')
    read(buffer, *, iostat=ios) Npoorsv
@@ -268,7 +283,7 @@ select case (label)
    case ('nbranches')
    allocate(nbranches(NComp))
    allocate(long_branches(NComp))
-
+   
    do NC = 1, NComp
      read(fh, *)nbranches(NC)
    enddo
@@ -284,6 +299,10 @@ select case (label)
         long_branches(NC) = long_branches(NC) + branch_long(j,NC)
      enddo
    enddo ! NC
+   
+  case('torsion angle')
+   read(buffer, *, iostat=ios) ta
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
 endselect
 
@@ -297,6 +316,8 @@ enddo
 
 if(curvature.eq.ndr)call stopundef('curvature')
 if(ntot.eq.ndi)call stopundef('ntot')
+if(minntotR.eq.ndi)call stopundef('minntotR')
+if(minntotZ.eq.ndi)call stopundef('minntotZ')
 if(maxntotR.eq.ndi)call stopundef('maxntotR')
 if(maxntotZ.eq.ndi)call stopundef('maxntotZ')
 if(totalcuantas.eq.ndi)call stopundef('cuantas')
@@ -337,23 +358,26 @@ endif
 allocate(segpoorsv(maxlong,Ncomp))
 allocate(acidtype(maxlong,Ncomp))
 allocate(basictype(maxlong,Ncomp))
+allocate(torsionstate(maxlong,Ncomp))
 
 do NC = 1, Ncomp
 
-write(filename2,'(A10,I3.3,A3)')'structure.',NC,'.in'
-open(file=filename2, unit = 9)
+  write(filename2,'(A10,I3.3,A3)')'structure.',NC,'.in'
+  open(file=filename2, unit = 9)
 
-if (flagMD.eq.0) then ! RIS conformation
-   do i = 1, long(NC)
-    read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC)
-   enddo
-else 
-   read(9,*) nMD ! number of MD beads
-   do i = 1, nMD
-    read(9,*) j, MDHs(i,NC), MDsegpoorsv(i,NC), MDacidtype(i,NC), MDbasictype(i,NC) ! properties of MD bead i, first column is 0 for H or 1 for heavy
-   enddo
-endif
-close(9)
+  if (flagMD.eq.0) then ! RIS conformation
+    do i = 1, long(NC)
+      read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC), torsionstate(i,NC)
+    enddo
+  else 
+    read(9,*) nMD ! number of MD beads
+    do i = 1, nMD
+      read(9,*) j, MDHs(i,NC), MDsegpoorsv(i,NC), MDacidtype(i,NC), MDbasictype(i,NC) ! properties of MD bead i, first column is 0 for H or 1 for heavy
+    enddo
+  endif
+
+  close(9)
+
 enddo ! NC
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
