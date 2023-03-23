@@ -62,7 +62,7 @@ PBCflag = 1 ! flag for PBC in z direction
 vtkflag = 0
 entflag = 0
 maxT = 1
-ta = 120
+ta = 112
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Control file variables

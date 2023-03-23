@@ -32,8 +32,8 @@ implicit none
 pi=acos(-1.0000000e0)
 sitheta=sin((180-ta)*pi/180.0)
 cotheta=cos((180-ta)*pi/180.0)
-siphip=sin(ta*pi/180.0)
-cophip=cos(ta*pi/180.0)
+siphip=sin(120.0*pi/180.0)
+cophip=cos(120.0*pi/180.0)
 
 tt(1,1)=cotheta
 tt(1,2)=sitheta
