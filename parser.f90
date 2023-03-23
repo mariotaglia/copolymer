@@ -7,6 +7,7 @@ use MPI
 use mkai
 use volume
 use layer
+use senos
 implicit none
 integer block_cuantas, restcuantas
 
@@ -47,6 +48,7 @@ infile = ndi
 flagkai = 0 ! zero by default
 r_pos = 0.3
 r_neg = 0.3
+MCfactor = 60
 npolini = ndi
 npolfirst = ndi
 npollast = ndi
@@ -60,6 +62,7 @@ PBCflag = 1 ! flag for PBC in z direction
 vtkflag = 0
 entflag = 0
 maxT = 1
+ta = 120
 ncha_max=12
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -255,6 +258,10 @@ select case (label)
    read(buffer, *, iostat=ios) Xulimit
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
+  case('MCsteps')
+   read(buffer, *, iostat=ios) MCfactor
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
   case ('Utg')
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -292,7 +299,11 @@ select case (label)
         long_branches(NC) = long_branches(NC) + branch_long(j,NC)
      enddo
    enddo ! NC
- 
+
+  case('torsion angle')
+   read(buffer, *, iostat=ios) ta
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
 endselect
 
 endif

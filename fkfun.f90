@@ -134,7 +134,7 @@ do iZ = 1,dimZ
    endif
 
 do iR = 1,dimR
-   gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
+   gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/2.0/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
    xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
 enddo 
 enddo
@@ -184,7 +184,7 @@ do is= 1, Npoorsv
 
 
     do iR= 1, dimR
-      gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
+      gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/2.0/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
       xpot(is,iR,iZ) = xpot(is,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(is)*vsol*wperm/2.0)
     enddo
   enddo
@@ -411,22 +411,22 @@ do iZ = 1, dimZ
      f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) &
      +wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-2.0*phi(iR,iZ)+phi(iR-1,iZ))*deltaR**(-2) &
      +wperm*epsfcn(iR,iZ)*(phi(iR,jZp)-2.0*phi(iR,iZ)+phi(iR,jZm))*deltaZ**(-2) &
-     +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR,iZ))*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2) &
+     +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR-1,iZ))/2.0*(phi(iR+1,iZ)-phi(iR-1,iZ))/2.0*deltaR**(-2) &
      +wperm*(epsfcn(iR,jZp)-epsfcn(iR,jZm))*(phi(iR,jZp)-phi(iR,jZm))/4.0*deltaZ**(-2) 
 
     case(1)
      f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) &
-     + wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)/(float(iR+dimRini)-0.5) &
+     + wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR-1,iZ))/2.0*deltaR**(-2)/(float(iR+dimRini)-0.5) &
      +wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-2.0*phi(iR,iZ)+phi(iR-1,iZ))*deltaR**(-2) &
      +wperm*epsfcn(iR,iZ)*(phi(iR,jZp)-2.0*phi(iR,iZ)+phi(iR,jZm))*deltaZ**(-2) &
-     +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR,iZ))*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2) &
+     +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR-1,iZ))/2.0*(phi(iR+1,iZ)-phi(iR-1,iZ))/2.0*deltaR**(-2) &
      +wperm*(epsfcn(iR,jZp)-epsfcn(iR,jZm))*(phi(iR,jZp)-phi(iR,jZm))/4.0*deltaZ**(-2)
 
     case(2)
      f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) &
-     + 2.0*wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)/(float(iR+dimRini)-0.5) &
+     + 2.0*wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-phi(iR-1,iZ))/2.0*deltaR**(-2)/(float(iR+dimRini)-0.5) &
      +wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-2.0*phi(iR,iZ)+phi(iR-1,iZ))*deltaR**(-2) &
-     +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR,iZ))*(phi(iR+1,iZ)-phi(iR,iZ))*deltaR**(-2)
+     +wperm*(epsfcn(iR+1,iZ)-epsfcn(iR-1,iZ))/2.0*(phi(iR+1,iZ)-phi(iR-1,iZ))/2.0*deltaR**(-2)
 
     end select
 

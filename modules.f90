@@ -18,6 +18,7 @@ real*8, allocatable :: st(:,:)
 real*8, allocatable :: dimf(:,:), dimfkais(:,:)
 real*8, allocatable :: Xu(:,:,:,:,:)
 integer Xulimit, Xulimitkais
+integer MCfactor, MCfactorkais
 integer flagkai, curvkais
 real*8 dimRkais
 endmodule

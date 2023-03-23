@@ -39,7 +39,7 @@ pi=dacos(-1.0d0)          ! pi = arccos(-1)
 
 Xu = 0.0 ! vector Xu
 
-MCsteps = 120*Xulimit
+MCsteps = MCfactor*Xulimit
 sumaXu(:,:)=0.0
 
 if (flagkai.eq.1) then
@@ -129,7 +129,7 @@ do js=1,Npoorsv
   if (flagkai.eq.0) then
 
     read(is*110+js,*)nada
-    read(is*110+js,*)curvkais,dimRkais,minntotRkais,maxntotRkais,Xulimitkais,dimfkais(is,js)
+    read(is*110+js,*)curvkais,dimRkais,minntotRkais,maxntotRkais,Xulimitkais,dimfkais(is,js),MCfactorkais
   
     if (curvkais.ne.curvature) then
       print*,"curvature of kais non equal curvature of DEFINITIONS.txt"
@@ -163,12 +163,17 @@ do js=1,Npoorsv
       stop
     endif
 
+    if (MCfactorkais.ne.MCfactor) then
+      print*,"MCsteps prefactor of kais.XXX.XXX.in non equal to MCsteps prefactor defined in kai.f90"
+    endif
+
+
   endif
 
   if (flagkai.eq.1) then
 
-    write(is*110+js,*)'#curvature dimR minntotR maxntotR Xulimit dimf#'
-    write(is*110+js,*)curvature,dimR,minntotR,maxntotR,Xulimit,dimf(is,js)
+    write(is*110+js,*)'#curvature dimR minntotR maxntotR Xulimit dimf factorMCsteps#'
+    write(is*110+js,*)curvature,dimR,minntotR,maxntotR,Xulimit,dimf(is,js),MCfactor
 
   endif
 

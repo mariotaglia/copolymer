@@ -24,6 +24,14 @@ Depsfcn(iR,iZ) = dielPr - 1.0
 enddo
 enddo
 
+epsfcn(0,:)=epsfcn(1,:)
+Depsfcn(0,:)=Depsfcn(1,:)
+
+epsfcn(dimR+1,:)=epsfcn(dimR,:)
+Depsfcn(dimR+1,:)=Depsfcn(dimR,:)
+
+
+
 !epsfcn(0) = epsfcn(1) 
 !epsfcn(ntot+1) = epsfcn(ntot) OJO boundary conditions  
 
