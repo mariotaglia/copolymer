@@ -27,7 +27,7 @@ real*8, allocatable :: Xu(:,:,:,:,:)
 integer Xulimit, Xulimitkais
 integer MCfactor, MCfactorkais
 integer flagkai, curvkais
-real*8 dimRkais
+real*8 dimRkais, dimRinikais
 endmodule
 
 module globals

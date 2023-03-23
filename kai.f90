@@ -129,7 +129,7 @@ do js=1,Npoorsv
   if (flagkai.eq.0) then
 
     read(is*110+js,*)nada
-    read(is*110+js,*)curvkais,dimRkais,minntotRkais,maxntotRkais,Xulimitkais,dimfkais(is,js),MCfactorkais
+    read(is*110+js,*)curvkais,dimRkais,dimRinikais,minntotRkais,maxntotRkais,Xulimitkais,dimfkais(is,js),MCfactorkais
   
     if (curvkais.ne.curvature) then
       print*,"curvature of kais non equal curvature of DEFINITIONS.txt"
