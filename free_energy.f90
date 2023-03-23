@@ -276,7 +276,7 @@ else if(PBCflag.eq.2) then
  iZm= PBCREFI(jZm,dimZ)
 endif
 
-  gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
+  gradphi2=((phi(iR+1,iZ)-phi(iR-1,iZ))/deltaR/2)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
   F_electro = F_electro + (xcharge(iR,iZ)*phi(iR,iZ) - wperm*epsfcn(iR,iZ)/2.0*gradphi2)*jacobian(iR)*deltaR*deltaZ
 enddo
 enddo
@@ -338,7 +338,7 @@ else if(PBCflag.eq.2) then
  iZm= PBCREFI(jZm,dimZ)
 endif
 
-  gradphi2=((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
+  gradphi2=((phi(iR+1,iZ)-phi(iR-1,iZ))/deltaR/2)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
   sumel = sumel - wperm*epsfcn(iR,iZ)/2.0*gradphi2*jacobian(iR)*deltaR*deltaZ
 
 enddo ! iZ
@@ -361,7 +361,7 @@ else if(PBCflag.eq.2) then
  iZm= PBCREFI(jZm,dimZ)
 endif
 
-  gradphi2 = ((phi(iR+1,iZ)-phi(iR,iZ))/deltaR)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
+  gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/deltaR/2)**2 + ((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
   sumdiel = sumdiel + 0.5*wperm*dielpol(iR,iZ)*Depsfcn(iR,iZ)*gradphi2*jacobian(iR)*vsol
 
 enddo

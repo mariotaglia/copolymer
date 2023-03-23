@@ -130,7 +130,7 @@ use globals
 use mkai
 use longs
 implicit none
-integer i,state,j,k1,k2,ncha, is, jj
+integer i,state,j,k1,k2,ncha, is, jj, k, kk
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3), m_branch(3,3,50)
@@ -349,15 +349,21 @@ do i=1,12
 
   call com(xend,xendcom,long(NC))       ! substracts center of mass
   call rota(xendcom,xendr,long(NC))   ! rotate chain conformation ncha time
-  ncha=ncha+1
+  
+!  do k=1,2  ! to reflect the chains in the R coordinate
 
-  if(entflag.eq.1)call print_ent2(xendr,ncha,NC)
+!    kk=2*(k-1)-1 ! kk = {-1,1} for k = {1,2} to reflect the chains in the R coordinate
 
-  do j=1,long(NC)
-    chains(1,j,ncha)=xendr(1,j)       ! output 
-    chains(2,j,ncha)=xendr(2,j)
-    chains(3,j,ncha)=xendr(3,j)
-  enddo
+    ncha=ncha+1
+
+    if(entflag.eq.1)call print_ent2(xendr,ncha,NC)
+
+    do j=1,long(NC)
+      chains(1,j,ncha)=xendr(1,j)   !kk*xendr(1,j)       ! to reflect the chains in the R coordinate 
+      chains(2,j,ncha)=xendr(2,j)
+      chains(3,j,ncha)=xendr(3,j)
+    enddo
+!  enddo
 enddo
 
 if(entflag.eq.1)stop
