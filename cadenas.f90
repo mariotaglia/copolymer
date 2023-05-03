@@ -134,7 +134,7 @@ real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3), m_branch(3,3,50)
 real*8 x(3),xend(3,maxlong+5),xendr(3,maxlong+5), xendcom(3,maxlong+5), xend_branch(3,50)
-REAL*8 chains(3,maxlong,ncha_max), Uconf
+REAL*8 chains(3,maxlong,2*ncha_max), Uconf
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
 integer*1 Ntconf(maxlong), seglength(0:Npoorsv)
 real*8 Ugyr, Rgyr(0:Npoorsv+1)
