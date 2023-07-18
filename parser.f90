@@ -300,7 +300,7 @@ select case (label)
      enddo
    enddo ! NC
    
-  case('torsion angle')
+  case('torsion_angle')
    read(buffer, *, iostat=ios) ta
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 

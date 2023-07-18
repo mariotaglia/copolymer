@@ -99,7 +99,7 @@ sal=sin(alfa)
 cga=cos(gama)
 sga=sin(gama)
 
-do i=1,n+1               ! rotation segmentos
+do i=1,n               ! rotation segmentos
 
   a=xend(1,i)
   b=xend(2,i)

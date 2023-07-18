@@ -21,7 +21,7 @@ cuantas 10000
 nrot 12 
 
 #torsion angle. default value = 112#
-ta 112
+torsion_angle 112
 
 #Number of beads of each compound#
 long 

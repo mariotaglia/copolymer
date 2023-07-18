@@ -141,6 +141,7 @@ do while (actionflag.lt.3)
    if((norma.gt.error).or.(ier.lt.0).or.(isnan(norma))) then
       if(actionflag.gt.0) then
          print*, " I am ", rank, " I stopped the work"
+         print*,"norma:",norma,"        error:", error,"        ier:,",ier
          stop
       endif
    endif
