@@ -333,6 +333,7 @@ if(pHbulk.eq.ndi)call stopundef('pHbulk')
 
 
 ! Auxiliary calculations
+   ncha_max=nrot
    block_cuantas=int(totalcuantas/size/nrot)
    cuantas=block_cuantas*nrot
    restcuantas=totalcuantas-size*nrot*block_cuantas

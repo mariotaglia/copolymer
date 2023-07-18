@@ -64,7 +64,8 @@ real*8, allocatable :: Depsfcn(:,:)
 integer first, last
 integer*2, allocatable :: innR(:,:,:,:), innZ(:,:,:)
 integer iter              ! counts number of iterations
-integer, parameter :: ncha_max = 700
+integer ncha_max
+! integer, parameter :: ncha_max = 700
 endmodule
 
 module partfunc
