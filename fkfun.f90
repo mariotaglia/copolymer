@@ -18,7 +18,7 @@ real*8 protemp
 real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
 real*8 xh(dimR+1,dimZ) 
 real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
-real*8 pro(cuantas)
+real*8 pro(cuantas_max)
 !real*8 time1, time2, duration, looptime1, looptime2, loopduration
 integer iR,iZ,kZ,kkZ,k,i,j,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
 integer is, js,ia,ib,iiR,iiZ,jR,jZ
@@ -234,7 +234,7 @@ avpol_tmp = 0.0
 
 do iiR=minntotR, maxntotR ! position of center of mass 
 do iiZ=minntotZ, maxntotZ
-   do i=1, cuantas ! loop over conformations
+   do i=1, cuantas(NC) ! loop over conformations
  
       pro(i) = exp(-Uchain(i, NC))
 

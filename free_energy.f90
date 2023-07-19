@@ -412,6 +412,10 @@ if(rank.eq.0) then
   write(314,*) npol, F_Uchain/npol
 endif                           
 
+
+
+F1=Free_energy
+F2=Free_energy2
 ! Save end-to-end distances         
 
 !ii = rank+1

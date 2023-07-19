@@ -1,5 +1,5 @@
 module cadenaMD
-integer flagMD ! flag que indica si lee cadenas desde MD, 1: lee md, 0: no lee MD 
+integer, allocatable :: flagMD(:) ! flag que indica si lee cadenas desde MD, 1: lee md, 0: no lee MD 
 integer nMD, MDHs(100,100), MDsegpoorsv(100,100), MDacidtype(100,100), MDbasictype(100,100)  ! mapeo entre MD y MOLT, usar 0 para H
 integer lineposMD
 endmodule
@@ -55,7 +55,8 @@ real*8, allocatable :: avpol(:,:,:,:) ! volume fraction of chains
 real*8, allocatable :: avpola(:,:,:,:), avpolb(:,:,:,:) ! volume fraction of acid and basic segments 
 real*8, allocatable :: xpol(:,:,:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xsol(:,:)
-INTEGER totalcuantas, cuantas, nrot
+INTEGER, allocatable :: totalcuantas(:), cuantas(:), nrot(:)
+integer cuantas_max
 integer curvature
 real*8, allocatable :: Ug(:), Ut(:)
 real*8, allocatable :: epsfcn(:,:)
@@ -66,6 +67,7 @@ integer*2, allocatable :: innR(:,:,:,:), innZ(:,:,:)
 integer iter              ! counts number of iterations
 integer ncha_max
 ! integer, parameter :: ncha_max = 700
+real*8 F1,F2
 endmodule
 
 module partfunc

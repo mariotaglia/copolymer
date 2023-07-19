@@ -366,7 +366,7 @@ Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)/float(long(NC))
 
 ncha=0
 
-do i=1,nrot
+do i=1,nrot(NC)
 
   call com(xend,xendcom,long(NC))       ! substracts center of mass
   call rota(xendcom,xendr,long(NC))   ! rotate chain conformation ncha time

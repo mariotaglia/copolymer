@@ -82,7 +82,7 @@ conf=0                    ! counter of number of conformations
 
 lineposMD = 0 
 
-if (flagMD.eq.1) then
+if (flagMD(NC).eq.1) then
     write(filename2,'(A3,I3.3,A3)')'MD.',NC,'.in'
     open(7777,file=filename2)
     if (rank.gt.0) then
@@ -105,9 +105,9 @@ else
 endif
 
 
-do while (conf.lt.cuantas)
+do while (conf.lt.cuantas(NC))
 
-if(flagMD.eq.1) then
+if(flagMD(NC).eq.1) then
    call cadenasMD(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
 else 
    call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
@@ -130,7 +130,7 @@ endif
    sumUgyr=sumUgyr+exp(-Ugyr)
 
    do j=1,ncha
-      if(conf.lt.cuantas) then
+      if(conf.lt.cuantas(NC)) then
 
 
 
@@ -208,7 +208,7 @@ endif
 
 enddo ! while
 
-if(flagMD.eq.1) then
+if(flagMD(NC).eq.1) then
   close(7777)
   if (rank.lt.size-1) then
      call MPI_SEND(lineposMD, 1, MPI_INTEGER, rank+1, rank, MPI_COMM_WORLD, ierr)

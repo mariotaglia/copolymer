@@ -10,6 +10,7 @@ use longs
 use mkai
 use transgauche
 use pis
+use senos
 implicit none
 real*8 tmp(dimR,dimZ)
 integer counter, counter2
@@ -68,8 +69,10 @@ open(unit=310,file=sysfilename)
       write(310,*)'system      = neutral polymer'
       write(310,*)'fnorm       = ', norma ! residual size of iteration vector
       write(310,*)'error       = ',error
-      write(310,*)'q           = ',q
-      write(310,*)'length seg  = ',0.50 ! value see subroutine cadenas
+      write(310,*)'Free energy = ',F1/npol,F2/npol
+!      write(310,*)'q           = ',q
+      write(310,*)'length seg  = ', lseg ! value see subroutine cadenas
+      write(310,*)'length seg kai =', lsegkai
       write(310,*)'deltaR      = ',deltaR
       write(310,*)'deltaZ      = ',deltaZ
       write(310,*)'vsol        = ',vsol
@@ -81,10 +84,15 @@ open(unit=310,file=sysfilename)
       write(310,*)'Actionflag = ', counter
 
       write(310,*)'cuantas     = ',cuantas
+      write(310,*)'rotations   = ',nrot
+    
       write(310,*)'iterations  = ',iter
 
 
       write(310,*)'npolratios  = ',npolratio
+      write(310,*)'MC_steps = ', MCfactor
+      write(310,*)'curvature =', curvature
+      write(310,*)'torsion angle =',ta
 
       close(310)
  

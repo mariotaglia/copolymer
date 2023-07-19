@@ -41,7 +41,7 @@ maxntotZ = ndi
 dimR = ndi
 dimRini = 0
 dimZ = ndi
-totalcuantas = ndi
+!totalcuantas = ndi
 Npoorsv = ndi ! zero by default
 Nacids = 0
 Nbasics = 0
@@ -63,8 +63,8 @@ PBCflag = 1 ! flag for PBC in z direction
 vtkflag = 0
 entflag = 0
 maxT = 1
-flagMD = 0
-nrot = 12 ! default number of rotations
+!flagMD = 0
+!nrot = 12 ! default number of rotations
 ta = 112
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -93,6 +93,14 @@ endif
 
 read(buffer, *, iostat=ios) Ncomp
 
+allocate(flagMD(Ncomp))
+allocate(nrot(Ncomp))
+allocate(totalcuantas(Ncomp),cuantas(Ncomp))
+nrot(:)=12
+flagMD(:)=0
+totalcuantas(:)=ndi
+
+
 do while (ios == 0)
 
  read(fh, '(A)', iostat=ios) buffer
@@ -110,12 +118,14 @@ do while (ios == 0)
 select case (label)
  
   case('flagMD')
-   read(buffer, *, iostat=ios) flagMD
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
+   do NC = 1, NComp
+     read(fh, *) flagMD(NC)
+   enddo
+  
   case('nrot')
-   read(buffer, *, iostat=ios) nrot
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   do NC =1,NComp
+     read(fh, *) nrot(NC)
+   enddo
 
   case('PBCflag')
    read(buffer, *, iostat=ios) PBCflag
@@ -180,17 +190,18 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),'= ',trim(buffer)
 
   case ('cuantas')
-   read(buffer, *, iostat=ios) totalcuantas
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+    do NC = 1, NComp
+      read(fh, *) totalcuantas(NC)
+    enddo
 
-   case ('long')
+  case ('long')
    allocate(long(NComp))
    do NC = 1, NComp
      read(fh, *) long(NC)
    enddo
    maxlong = maxval(long)
 
-   case ('npolratio')
+  case ('npolratio')
    allocate(npolratio(NComp))
    do NC = 1, NComp
      read(fh, *) npolratio(NC)
@@ -320,7 +331,11 @@ if(minntotR.eq.ndi)call stopundef('minntotR')
 if(minntotZ.eq.ndi)call stopundef('minntotZ')
 if(maxntotR.eq.ndi)call stopundef('maxntotR')
 if(maxntotZ.eq.ndi)call stopundef('maxntotZ')
-if(totalcuantas.eq.ndi)call stopundef('cuantas')
+
+do NC=1,Ncomp
+  if(totalcuantas(NC).eq.ndi)call stopundef('cuantas')
+enddo
+
 if(infile.eq.ndi)call stopundef('infile')
 if(npolini.eq.ndi)call stopundef('npolini')
 if(npolfirst.eq.ndi)call stopundef('npolfirst')
@@ -333,11 +348,24 @@ if(pHbulk.eq.ndi)call stopundef('pHbulk')
 
 
 ! Auxiliary calculations
-   ncha_max=nrot
-   block_cuantas=int(totalcuantas/size/nrot)
-   cuantas=block_cuantas*nrot
-   restcuantas=totalcuantas-size*nrot*block_cuantas
-   if(rank.eq.(size-1))cuantas=cuantas+restcuantas
+
+ncha_max=nrot(1)
+block_cuantas=int(totalcuantas(1)/size/nrot(1))
+cuantas(1)=block_cuantas*nrot(1)
+restcuantas=totalcuantas(1)-size*nrot(1)*block_cuantas
+if(rank.eq.(size-1))cuantas(1)=cuantas(1)+restcuantas
+
+cuantas_max=cuantas(1)
+
+  do NC=2,Ncomp
+     block_cuantas=int(totalcuantas(NC)/size/nrot(NC))
+     cuantas(NC)=block_cuantas*nrot(NC)
+     restcuantas=totalcuantas(NC)-size*nrot(NC)*block_cuantas
+     if(rank.eq.(size-1))cuantas(NC)=cuantas(NC)+restcuantas
+     if(cuantas(NC).gt.cuantas(1))cuantas_max=cuantas(NC)
+     if(nrot(NC).gt.ncha_max)ncha_max=nrot(NC)
+  enddo
+
 
 ! write output
 
@@ -366,7 +394,7 @@ do NC = 1, Ncomp
   write(filename2,'(A10,I3.3,A3)')'structure.',NC,'.in'
   open(file=filename2, unit = 9)
 
-  if (flagMD.eq.0) then ! RIS conformation
+  if (flagMD(NC).eq.0) then ! RIS conformation
     do i = 1, long(NC)
       read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC), torsionstate(i,NC)
     enddo
