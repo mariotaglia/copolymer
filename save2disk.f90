@@ -83,7 +83,7 @@ open(unit=310,file=sysfilename)
       write(310,*)'st         = ', st
       write(310,*)'Actionflag = ', counter
 
-      write(310,*)'cuantas     = ',cuantas
+      write(310,*)'cuantas     = ',totalcuantas
       write(310,*)'rotations   = ',nrot
     
       write(310,*)'iterations  = ',iter
