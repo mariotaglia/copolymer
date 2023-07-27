@@ -14,6 +14,11 @@ dimensions 140 1   1 18   1 1
 #Size of layer R and Z#
 layersize 0.2 1
 
+#RIS or MD conformations, 0==RIS, 1==MD#
+MDflag
+0
+0
+
 #Number of conformations of each component#
 cuantas 
 10000
