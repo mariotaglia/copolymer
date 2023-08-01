@@ -117,6 +117,7 @@ integer maxnbranches
 integer, allocatable :: long_branches(:)
 integer, allocatable :: branch_pos(:,:), branch_long(:,:) ! position and lenght of branches read from input
 integer, allocatable :: torsionstate(:,:)
+integer flagtorsionstate
 endmodule
 
 module pis

@@ -47,6 +47,7 @@ Nacids = 0
 Nbasics = 0
 infile = ndi
 flagkai = 0 ! zero by default
+flagtorsionstate = 0 ! zero by defaul
 r_pos = 0.3
 r_neg = 0.3
 MCfactor = 60
@@ -271,6 +272,9 @@ select case (label)
   case ('flagkai')
    read(buffer, *, iostat=ios) flagkai
 
+  case ('flagtorsionstate')
+   read(buffer, *, iostat=ios) flagtorsionstate
+
   case ('npol')
    read(buffer, *, iostat=ios) npolini, npolfirst, npollast, npolstep
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -400,10 +404,18 @@ do NC = 1, Ncomp
   open(file=filename2, unit = 9)
 
   if (flagMD(NC).eq.0) then ! RIS conformation
-    do i = 1, long(NC)
-      read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC), torsionstate(i,NC)
-    enddo
-  else 
+    if (flagtorsionstate.eq.0) then
+      do i = 1, long(NC)
+        read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC) ! , torsionstate(i,NC)
+        torsionstate(i,NC)=3
+      enddo
+    else 
+      do i = 1, long(NC)
+        read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC), torsionstate(i,NC)
+      enddo
+    endif
+
+  else
     read(9,*) nMD ! number of MD beads
     do i = 1, nMD
       read(9,*) j, MDHs(i,NC), MDsegpoorsv(i,NC), MDacidtype(i,NC), MDbasictype(i,NC) ! properties of MD bead i, first column is 0 for H or 1 for heavy

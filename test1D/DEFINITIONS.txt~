@@ -13,7 +13,7 @@ long
 
 layersize 0.2 1.0
 
-Npoorsv 3 
+npoorsv 3 
 vpol 3 
 0.113097335529233 
 0.113097335529233
@@ -34,7 +34,7 @@ vpol_b 1
 0.113097335529233
 
 infile 2
-flagkai 1 
+flagkai 0 
 
 npol 1.21 1.21 1.21 0.01
 

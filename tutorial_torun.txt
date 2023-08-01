@@ -6,8 +6,14 @@ Description: see example in main directory. Mandatory.
 
 File name: kais.001.001.dat kais.001.002.dat etc
 Description: geometric dependency of 1-1 interactions, 1-2 interactions, etc.
-Depends on curvature, dimR,dimRini, minntot, maxntot, Xulimit, dimf and MCsteps. 
+Depends on curvature, dimR, dimRini, minntotR, maxntotR, Xulimit, dimf and MCsteps. 
 If any of those parameteres changes, it has to be recalculated. Mandatory if flagkai is 0.
+Header should contain the value of the following parameters in this specific
+order:
+ #curvature dimR dimRini minntotR maxntotR Xulimit dimf factorMCsteps#
+     0       100    0        1       25       5     6.0       60
+
+
 
 File name: fort.100 
 Description: initial guess for solvent volume fraction. Mandatory if infile is 1.
@@ -40,22 +46,36 @@ Example:
 
 File name: structure.001.in structure.002.in etc
 Description: these files indicate the structure of compounds 1, 2, etc. The
-file contains four columns. Each line of the file indicates poorsv type,
-acid type and basic type, and torsion state of each bead. The number of lines
-must coincide with long. Branches go at the end ordered as in DEFINITIONS.txt 
+file contains three columns. Each line of the file indicates poorsv type,
+acid type and basic type. The number of lines must coincide with long. 
+Branches go at the end ordered as in DEFINITIONS.txt 
 (see example in main directory). Mandatory.
-Torsion states (4th column): 0 = trans. 1 = gauche+. 2 = gauche-. 3 = random.
 
 Example (long=8, npoorsv=2, Nacids=1, Nbasics=0):
 
+1	0	0	
+1	0	0	
+1	0	0	
+1	0	0	
+2	0	0	
+2	0	0	
+0	0	0	
+0	1	0	
+
+If flagtorsionstate =/= 0, a fourth column must be added to indicate torsion
+state of each segment.
+Torsion states (4th column): 0 = trans. 1 = gauche+. 2 = gauche-. 3 = random.
+Example:
+
 1	0	0	3
 1	0	0	3
 1	0	0	3
 1	0	0	3
-2	0	0	3
-2	0	0	3
-0	0	0	3
+2	0	0	1
+2	0	0	1
+0	0	0	1
 0	1	0	3
+
 
 ##            OUTPUTS             ##
 

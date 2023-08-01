@@ -33,6 +33,10 @@ nrot
 12 
 12
 
+#Flag for chosing the torsion state of each bead. If flag=0 (default), torsion state is
+random. If flag=1, it is read from structure.in (see turorial_torun.txt)#
+flagtorsionstate 0
+
 #torsion angle. default value = 112#
 torsion_angle 112
 
