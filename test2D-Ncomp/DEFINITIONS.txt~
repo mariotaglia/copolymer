@@ -1,7 +1,14 @@
+Ncomp 1
+
+npolratio
+1.0
+
 curvature 0
 dimensions 80 1 18 1
 cuantas 100000
-long 15
+long
+15
+
 layersize 0.2 1.0
 
 Npoorsv 2
@@ -22,8 +29,8 @@ vpol_a 1
 vpol_b 1
 0.113097335529233
 
-infile 0
-flagkai 1
+infile 1
+flagkai 0
 
 npol 0.51 0.51 0.51 0.01
 
@@ -36,6 +43,7 @@ Utg 2
 
 csalt 0.1
 pHbulk 7
-dielP 78.54
+dielP 18.54
 
-nbranches 0
+nbranches
+0

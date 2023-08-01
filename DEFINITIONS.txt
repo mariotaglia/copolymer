@@ -9,7 +9,11 @@ npolratio
 curvature 0
 
 #DimR DimZ minntotR maxntotR minntotZ maxntotZ #
-dimensions 140 1   1 18   1 1
+dimensions 140 1  18 1
+
+#minntotR minntotZ, default values = 1#
+minntot 1 1
+
 
 #Size of layer R and Z#
 layersize 0.2 1
@@ -49,7 +53,8 @@ vpol 2
 #Radius of cation and anion
 rsalt 0.3 0.3
 
-#Exponent that governs interactions between beads. After dimf repeat npoorsv"
+#Exponent that governs interactions between beads. Npoorsv must be defined.
+After dimf repeat npoorsv. Default values = 6"
 dimf 2
 6
 6	6
@@ -92,7 +97,8 @@ lsegkai 0.5
 # lseg is the segment length used to build the conformations
 lseg 0.5
 
-#Energy penalization of trans and gauche configurations. After Utg indicate again npoorsv #
+#Energy penalization of trans and gauche configurations. Npoorsv must be
+defined. After Utg indicate Npoorsv. Default values = 0.0 #
 Utg 2
 0.0 0.0
 0.0 0.0

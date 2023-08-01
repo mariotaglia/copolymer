@@ -5,13 +5,15 @@ npolratio
 
 curvature 0
 dimensions 140 1 18 1
-cuantas 10000
+cuantas 
+10000
+
 long 
 10
 
 layersize 0.2 1.0
 
-Npoorsv 3 
+npoorsv 3 
 vpol 3 
 0.113097335529233 
 0.113097335529233
@@ -20,10 +22,6 @@ vpol 3
 
 rsalt 0.3 0.3
 
-dimf 3
-6
-6	6
-6	6	6
 
 Nacids 1
 7
@@ -35,18 +33,14 @@ vpol_a 1
 vpol_b 1
 0.113097335529233
 
-infile 1
-flagkai 0 
+infile 2
+flagkai 1 
 
 npol 1.21 1.21 1.21 0.01
 
 Xulimit 5
 lseg 0.5
-Utg 3
-0.0 0.0
-0.0 0.0
-0.0 0.0
-0.0 0.0
+lsegkai 0.5
 
 csalt 0.1
 pHbulk 12

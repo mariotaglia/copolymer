@@ -34,8 +34,8 @@ ndr = -1.0d10
 dielP = 78.54
 curvature = ndi
 ntot = ndi
-minntotR = ndi
-minntotZ = ndi
+minntotR = 1
+minntotZ = 1
 maxntotR = ndi
 maxntotZ = ndi
 dimR = ndi
@@ -93,12 +93,15 @@ endif
 
 read(buffer, *, iostat=ios) Ncomp
 
+
 allocate(flagMD(Ncomp))
 allocate(nrot(Ncomp))
 allocate(totalcuantas(Ncomp),cuantas(Ncomp))
 nrot(:)=12
 flagMD(:)=0
 totalcuantas(:)=ndi
+
+
 
 
 do while (ios == 0)
@@ -176,10 +179,14 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case ('dimensions')
-   read(buffer, *, iostat=ios) dimR, dimZ, minntotR, maxntotR, minntotZ,  maxntotZ
+   read(buffer, *, iostat=ios) dimR, dimZ, maxntotR, maxntotZ
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    ntot=dimR*dimZ
- 
+
+  case('minntot')
+   read(buffer, *, iostat=ios) minntotR, minntotZ
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
   case ('dimRini')
    read(buffer, *, iostat=ios) dimRini
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -207,18 +214,21 @@ select case (label)
      read(fh, *) npolratio(NC)
    enddo
   
-  case ('npoorsv')
+  case ('Npoorsv')
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-  
+   allocate(Ut(0:Npoorsv),Ug(0:Npoorsv))
+   Ut=0.0
+   Ug=0.0
+   allocate(dimfkais(0:Npoorsv,0:Npoorsv),dimf(0:Npoorsv,0:Npoorsv))
+   dimf(:,:)=6.
+   dimf(0,0)=0.
+   print*,dimf
+
   case ('dimf')
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   allocate(dimfkais(0:Npoorsv,0:Npoorsv),dimf(0:Npoorsv,0:Npoorsv))
-   dimf(0,0)=0
    do i = 1, Npoorsv
-   dimf(0,i)=0.
-   dimf(i,0)=0.
    read(fh,*)(dimf(i,j), j = 1, i)
      do j = 1, i
       dimf(j,i) = dimf(i,j)
@@ -276,9 +286,6 @@ select case (label)
   case ('Utg')
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   allocate(Ut(0:npoorsv),Ug(0:Npoorsv))
-   Ut=0.0
-   Ug=0.0
    do i = 0, Npoorsv
      read(fh,*) Ut(i), Ug(i)
    enddo
@@ -327,8 +334,6 @@ enddo
 
 if(curvature.eq.ndr)call stopundef('curvature')
 if(ntot.eq.ndi)call stopundef('ntot')
-if(minntotR.eq.ndi)call stopundef('minntotR')
-if(minntotZ.eq.ndi)call stopundef('minntotZ')
 if(maxntotR.eq.ndi)call stopundef('maxntotR')
 if(maxntotZ.eq.ndi)call stopundef('maxntotZ')
 

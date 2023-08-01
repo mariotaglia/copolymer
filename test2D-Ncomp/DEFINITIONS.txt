@@ -16,9 +16,6 @@ vpol 2
 0.113097335529233 
 0.113097335529233
 0.113097335529233
-dimf 2
-6
-0	6
 
 Nacids 1
 14
@@ -29,17 +26,13 @@ vpol_a 1
 vpol_b 1
 0.113097335529233
 
-infile 1
-flagkai 0
+infile 2
+flagkai 1
 
 npol 0.51 0.51 0.51 0.01
 
 Xulimit 5
 lseg 0.5
-Utg 2
-0.0 0.0
-0.0 0.0
-0.0 0.0
 
 csalt 0.1
 pHbulk 7
