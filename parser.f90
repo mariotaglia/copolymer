@@ -95,11 +95,12 @@ endif
 read(buffer, *, iostat=ios) Ncomp
 
 
-allocate(flagMD(Ncomp))
-allocate(nrot(Ncomp))
+allocate(flagMD(Ncomp),flagreflex(Ncomp))
+allocate(nrot(Ncomp),nrot_corr(Ncomp))
 allocate(totalcuantas(Ncomp),cuantas(Ncomp))
 nrot(:)=12
 flagMD(:)=0
+flagreflex(:)=1
 totalcuantas(:)=ndi
 
 
@@ -129,6 +130,11 @@ select case (label)
   case('nrot')
    do NC =1,NComp
      read(fh, *) nrot(NC)
+   enddo
+ 
+  case('flagreflex')
+   do NC =1,NComp
+     read(fh, *) flagreflex(NC)
    enddo
 
   case('PBCflag')
@@ -358,21 +364,24 @@ if(pHbulk.eq.ndi)call stopundef('pHbulk')
 
 ! Auxiliary calculations
 
-ncha_max=nrot(1)
-block_cuantas=int(totalcuantas(1)/size/nrot(1))
-cuantas(1)=block_cuantas*nrot(1)
-restcuantas=totalcuantas(1)-size*nrot(1)*block_cuantas
+do i=NC,Ncomp
+  nrot_corr(NC)=nrot(NC)*flagreflex(NC)
+enddo
+ncha_max=nrot_corr(1)
+block_cuantas=int(totalcuantas(1)/size/nrot_corr(1))
+cuantas(1)=block_cuantas*nrot_corr(1)
+restcuantas=totalcuantas(1)-size*nrot_corr(1)*block_cuantas
 if(rank.eq.(size-1))cuantas(1)=cuantas(1)+restcuantas
 
 cuantas_max=cuantas(1)
 
   do NC=2,Ncomp
-     block_cuantas=int(totalcuantas(NC)/size/nrot(NC))
-     cuantas(NC)=block_cuantas*nrot(NC)
-     restcuantas=totalcuantas(NC)-size*nrot(NC)*block_cuantas
+     block_cuantas=int(totalcuantas(NC)/size/nrot_corr(NC))
+     cuantas(NC)=block_cuantas*nrot_corr(NC)
+     restcuantas=totalcuantas(NC)-size*nrot_corr(NC)*block_cuantas
      if(rank.eq.(size-1))cuantas(NC)=cuantas(NC)+restcuantas
      if(cuantas(NC).gt.cuantas(1))cuantas_max=cuantas(NC)
-     if(nrot(NC).gt.ncha_max)ncha_max=nrot(NC)
+     if(nrot_corr(NC).gt.ncha_max)ncha_max=nrot_corr(NC)
   enddo
 
 

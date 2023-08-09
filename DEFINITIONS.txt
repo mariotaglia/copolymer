@@ -33,6 +33,12 @@ nrot
 12 
 12
 
+#Flag to reflect or not the rotaconformations. Flagreflex=1 (default): no
+reflexion. Flagreflex=2, reflexion#
+flagreflex
+1
+1
+
 #Flag for chosing the torsion state of each bead. If flag=0 (default), torsion state is
 random. If flag=1, it is read from structure.in (see turorial_torun.txt)#
 flagtorsionstate 0

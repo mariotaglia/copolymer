@@ -32,7 +32,7 @@ integer MDid(2000), MDmol(2000), MDtype(2000)
 real*8 MDx(2000), MDy(2000), MDz(2000)
 integer isH
 integer*8 timestep
-
+integer k,kk
 
 Uconf = 0.0
 Ntconf = 0
@@ -105,15 +105,43 @@ do i=1,nrot(NC)
 
   call com(xend,xendcom,long(NC))       ! substracts center of mass
   call rota(xendcom,xendr,long(NC))   ! rotate chain conformation ncha time
-  ncha=ncha+1
+  
+  if (flagreflex(NC).eq.1) then
 
-  if(entflag.eq.1)call print_ent2(xendr,ncha,NC)
+     ncha=ncha+1
 
-  do j=1,long(NC)
-    chains(1,j,ncha)=xendr(1,j)       ! output 
-    chains(2,j,ncha)=xendr(2,j)
-    chains(3,j,ncha)=xendr(3,j)
-  enddo
+     if(entflag.eq.1)call print_ent2(xendr,ncha,NC)
+
+     do j=1,long(NC)
+       chains(1,j,ncha)=xendr(1,j)
+       chains(2,j,ncha)=xendr(2,j)
+       chains(3,j,ncha)=xendr(3,j)
+     enddo
+
+  elseif (flagreflex(NC).eq.2) then
+    do k=1,2  ! to reflect the chains in the R coordinate
+ 
+      kk=2*(k-1)-1 ! kk = {-1,1} for k = {1,2} to reflect the chains in the R coordinate
+
+      ncha=ncha+1
+
+      if(entflag.eq.1)call print_ent2(xendr,ncha,NC)
+
+      do j=1,long(NC)
+
+       chains(1,j,ncha)=kk*xendr(1,j)   !kk*xendr(1,j)       ! to reflect the chains in the R coordinate
+       chains(2,j,ncha)=xendr(2,j)
+       chains(3,j,ncha)=xendr(3,j)
+
+      enddo
+     enddo
+
+  else
+    print*,"flagreflex must be either 1 or 2"
+  stop
+
+  endif
+
 enddo
 
 if(entflag.eq.1)stop
