@@ -364,7 +364,7 @@ if(pHbulk.eq.ndi)call stopundef('pHbulk')
 
 ! Auxiliary calculations
 
-do i=NC,Ncomp
+do NC=1,Ncomp
   nrot_corr(NC)=nrot(NC)*flagreflex(NC)
 enddo
 ncha_max=nrot_corr(1)
