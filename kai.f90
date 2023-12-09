@@ -31,7 +31,6 @@ character*16 kaisfilename
 
 if(rank.eq.0)print*,'Kai calculation'
 
-print*,minntotR_min,maxntotR_max
 
 allocate(sumaXu(Npoorsv,Npoorsv))
 
