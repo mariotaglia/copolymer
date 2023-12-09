@@ -11,9 +11,15 @@ curvature 0
 #DimR DimZ minntotR maxntotR minntotZ maxntotZ #
 dimensions 140 1  18 1
 
-#minntotR minntotZ, default values = 1#
-minntot 1 1
+#minntotR minntotZ of each compound, default values = 1#
+minntot 
+1 1
+1 1
 
+#maxntotR maxntotZ of each compound. Default values defined in dimensions. If needed, this case must be written after dimensions.#
+maxntot 
+18 1
+18 1
 
 #Size of layer R and Z#
 layersize 0.2 1

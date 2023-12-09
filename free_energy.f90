@@ -79,11 +79,11 @@ Free_Energy = Free_Energy + F_Mix_s
 F_Mix_p = 0.0                                                    
 
 do NC = 1, Ncomp
-do iR = minntotR, maxntotR                                                
-do iZ = minntotZ, maxntotZ
-   F_Mix_p = F_Mix_p + xpol(iR,iZ,NC)*(dlog(xpol(iR,iZ,NC))-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0) 
-enddo                                                            
-enddo
+   do iR = minntotR(NC), maxntotR(NC)                                             
+   do iZ = minntotZ(NC), maxntotZ(NC)
+      F_Mix_p = F_Mix_p + xpol(iR,iZ,NC)*(dlog(xpol(iR,iZ,NC))-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0) 
+   enddo                                                            
+   enddo
 enddo
 
 Free_Energy = Free_Energy + F_Mix_p            
@@ -143,25 +143,25 @@ Free_Energy = Free_Energy + F_Mix_OHmin
 ! 6. Polymer conformational entropy                                         
 
 do NC = 1, Ncomp
-F_conf = 0 
+   F_conf = 0 
 
-do iR = minntotR, maxntotR
-do iZ = minntotZ, maxntotZ
-  F_Conf = F_conf + (sumprolnpro(iR,iZ,NC)/q(iR,iZ,NC)-dlog(q(iR,iZ,NC)))*jacobian(iR)*deltaR*deltaZ*xpol(iR,iZ,NC)
-enddo 
-enddo
+   do iR = minntotR(NC), maxntotR(NC)
+   do iZ = minntotZ(NC), maxntotZ(NC)
+     F_Conf = F_conf + (sumprolnpro(iR,iZ,NC)/q(iR,iZ,NC)-dlog(q(iR,iZ,NC)))*jacobian(iR)*deltaR*deltaZ*xpol(iR,iZ,NC)
+   enddo 
+   enddo
 
-Free_Energy = Free_Energy + F_Conf
+   Free_Energy = Free_Energy + F_Conf
 
-F_Uchain = 0.0
+   F_Uchain = 0.0
 
-do iR=minntotR, maxntotR
-do iZ=minntotZ, maxntotZ
-  F_Uchain = F_Uchain + deltaR*deltaZ*xpol(iR,iZ,NC)*jacobian(iR)*(sumprouchain(iR,iZ,NC)/q(iR,iZ,NC))
-enddo
-enddo
+   do iR=minntotR(NC), maxntotR(NC)
+   do iZ=minntotZ(NC), maxntotZ(NC)
+     F_Uchain = F_Uchain + deltaR*deltaZ*xpol(iR,iZ,NC)*jacobian(iR)*(sumprouchain(iR,iZ,NC)/q(iR,iZ,NC))
+   enddo
+   enddo
 
-Free_Energy = Free_Energy + F_Uchain
+   Free_Energy = Free_Energy + F_Uchain
 enddo
 
 ! 7. Chemical Equilibrium                                              
@@ -169,25 +169,26 @@ enddo
 F_Eq = 0.0                                                       
 
 do NC = 1, Ncomp
-do iR=1,dimR
-do iZ=1,dimZ
-
-do is=1, Nacids
-F_Eq = F_Eq + fAmin(is,iR,iZ)*dlog(fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
-F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(1.0-fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)                                     
-F_Eq = F_Eq - (1.0-fAmin(is,iR,iZ))*dlog(expmuHplus)*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
-F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(Ka(is))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
-enddo
-  
-do is=1, Nbasics
-F_Eq = F_Eq + fBHplus(is,iR,iZ)*dlog(fBHplus(is,iR,iZ))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
-F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(1.0-fBHplus(is,iR,iZ))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
-F_Eq = F_Eq - (1.0-fBHplus(is,iR,iZ))*dlog(expmuOHmin)*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
-F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(Kb(is))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
-enddo    
-
-enddo
-enddo
+ do iR=1,dimR
+ do iZ=1,dimZ
+  do is=1, Nacids
+   F_Eq = F_Eq + fAmin(is,iR,iZ)*dlog(fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
+   F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(1.0-fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ&
+           /(vpol_a(is)*vsol)                                 
+   F_Eq = F_Eq - (1.0-fAmin(is,iR,iZ))*dlog(expmuHplus)*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
+   F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(Ka(is))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
+  enddo
+     
+  do is=1, Nbasics
+   F_Eq = F_Eq + fBHplus(is,iR,iZ)*dlog(fBHplus(is,iR,iZ))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ & 
+           /(vpol_b(is)*vsol)
+   F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(1.0-fBHplus(is,iR,iZ))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ &
+          /(vpol_b(is)*vsol)
+   F_Eq = F_Eq - (1.0-fBHplus(is,iR,iZ))*dlog(expmuOHmin)*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
+   F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(Kb(is))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
+  enddo   
+ enddo
+ enddo
 enddo ! NC
 
 Free_Energy = Free_Energy + F_Eq     
@@ -234,12 +235,12 @@ do iZ = 1, dimZ
   do js = 1, Npoorsv
     do jR= Rini_kais, Rfin_kais
     do jZ= -Xulimit, Xulimit    
-kZ = jZ + iZ
-if(PBCflag.eq.1)kkZ = PBCSYMI (kZ,dimZ)
-if(PBCflag.eq.2)kkZ = PBCREFI (kZ,dimZ)
-F_vdW (is,js) = F_vdW(is,js) &
-        - 0.5*Xu(iR,jR,jZ,is,js)*avpol(is,iR,iZ,NC)*avpol(js,jR,kkZ,MC)  &
-        *st(is,js)/(vpol(is)*vpol(js)*vsol**2)*jacobian(iR)*deltaR*deltaZ
+      kZ = jZ + iZ
+      if(PBCflag.eq.1)kkZ = PBCSYMI (kZ,dimZ)
+      if(PBCflag.eq.2)kkZ = PBCREFI (kZ,dimZ)
+      F_vdW (is,js) = F_vdW(is,js) &
+              - 0.5*Xu(iR,jR,jZ,is,js)*avpol(is,iR,iZ,NC)*avpol(js,jR,kkZ,MC)  &
+              *st(is,js)/(vpol(is)*vpol(js)*vsol**2)*jacobian(iR)*deltaR*deltaZ
     enddo ! jZ
     enddo ! jR
   enddo ! js
@@ -315,11 +316,11 @@ enddo
 enddo
 
 do NC = 1, NComp
-do iR=minntotR,maxntotR
-do iZ=minntotZ,maxntotZ
-  sumrho = sumrho + (-xpol(iR,iZ,NC)*vsol*jacobian(iR)) ! sum over  rho_i i=+,-,si
-enddo
-enddo
+   do iR=minntotR(NC),maxntotR(NC)
+   do iZ=minntotZ(NC),maxntotZ(NC)
+     sumrho = sumrho + (-xpol(iR,iZ,NC)*vsol*jacobian(iR)) ! sum over  rho_i i=+,-,si
+   enddo
+   enddo
 enddo
 
 ! sumel
@@ -377,9 +378,9 @@ do is=1,Npoorsv
 enddo
 
 do NC = 1,Ncomp
-  mupol = dlog(xpol(minntotR,minntotZ,NC))-dlog(q(minntotR,minntotZ,NC))
-  do iR = minntotR, maxntotR
-  do iZ = minntotZ, maxntotZ
+  mupol = dlog(xpol(minntotR(NC),minntotZ(NC),NC))-dlog(q(minntotR(NC),minntotZ(NC),NC))
+  do iR = minntotR(NC), maxntotR(NC)
+  do iZ = minntotZ(NC), maxntotZ(NC)
     sumpol = sumpol + xpol(iR,iZ,NC)*mupol*jacobian(iR)*deltaR*deltaZ
   enddo
   enddo

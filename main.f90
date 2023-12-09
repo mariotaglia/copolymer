@@ -118,8 +118,15 @@ actionflag = 1 ! Actionflag controls the current action of loop
 npol = npolini
 
 do while (actionflag.lt.3)
-   if(rank.eq.0)print*, ' npol:', npol, 'minntotR',minntotR, 'maxntotR:', maxntotR, 'minntotZ',minntotZ, 'maxntotZ:', maxntotZ
-
+   
+   if(rank.eq.0) then
+      print*, ' npol:', npol ! ,  'minntotR',minntotR, 'maxntotR:', maxntotR, 'minntotZ',minntotZ, 'maxntotZ:', maxntotZ
+      print*, ' minntotR', minntotR
+      print*, ' maxntotR', maxntotR
+      print*, ' minntotZ', minntotZ
+      print*, ' maxntotZ', maxntotZ
+   endif   
+   
    do i=1,(npoorsv+2)*n             ! initial guess for x1
       xg1(i)=x1(i)
    enddo

@@ -34,10 +34,10 @@ ndr = -1.0d10
 dielP = 78.54
 curvature = ndi
 ntot = ndi
-minntotR = 1
-minntotZ = 1
-maxntotR = ndi
-maxntotZ = ndi
+! minntotR(:) = 1
+! minntotZ(:) = 1
+! maxntotR = ndi
+! maxntotZ = ndi
 dimR = ndi
 dimRini = 0
 dimZ = ndi
@@ -98,6 +98,12 @@ read(buffer, *, iostat=ios) Ncomp
 allocate(flagMD(Ncomp),flagreflex(Ncomp))
 allocate(nrot(Ncomp),nrot_corr(Ncomp))
 allocate(totalcuantas(Ncomp),cuantas(Ncomp))
+allocate(minntotR(Ncomp),minntotZ(Ncomp),maxntotR(Ncomp),maxntotZ(Ncomp))
+
+minntotR(:)=1
+minntotZ(:)=1
+maxntotR(:)=ndi
+maxntotZ(:)=ndi
 nrot(:)=12
 flagMD(:)=0
 flagreflex(:)=1
@@ -186,14 +192,25 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
   case ('dimensions')
-   read(buffer, *, iostat=ios) dimR, dimZ, maxntotR, maxntotZ
+   read(buffer, *, iostat=ios) dimR, dimZ, maxntotR_all, maxntotZ_all
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    ntot=dimR*dimZ
+   maxntotR(:)=maxntotR_all
+   maxntotZ(:)=maxntotZ_all
+   maxntotR_max=maxntotR_all
 
   case('minntot')
-   read(buffer, *, iostat=ios) minntotR, minntotZ
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
+    do NC=1,Ncomp
+      read(fh, *) minntotR(NC),minntotZ(NC)
+    enddo
+    minntotR_min = minval(minntotR)
+  
+  case('maxntot') ! must be read after reading the lattice properties (case dimensions)
+    do NC=1,Ncomp
+      read(fh, *) maxntotR(NC),minntotZ(NC)
+    enddo
+    maxntotR_max = maxval(maxntotR)
+   
   case ('dimRini')
    read(buffer, *, iostat=ios) dimRini
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -344,10 +361,10 @@ enddo
 
 if(curvature.eq.ndr)call stopundef('curvature')
 if(ntot.eq.ndi)call stopundef('ntot')
-if(maxntotR.eq.ndi)call stopundef('maxntotR')
-if(maxntotZ.eq.ndi)call stopundef('maxntotZ')
 
 do NC=1,Ncomp
+  if(maxntotR(NC).eq.ndi)call stopundef('maxntotR')
+  if(maxntotZ(NC).eq.ndi)call stopundef('maxntotZ')
   if(totalcuantas(NC).eq.ndi)call stopundef('cuantas')
 enddo
 

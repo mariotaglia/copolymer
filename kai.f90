@@ -141,13 +141,13 @@ do js=1,Npoorsv
       stop
     endif
 
-    if (minntotRkais.ne.minntotR) then
-      print*,"minntotR of kais non equal mintotR of DEFINITIONS.txt"
+    if (minntotRkais.ne.minntotR_min) then
+      print*,"minntotR of kais non equal minntotR of DEFINITIONS.txt"
       stop
     endif
 
 
-    if (maxntotRkais.ne.maxntotR) then
+    if (maxntotRkais.ne.maxntotR_max) then
       print*,"maxntotR of kais non equal maxntotR of DEFINITIONS.txt"
       stop
     endif
@@ -178,7 +178,7 @@ do js=1,Npoorsv
   if (flagkai.eq.1) then
 
     write(is*110+js,*)'#curvature dimR dimRini minntotR maxntotR Xulimit dimf factorMCsteps#'
-    write(is*110+js,*)curvature,dimR,dimRini,minntotR,maxntotR,Xulimit,dimf(is,js),MCfactor
+    write(is*110+js,*)curvature,dimR,dimRini,minntotR_min,maxntotR_max,Xulimit,dimf(is,js),MCfactor
 
   endif
 

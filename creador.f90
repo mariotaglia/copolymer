@@ -177,7 +177,7 @@ endif
 !          write(9800+k,*)chains(3,k,j)
 
 
-            do ii = minntotR,maxntotR ! position of first segment (or Center of mass?)
+            do ii = minntotR(NC),maxntotR(NC) ! position of first segment (or Center of mass?)
 
                select case (abs(curvature))
                  case (2)

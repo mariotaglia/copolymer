@@ -21,11 +21,11 @@ allocate (sumprouchain(dimR,dimZ,Ncomp))
 allocate (avpol(0:Npoorsv, dimR,dimZ,NComp))
 allocate (avpola(0:Nacids,dimR,dimZ,Ncomp), avpolb(0:Nbasics,dimR,dimZ,Ncomp))
 allocate (xpol(dimR,dimZ,Ncomp))
-allocate (innZ(maxlong,cuantas_max,Ncomp),innR(maxlong,cuantas_max,maxntotR,Ncomp))
+allocate (innZ(maxlong,cuantas_max,Ncomp),innR(maxlong,cuantas_max,maxntotR_max,Ncomp))
 allocate (xtotal(Npoorsv,dimR,dimZ))
 
-Rini_kais=minntotR-10
-Rfin_kais=maxntotR+10
+Rini_kais=minntotR_min-10
+Rfin_kais=maxntotR_max+10
 if(Rini_kais.lt.1)Rini_kais = 1
 if(Rfin_kais.gt.dimR)Rfin_kais = dimR
 allocate (Xu(dimR,Rini_kais:Rfin_kais,-Xulimit:Xulimit,Npoorsv, Npoorsv))
