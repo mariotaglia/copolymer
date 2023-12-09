@@ -101,7 +101,10 @@ allocate(totalcuantas(Ncomp),cuantas(Ncomp))
 allocate(minntotR(Ncomp),minntotZ(Ncomp),maxntotR(Ncomp),maxntotZ(Ncomp))
 
 minntotR(:)=1
+minntotR_min=1
+
 minntotZ(:)=1
+
 maxntotR(:)=ndi
 maxntotZ(:)=ndi
 nrot(:)=12
