@@ -95,6 +95,9 @@ infile 1
 #flagkai=1 means kai.dat is calculated. flagkai=0 means kai.dat is read from file#
 flagkai 1
 
+#flagonekais = 1 means all kais read/written from/to kais.001.001.in. Default=0
+flagonekais 0 
+
 # Npolini=initial density # Npolfirst=minimum density # npollast=maximum density # Npolstep = step
 # Npolini, Npolfirst, Npollast, Npolstep #
 npol 0.4 0.1 1.4 0.01
