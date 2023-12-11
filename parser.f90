@@ -67,6 +67,7 @@ maxT = 1
 !flagMD = 0
 !nrot = 12 ! default number of rotations
 ta = 112
+flagonekais = 0
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Control file variables
@@ -261,6 +262,11 @@ select case (label)
       dimf(j,i) = dimf(i,j)
      enddo
    enddo
+
+  case ('flagonekais')
+   read(buffer, *, iostat=ios) flagonekais
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
 
   case ('Nacids')
    read(buffer, *, iostat=ios) Nacids

@@ -1,5 +1,5 @@
 #Number of compounds#
-Ncomp 2 
+Ncomp 3 
 
 #Proportion of each compound#
 npolratio
@@ -8,7 +8,7 @@ npolratio
 
 curvature 0
 
-#DimR DimZ minntotR maxntotR minntotZ maxntotZ #
+#DimR DimZ maxntotR maxntotZ #
 dimensions 140 1  18 1
 
 #minntotR minntotZ of each compound, default values = 1#

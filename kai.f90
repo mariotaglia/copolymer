@@ -122,8 +122,10 @@ endif
 
 do is=1,Npoorsv
 do js=1,Npoorsv
-
+  
+  
   write(kaisfilename,'(A5,BZ,I3.3,A1,I3.3,A3)')'kais.',is,'.',js,'.in'
+  
   open(unit=200,file='suma.dat')
   open(unit=is*110+js, file=kaisfilename)
 
@@ -226,8 +228,24 @@ do js=1,Npoorsv
 
   close(is*110+js)
 
+  if (flagonekais.eq.1) then
+    exit
+  endif
 enddo !js
+if (flagonekais.eq.1) then
+  exit
+endif
+
 enddo !is
+
+if (flagonekais.eq.1) then
+  do is=1,Npoorsv
+  do js=1,Npoorsv
+    sumaXu(is,js) = sumaXu(1,1)
+    Xu(:,:,:,is,js) = Xu(:,:,:,1,1)
+  enddo
+  enddo
+endif
 
 close(200)
 end
