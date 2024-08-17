@@ -565,7 +565,7 @@ if(lsegkai.eq.ndr)call stopundef('lsegkai')
 ! curvature
 if(curvature.eq.ndi)call stopundef('curvature')
 select case (curvature)
-   case(0,1,2)
+   case(0,1,2,3)
    case DEFAULT
        call stopparser('Curvature should be 0,1,2 or 3') 
 endselect
