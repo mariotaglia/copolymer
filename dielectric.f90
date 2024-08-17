@@ -23,11 +23,19 @@ epsfcn(iR,iZ) = pol(iR,iZ)*dielPr + (1.0-pol(iR,iZ))
 Depsfcn(iR,iZ) = dielPr - 1.0
 enddo
 enddo
-epsfcn(0,:)=epsfcn(1,:)
-Depsfcn(0,:)=Depsfcn(1,:)
 
-epsfcn(dimR+1,:)=epsfcn(dimR,:)
-Depsfcn(dimR+1,:)=Depsfcn(dimR,:)
+select case (curvature)
+   case(0,1,2) ! reflex at r=0 and bulk at r->inf 
+      epsfcn(0,:)=epsfcn(1,:)
+      Depsfcn(0,:)=Depsfcn(1,:)
+      epsfcn(dimR+1,:)=epsfcn(dimR,:)
+      Depsfcn(dimR+1,:)=Depsfcn(dimR,:)
+   case(3) ! PBC at r=0 and dimR+1
+      epsfcn(0,:)=epsfcn(dimR,:)
+      Depsfcn(0,:)=Depsfcn(dimR,:)
+      epsfcn(dimR+1,:)=epsfcn(1,:)
+      Depsfcn(dimR+1,:)=Depsfcn(1,:)
+endselect
 
 !epsfcn(0) = epsfcn(1) 
 !epsfcn(ntot+1) = epsfcn(ntot) OJO boundary conditions  

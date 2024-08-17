@@ -305,7 +305,7 @@ select case (label)
 
 
 ! curvature
-! 0 = plane, 1: cylinder, 2 : micelle
+! 0 = plane, 1: cylinder, 2 : micelle, 3 : plane with PBC
   case ('curvature')
    read(buffer, *, iostat=ios) curvature
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
@@ -567,7 +567,7 @@ if(curvature.eq.ndi)call stopundef('curvature')
 select case (curvature)
    case(0,1,2)
    case DEFAULT
-       call stopparser('Curvature should be 0,1 or 2') 
+       call stopparser('Curvature should be 0,1,2 or 3') 
 endselect
 
 ! dielP   

@@ -189,7 +189,12 @@ endif
                  case (0) 
                   tempr_R=abs(chains(1,k,j)+(float(ii+dimRini)-0.5)*deltaR)
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
-               endselect
+                 case(3) ! lamella with PBC in r
+                  tempr_R=chains(1,k,j)
+                  temp_R=int(anint(tempr_R/deltaR)) 
+                  temp_R = PBCSYMI(temp_R,dimR)+dimRini ! puts the segment within the calculation box using PBC,
+                                                        ! adds dimRini for compatibility 
+             endselect
              
                if(temp_R.gt.(dimR+dimRini)) then
                      print*, 'creador.f90: increase dimR', temp_R, chains(1,k,j), ii, j
@@ -201,7 +206,7 @@ endif
               innR(k,conf,ii,NC)=temp_R-dimRini ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
             enddo ! ii
          tempr_Z=chains(3,k,j)
-         innZ(k,conf,NC)=-int(anint(tempr_Z/deltaZ)) ! mirror conformation in Z
+         innZ(k,conf,NC)=-int(anint(tempr_Z/deltaZ)) ! mirror conformation in Z (legacy, does not introduce a bias)
          enddo ! k
       endif
    enddo ! j

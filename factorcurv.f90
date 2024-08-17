@@ -6,7 +6,7 @@ integer bas, pos
 
 
 select case (curvature)
-case (0)
+case (0, 3)
 factorcurv = 1.0
 case (1)
 factorcurv = (float(bas+dimRini)-0.5)/(float(pos+dimRini)-0.5)
@@ -24,7 +24,7 @@ use layer
 implicit none
 integer i
 select case (curvature)
-case (0)
+case (0, 3)
 jacobian = 1.0
 case(1)
 jacobian = 2.0*pi*(dfloat(i+dimRini)-0.5)*deltaR ! 2*pi*r

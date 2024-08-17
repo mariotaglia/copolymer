@@ -64,8 +64,14 @@ do iZ=1,dimZ
 enddo
 enddo
 
-phi(0,:)=phi(1,:) ! symmetry at r = 0
-phi(dimR+1,:)=0.0 ! bulk for r -> inf
+select case (curvature)
+   case (0,1,2) 
+       phi(0,:)=phi(1,:) ! symmetry at r = 0
+       phi(dimR+1,:)=0.0 ! bulk for r -> inf
+   case (3)
+       phi(0,:)=phi(dimR,:) ! PBC at r = 0
+       phi(dimR+1,:)=phi(1,:) !PBC at r = dimR 
+end select
 
 ! Recover xtotal from input
 do is = 1,Npoorsv
@@ -113,6 +119,7 @@ call dielectfcn(dielpol,epsfcn,Depsfcn)
 
 ! Calculation of xpot
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! is = 0 (solvent) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 do iZ = 1, dimZ
 do iR = 1, dimR
 ! osmotic pressure
@@ -133,15 +140,20 @@ do iZ = 1,dimZ
       iZm=PBCREFI(jZm,dimZ)
    endif
 
-do iR = 1,dimR
+do iR = 1,dimR  ! phi(0) and phi(dimR) are defined for all curvatures above, no need to analyze PBC here
    gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/2.0/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
    xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
 enddo 
 enddo
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! is =! 0 (not solvent) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! xpot
 do iZ = 1, dimZ
 do iR = 1, dimR
 
+
+! poor solvent and volume
   do is = 1, Npoorsv
 !   calculate xpot(i, is)
 
@@ -167,7 +179,7 @@ do iR = 1, dimR
 enddo
 enddo
 
-
+! dielectricts
 do is= 1, Npoorsv
   do iZ= 1, dimZ
 
@@ -183,13 +195,14 @@ do is= 1, Npoorsv
    endif
 
 
-    do iR= 1, dimR
+    do iR = 1,dimR  ! phi(0) and phi(dimR) are defined for all curvatures above, no need to analyze PBC here
       gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/2.0/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
       xpot(is,iR,iZ) = xpot(is,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(is)*vsol*wperm/2.0)
     enddo
   enddo
 enddo
 
+! acid base
 do iR = 1, dimR
 do iZ = 1, dimZ
   do ic = 1,Nacids
@@ -243,10 +256,10 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
       do k=1,long(NC)
          iZ = innZ(k,i,NC)+iiZ
 
-         if(PBCflag.eq.1)aZ = PBCSYMI(iZ,dimZ)
+         if(PBCflag.eq.1)aZ = PBCSYMI(iZ,dimZ) ! z direction is always cartesian, so innZ codes for z1-z2
          if(PBCflag.eq.2)aZ = PBCREFI(iZ,dimZ)
 
-         aR = innR(k,i,iiR,NC)
+         aR = innR(k,i,iiR,NC)                 ! r direction may not be cartesian, so innR depends on iiR
          is = segpoorsv(k,NC)
          ia = acidtype(k,NC)
          ib = basictype(k,NC) 
@@ -308,7 +321,7 @@ do iR = 1, dimR
 do iZ = 1, dimZ
    do is = 0, Npoorsv
       select case (curvature)
-       case (0)
+       case (0,3)
         sumpol = sumpol + avpol(is,iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or in units of chains/nm of belt (2D)
        case(1)
         sumpol = sumpol + avpol(is,iR,iZ,NC)*deltaZ*(float(iR+dimRini)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm of fiber (1D) or chains/fiber (2D)
@@ -329,7 +342,7 @@ sumpol = 0.0
 do iR = 1, dimR
 do iZ = 1, dimZ
    select case (curvature)
-    case (0)
+    case (0,3)
      sumpol = sumpol + xpol(iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
     case (1)
      sumpol = sumpol + xpol(iR,iZ,NC)*deltaZ*(float(iR+dimRini)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
@@ -344,7 +357,7 @@ trans(:,NC) = 0.0
 do iR = minntotR(NC), maxntotR(NC)
 do iZ = minntotZ(NC), maxntotZ(NC)
    select case (curvature)
-    case (0)
+    case (0,3)
      trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
     case(1)
      trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaZ*(float(iR+dimRini)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
@@ -411,7 +424,7 @@ do iZ = 1, dimZ
 
    select case (curvature)
 
-    case (0)
+    case (0, 3)
      f(n*(Npoorsv+1)+dimR*(iZ-1)+iR)=xcharge(iR,iZ) &
      +wperm*epsfcn(iR,iZ)*(phi(iR+1,iZ)-2.0*phi(iR,iZ)+phi(iR-1,iZ))*deltaR**(-2) &
      +wperm*epsfcn(iR,iZ)*(phi(iR,jZp)-2.0*phi(iR,iZ)+phi(iR,jZm))*deltaZ**(-2) &
