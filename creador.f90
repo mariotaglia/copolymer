@@ -29,6 +29,8 @@ integer conf              ! counts number of conformations
 
 
 character*80 line
+integer, external :: PBCSYMI
+
 
 ! MPI
 integer tag

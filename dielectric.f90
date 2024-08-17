@@ -3,7 +3,7 @@ subroutine dielectfcn(pol,epsfcn,Depsfcn)
 ! determines the dielectric function using an average mixing rule
 
 use mcharge
-use globals, only : dimR,dimZ
+use globals, only : dimR,dimZ, curvature
 
 implicit none
 integer iR,iZ
