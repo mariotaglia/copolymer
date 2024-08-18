@@ -102,7 +102,8 @@ write(phifilename,'(A18,BZ,I3.3,A1,I3.3,A4)')'electricpotential.', counter,'.',c
 open(unit=311,file=phifilename)
 do iR=1,dimR
    do iZ=1,dimZ
-         write(311,*)zc(iR),iZ,phi(iR,iZ)
+   if(dimz.ne.1)write(311,*)zc(iR),iZ,phi(iR,iZ)
+   if(dimz.eq.1)write(311,*)zc(iR),phi(iR,iZ)
    enddo
 enddo
 close(311)
@@ -120,7 +121,8 @@ open(unit=311,file=denspolfilename)
 
 do iR=1,dimR
    do iZ=1,dimZ
-       write(311,*)zc(iR),iZ,avpol(is,iR,iZ,NC)
+   if(dimZ.ne.1)write(311,*)zc(iR),iZ,avpol(is,iR,iZ,NC)
+   if(dimZ.eq.1)write(311,*)zc(iR),avpol(is,iR,iZ,NC)
    enddo
 enddo
 
@@ -138,7 +140,8 @@ open(unit=311,file=poorsvfilename)
 
 do iR=1,dimR
    do iZ=1,dimZ
-       write(311,*)zc(iR),iZ,xtotal(is,iR,iZ)
+   if(dimz.ne.1)write(311,*)zc(iR),iZ,xtotal(is,iR,iZ)
+   if(dimz.eq.1)write(311,*)zc(iR),xtotal(is,iR,iZ)
    enddo
 enddo
 if(vtkflag.eq.1)call savevtk(poorsvfilename, xtotal(is,:,:))
@@ -158,7 +161,8 @@ do iR=1,dimR
        do NC = 1, Ncomp 
        tmp(iR,iZ) = tmp(iR,iZ) + avpol(is,iR,iZ,NC)
        enddo
-       write(311,*)zc(iR),iZ,tmp(iR,iZ)
+       if(dimz.ne.1)write(311,*)zc(iR),iZ,tmp(iR,iZ)
+       if(dimz.eq.1)write(311,*)zc(iR),tmp(iR,iZ)
    enddo
 enddo
 close(311)
@@ -172,7 +176,8 @@ write(fracAmin,'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionAmin',ic,'.',counter,
 open(unit=1050, file=fracAmin)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(1050,*)zc(iR),iZ,fAmin(ic,iR,iZ)
+   if(dimz.ne.1)write(1050,*)zc(iR),iZ,fAmin(ic,iR,iZ)
+   if(dimz.eq.1)write(1050,*)zc(iR),fAmin(ic,iR,iZ)
    enddo
 enddo
 close(1050)
@@ -185,7 +190,8 @@ write(densAcidfilename,'(A11,BZ,I3.3,A1,I3.3, A1, I3.3,A1,I3.3,A4)')'densityacid
 open(unit=1780, file=densAcidfilename)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(1780,*)zc(iR),iz,avpola(ic,iR,iZ,NC)
+   if(dimz.ne.1)write(1780,*)zc(iR),iz,avpola(ic,iR,iZ,NC)
+   if(dimz.eq.1)write(1780,*)zc(iR),avpola(ic,iR,iZ,NC)
    enddo
 enddo
 close(1780)
@@ -198,7 +204,8 @@ write(fracBHplus,'(A12,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'fractionBHplus',ic,'.',coun
 open(unit=1050, file=fracBHplus)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(1050,*)zc(iR),iZ,fBHplus(ic,iR,iZ)
+   if(dimz.ne.1)write(1050,*)zc(iR),iZ,fBHplus(ic,iR,iZ)
+   if(dimz.eq.1)write(1050,*)zc(iR),fBHplus(ic,iR,iZ)
    enddo
 enddo
 close(1050)
@@ -211,7 +218,8 @@ write(densBasicfilename,'(A11,BZ,I3.3,A1,I3.3,A1,I3.3,A1,I3.3,A4)')'densitybasic
 open(unit=1780, file=densBasicfilename)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(1780,*)zc(iR),iz,avpolb(ic,iR,iZ,NC)
+   if(dimz.ne.1)write(1780,*)zc(iR),iz,avpolb(ic,iR,iZ,NC)
+   if(dimz.eq.1)write(1780,*)zc(iR),avpolb(ic,iR,iZ,NC)
    enddo
 enddo
 close(1780)
@@ -223,7 +231,8 @@ write(denssolfilename,'(A15,BZ,I3.3,A1,I3.3,A4)')'densitysolvent.', counter,'.',
 open(unit=330,file=denssolfilename)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(330,*)zc(iR),iZ,xsol(iR,iZ)
+   if(dimz.ne.1)write(330,*)zc(iR),iZ,xsol(iR,iZ)
+   if(dimz.eq.1)write(330,*)zc(iR),xsol(iR,iZ)
    enddo
 enddo
 close(330)
@@ -234,7 +243,8 @@ write(densposfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitypositive.',counter,'.',
 open(unit=331,file=densposfilename)
  do iR=1,dimR
    do iZ=1,dimZ
-       write(331,*)zc(iR),iZ,avpos(iR,iZ)
+   if(dimz.ne.1)write(331,*)zc(iR),iZ,avpos(iR,iZ)
+   if(dimz.eq.1)write(331,*)zc(iR),avpos(iR,iZ)
    enddo
 enddo
 close(331)
@@ -245,7 +255,8 @@ write(densnegfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'densitynegative.',counter,'.',
 open(unit=332,file=densnegfilename)
  do iR=1,dimR
    do iZ=1,dimZ
-       write(332,*)zc(iR),iZ,avneg(iR,iZ)
+   if(dimz.ne.1)write(332,*)zc(iR),iZ,avneg(iR,iZ)
+   if(dimz.eq.1)write(332,*)zc(iR),avneg(iR,iZ)
    enddo
 enddo
 close(332)
@@ -256,7 +267,8 @@ write(densHplusfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densityHplus.',counter,'.',c
 open(unit=333,file=densHplusfilename)
  do iR=1,dimR
    do iZ=1,dimZ
-       write(333,*)zc(iR),iZ,avHplus(iR,iZ)
+   if(dimz.ne.1)write(333,*)zc(iR),iZ,avHplus(iR,iZ)
+   if(dimz.eq.1)write(333,*)zc(iR),avHplus(iR,iZ)
    enddo
 enddo
 close(333)
@@ -267,7 +279,8 @@ write(densOHminfilename,'(A13,BZ,I3.3,A1,I3.3,A4)')'densityOHmin.',counter,'.',c
 open(unit=334,file=densOHminfilename)
 do iR=1,dimR
    do iZ=1,dimZ
-       write(334,*)zc(iR),iZ,avOHmin(iR,iZ)
+   if(dimz.ne.1)write(334,*)zc(iR),iZ,avOHmin(iR,iZ)
+   if(dimz.eq.1)write(334,*)zc(iR),avOHmin(iR,iZ)
    enddo
 enddo
 close(334)
@@ -278,7 +291,8 @@ write(dielfilename,'(A16,BZ,I3.3,A1,I3.3,A4)')'dielectric_cons.',counter,'.',cou
 open(unit=335,file=dielfilename)
  do iR=1,dimR
    do iZ=1,dimZ
-       write(335,*)zc(iR),iZ,epsfcn(iR,iZ)
+   if(dimz.ne.1)write(335,*)zc(iR),iZ,epsfcn(iR,iZ)
+   if(dimz.eq.1)write(335,*)zc(iR),epsfcn(iR,iZ)
    enddo
 enddo
 close(335)
@@ -290,7 +304,8 @@ write(xtotalfilename,'(A13,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'xdensitytota.',NC,'.',c
 open(unit=329,file=xtotalfilename)
  do iR=1,dimR
    do iZ=1,dimZ
-      write(329,*)zc(iR),iZ,xpol(iR,iZ,NC)
+   if(dimz.ne.1)write(329,*)zc(iR),iZ,xpol(iR,iZ,NC)
+   if(dimz.eq.1)write(329,*)zc(iR),xpol(iR,iZ,NC)
    enddo
  enddo
 if(vtkflag.eq.1)call savevtk(xtotalfilename, xpol(:,:,NC))
@@ -314,7 +329,8 @@ write(lnqfilename,'(A16,BZ,I3.3,A1,I3.3,A1,I3.3,A4)')'chemical_potent.',NC,'.',c
 open(unit=324,file=lnqfilename)
 do iR = minntotR(NC), maxntotR(NC)
    do iZ = minntotZ(NC), maxntotZ(NC)
-       write(324,*)zc(iR),iZ,dlog(xpol(iR,iZ,NC))-dlog(q(iR,iZ,NC))
+   if(dimz.ne.1)write(324,*)zc(iR),iZ,dlog(xpol(iR,iZ,NC))-dlog(q(iR,iZ,NC))
+   if(dimz.eq.1)write(324,*)zc(iR),dlog(xpol(iR,iZ,NC))-dlog(q(iR,iZ,NC))
     enddo
 enddo
 close(324)
