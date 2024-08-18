@@ -160,7 +160,7 @@ do iR = 1, dimR
     protemp = 0.0
     
       do js = 1, Npoorsv 
-         do jR = Rini_kais, Rfin_kais
+         do jR = 1, dimR
          do jZ = -Xulimit, Xulimit
             kZ=jZ+iZ
 

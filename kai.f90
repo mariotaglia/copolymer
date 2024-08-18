@@ -52,7 +52,7 @@ select case (curvature)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 case(0,1,2)
          
-   do ii = Rini_kais, Rfin_kais ! loop sobre cada posicion del segmento
+   do ii = 1, dimR ! loop sobre cada posicion del segmento
 
       ymax = cutoff
       ymin = -cutoff
@@ -93,7 +93,7 @@ case(0,1,2)
          jR = int(R/deltaR)-dimRini+1 ! jR tiene la celda donde cae el punto a integrar
          jZ = int(anint(Z/deltaZ)) ! OJO
 
-         if((jR.le.Rfin_kais).and.(jR.ge.Rini_kais)) then
+         if((jR.le.1).and.(jR.ge.dimR)) then
          
          if(vect.le.(cutoff)) then ! esta dentro de la esfera del cut-off   
          
@@ -114,7 +114,7 @@ case(0,1,2)
       enddo!iy
       enddo!ix
       
-      do jR = Rini_kais, Rfin_kais
+      do jR = 1, dimR
       do jZ = -Xulimit, Xulimit
          do is=1,Npoorsv
          do js=1,Npoorsv
@@ -208,7 +208,7 @@ do js=1,Npoorsv
   if (flagkai.eq.0) then
 
     read(is*110+js,*)nada
-    read(is*110+js,*)curvkais,dimRkais,dimRinikais,minntotRkais,maxntotRkais,Xulimitkais,dimfkais(is,js),MCfactorkais
+    read(is*110+js,*)curvkais,dimRkais,dimRinikais,Xulimitkais,dimfkais(is,js),MCfactorkais
   
     if (curvkais.ne.curvature) then
       print*,"curvature of kais non equal curvature of DEFINITIONS.txt"
@@ -219,18 +219,6 @@ do js=1,Npoorsv
       print*,"box size of kais non equal box size of DEFINITIONS.txt"
       stop
     endif
-
-    if (minntotRkais.ne.minntotR_min) then
-      print*,"minntotR of kais non equal minntotR of DEFINITIONS.txt"
-      stop
-    endif
-
-
-    if (maxntotRkais.ne.maxntotR_max) then
-      print*,"maxntotR of kais non equal maxntotR of DEFINITIONS.txt"
-      stop
-    endif
-
 
     if (Xulimitkais.ne.Xulimit) then
       print*,"Xulimit of kais non equal Xulimit of DEFINITIONS.txt"
@@ -257,12 +245,12 @@ do js=1,Npoorsv
   if (flagkai.eq.1) then
 
     write(is*110+js,*)'#curvature dimR dimRini minntotR maxntotR Xulimit dimf factorMCsteps#'
-    write(is*110+js,*)curvature,dimR,dimRini,minntotR_min,maxntotR_max,Xulimit,dimf(is,js),MCfactor
+    write(is*110+js,*)curvature,dimR,dimRini,Xulimit,dimf(is,js),MCfactor
 
   endif
 
-  do ii=Rini_kais, Rfin_kais
-  do jR=Rini_kais, Rfin_kais
+  do ii=1, dimR
+  do jR=1, dimR
   do jZ=-Xulimit,Xulimit
 
      if (flagkai.eq.1) then
@@ -294,9 +282,9 @@ do js=1,Npoorsv
   enddo
   enddo
 
-  do jR = (Rfin_kais+Rini_kais)/2-Xulimit, (Rfin_kais+Rini_kais)/2+Xulimit
+  do jR = 1, dimR
   do jZ = -Xulimit,Xulimit
-    sumaXu(is,js) = sumaXu(is,js) + Xu((Rfin_kais+Rini_kais)/2,jR,jZ,is,js)
+    sumaXu(is,js) = sumaXu(is,js) + Xu(1,jR,jZ,is,js)
   enddo
   enddo
 

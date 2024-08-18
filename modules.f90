@@ -51,7 +51,6 @@ real*8 norma
 INTEGER adsmax
 integer ntot, dimRini, dimR, dimZ, maxntotR_all, maxntotZ_all, minntotR_min, maxntotR_max ! lattice sites
 integer, allocatable :: maxntotR(:), maxntotZ(:), minntotR(:), minntotZ(:) ! translational constraints
-integer Rini_kais, Rfin_kais, minntotRkais, maxntotRkais ! kai limits
 real*8, allocatable :: avpol(:,:,:,:) ! volume fraction of chains 
 real*8, allocatable :: avpola(:,:,:,:), avpolb(:,:,:,:) ! volume fraction of acid and basic segments 
 real*8, allocatable :: xpol(:,:,:) ! volume fraction polymers already adsorbed
