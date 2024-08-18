@@ -192,7 +192,7 @@ endif
                   tempr_R=abs(chains(1,k,j)+(float(ii+dimRini)-0.5)*deltaR)
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                  case(3) ! lamella with PBC in r
-                  tempr_R=chains(1,k,j)
+                  tempr_R=chains(1,k,j)+(float(ii+dimRini)-0.5)*deltaR
                   temp_R=int(anint(tempr_R/deltaR)) 
                   temp_R = PBCSYMI(temp_R,dimR)+dimRini ! puts the segment within the calculation box using PBC,
                                                         ! adds dimRini for compatibility 

@@ -93,7 +93,7 @@ case(0,1,2)
          jR = int(R/deltaR)-dimRini+1 ! jR tiene la celda donde cae el punto a integrar
          jZ = int(anint(Z/deltaZ)) ! OJO
 
-         if((jR.le.1).and.(jR.ge.dimR)) then
+         if((jR.ge.1).and.(jR.le.dimR)) then
          
          if(vect.le.(cutoff)) then ! esta dentro de la esfera del cut-off   
          
