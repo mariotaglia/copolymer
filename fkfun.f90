@@ -281,6 +281,8 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
          if(PBCflag.eq.1)aZ = PBCSYMI(iZ,dimZ)
          if(PBCflag.eq.2)aZ = PBCREFI(iZ,dimZ)
          aR = innR(j,i,iiR,NC)
+
+
          is = segpoorsv (j,NC)
          ia = acidtype (j,NC)
          ib = basictype (j,NC)
@@ -295,6 +297,7 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
 
 enddo ! iiR
 enddo ! iiZ
+
 
 avpol_tosend(:, 1:dimR, 1:dimZ)=avpol_tmp(:, 1:dimR, 1:dimZ) 
 avpola_tosend(:, 1:dimR, 1:dimZ)=avpola_tmp(:, 1:dimR, 1:dimZ)
