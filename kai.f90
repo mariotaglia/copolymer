@@ -136,8 +136,8 @@ case(3) ! lamella con PBC
       zmax = cutoff
       zmin = -cutoff
 
-      xmax = cutoff + (dfloat(ii+dimRini) - 0.5)*deltaR
-      xmin = -cutoff + (dfloat(ii+dimRini) - 0.5)*deltaR
+      xmax = cutoff + dfloat(ii)*deltaR
+      xmin = -cutoff + dfloat(ii)*deltaR
       
       do ix = 1, MCsteps
       do iy = 1, MCsteps
@@ -145,7 +145,7 @@ case(3) ! lamella con PBC
 
   ! coordenadas del segmento (x1,y1,z1) y del punto a integrar (x2,y2,z2)
 
-  x1 = dfloat(ii)*deltaR ! for ii=1, x1=delta and if x2 is between delta/2 and 3/2*delta, the point falls in layer 1
+         x1 = dfloat(ii)*deltaR ! for ii=1, x1=delta and if x2 is between delta/2 and 3/2*delta, the point falls in layer 1
          y1 = 0.0
          z1 = 0.0
 

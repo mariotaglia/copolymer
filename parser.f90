@@ -713,6 +713,22 @@ endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
+! Aditional consistency checkes
+! 
+
+
+if((curvature.eq.3).and.(dimRini.ne.0.0)) then
+        call stopparser('dimRini should be 0.0 for curvature 3')
+endif
+
+if((curvature.eq.2).and.(dimZ.ne.1)) then
+        call stopparser('dimZ should be 1 for curvature 2')
+endif
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
 !                                        Auxiliary calculations
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
