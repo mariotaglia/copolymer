@@ -69,7 +69,7 @@ integer iter              ! counts number of iterations
 integer ncha_max
 ! integer, parameter :: ncha_max = 700
 real*8 F1,F2
-integer, allocatable :: flagreflex(:)
+integer, allocatable :: flagreflex(:), flagGC(:)
 endmodule
 
 module partfunc
@@ -97,6 +97,7 @@ real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
 real*8, allocatable :: phi(:,:), avpos(:,:), avneg(:,:), avHplus(:,:), avOHmin(:,:), xcharge(:,:), fAmin(:,:,:), fBHplus(:,:,:)
 real*8 Csalt, wperm, rhosalt, expmupos, expmuneg, xposbulk, xnegbulk
 real*8 cHplus, cOHmin, pHbulk, pOHbulk, pKw, xHplusbulk, xOHminbulk, expmuHplus, expmuOHmin
+real*8, allocatable :: Cpolbulk(:), expmupol(:), xpolbulk(:), fAmin_bulk(:), fBHplus_bulk(:), Cacidsbulk(:), Cbasicsbulk(:)
 endmodule
 
 

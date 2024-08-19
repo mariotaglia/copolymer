@@ -319,10 +319,20 @@ do iZ = 1, dimZ
 enddo
 enddo
 
+
+!!!
+! Hacer:
+! agregar flag que cuando valga 1 en vez normalizar por npol, se multiplique por expmupept
+
+
+
 sumpol = sumpol/(vchain(NC)*vsol) 
 avpol(:,:,:,NC) = avpol(:,:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fixed
 avpola(:,:,:,NC) = avpola(:,:,:,NC)/sumpol*npol*npolratio(NC)
 avpolb(:,:,:,NC) = avpolb(:,:,:,NC)/sumpol*npol*npolratio(NC)
+
+
+
 
 sumpol = 0.0
 
