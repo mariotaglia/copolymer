@@ -45,7 +45,7 @@ real*8 npolini, npolfirst, npollast, npolstep
 real*8, allocatable :: npolratio(:) 
 real*8 npol
 real*8 error              ! error imposed accuaracy
-real*8 infile             ! inputfile control variable for reading input files  value 0,1
+integer infile             ! inputfile control variable for reading input files  value 0,1
 CHARACTER nada
 real*8 norma
 INTEGER adsmax

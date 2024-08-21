@@ -4,11 +4,13 @@ npolratio
 1.
 
 
-flagMD 1
+flagMD
+1
 
 curvature 2
 dimensions 100 1 15 1
-cuantas 60000
+cuantas
+60000
 long 
 36
 
@@ -40,10 +42,10 @@ vpol_b 1
 
 PBCflag 1
 infile 	2
-flagkai 1
+flagkai 0
 
 
-npol 60 20 100. 0.5
+npol 60 60 60. 0.5
 
 Xulimit 8
 lseg 0.15
@@ -66,3 +68,6 @@ nbranches
 19 1
 21 5
 22 1
+
+
+MCsteps 20
