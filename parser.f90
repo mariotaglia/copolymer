@@ -96,7 +96,7 @@ endif
 read(buffer, *, iostat=ios) Ncomp
 
 
-allocate(flagMD(Ncomp),flagreflex(Ncomp),flagGC(Ncomp))
+allocate(flagMD(Ncomp),flagreflex(Ncomp))
 allocate(nrot(Ncomp),nrot_corr(Ncomp))
 allocate(totalcuantas(Ncomp),cuantas(Ncomp))
 allocate(minntotR(Ncomp),minntotZ(Ncomp),maxntotR(Ncomp),maxntotZ(Ncomp))
@@ -106,13 +106,12 @@ minntotR_min=1
 
 minntotZ(:)=1
 
-maxntotR(:) = ndi
-maxntotZ(:) = ndi
-nrot(:) = 12
-flagMD(:) = 0
-flagGC(:) = 0
-flagreflex(:) = 1
-totalcuantas(:) = ndi
+maxntotR(:)=ndi
+maxntotZ(:)=ndi
+nrot(:)=12
+flagMD(:)=0
+flagreflex(:)=1
+totalcuantas(:)=ndi
 
 
 
@@ -142,12 +141,7 @@ select case (label)
    do NC =1,NComp
      read(fh, *) nrot(NC)
    enddo
-
-  case('flagGC')
-   do NC = 1,Ncomp
-     read(fh, *) flagGC(NC)
-   enddo
-
+ 
   case('flagreflex')
    do NC =1,NComp
      read(fh, *) flagreflex(NC)
