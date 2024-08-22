@@ -23,7 +23,7 @@ integer Npoorsv ! number of different types of poor solvent
 REAL*8, allocatable ::  xtotal(:,:,:)
 real*8, allocatable :: st(:,:)
 real*8, allocatable :: dimf(:,:), dimfkais(:,:)
-real*8, allocatable :: Xu(:,:,:,:,:)
+real*8, allocatable :: Xu(:,:,:,:,:), sumaXu(:,:)
 integer Xulimit, Xulimitkais
 integer MCfactor, MCfactorkais
 integer flagkai, curvkais,flagonekais
@@ -97,12 +97,13 @@ real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
 real*8, allocatable :: phi(:,:), avpos(:,:), avneg(:,:), avHplus(:,:), avOHmin(:,:), xcharge(:,:), fAmin(:,:,:), fBHplus(:,:,:)
 real*8 Csalt, wperm, rhosalt, expmupos, expmuneg, xposbulk, xnegbulk
 real*8 cHplus, cOHmin, pHbulk, pOHbulk, pKw, xHplusbulk, xOHminbulk, expmuHplus, expmuOHmin
-real*8, allocatable :: Cpolbulk(:), expmupol(:), rhopolbulk(:), fAmin_bulk(:), fBHplus_bulk(:), rhoAcidsbulk(:), rhoBasicsbulk(:)
+real*8, allocatable :: fAmin_bulk(:), fBHplus_bulk(:), rhoAcidsbulk(:), rhoBasicsbulk(:)
 endmodule
 
 
 module bulk
 real*8 xsolbulk, phibulkpol           ! volume fraction of solvent in bulk
+real*8, allocatable :: Cpolbulk(:), expmupol(:), rhopolbulk(:), xpolbulk(:)
 endmodule
 
 module seed1

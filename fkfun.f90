@@ -319,20 +319,10 @@ do iZ = 1, dimZ
 enddo
 enddo
 
-
-!!!
-! Hacer:
-! agregar flag que cuando valga 1 en vez normalizar por npol, se multiplique por expmupept
-
-
-
 sumpol = sumpol/(vchain(NC)*vsol) 
 avpol(:,:,:,NC) = avpol(:,:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fixed
 avpola(:,:,:,NC) = avpola(:,:,:,NC)/sumpol*npol*npolratio(NC)
 avpolb(:,:,:,NC) = avpolb(:,:,:,NC)/sumpol*npol*npolratio(NC)
-
-
-
 
 sumpol = 0.0
 
@@ -349,22 +339,43 @@ do iZ = 1, dimZ
 enddo
 enddo
 
-xpol(:,:,NC) = xpol(:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fixed
-trans(:,NC) = 0.0
-do iR = minntotR(NC), maxntotR(NC)
-do iZ = minntotZ(NC), maxntotZ(NC)
-   select case (curvature)
-    case (0)
-     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
-    case(1)
-     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaZ*(float(iR+dimRini)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
-    case(2)
-     trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*(((float(iR+dimRini)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
-   end select
-enddo
-enddo
+!! calculate expmupol from bulk conditions for GC components !!
 
-trans(:,NC) = trans(:,NC)/npol/npolratio(NC)
+if (flagGC(NC).eq.1) then
+   do i=1,long(NC)
+   do j=1,long(NC)
+      is = segpoorsv(i,NC)
+      js = segpoorsv(j,NC)
+      expmupol(NC) = expmupol(NC) / (rhopolbulk(NC) * sumaXu(is,js) * st(is,js))
+   enddo
+   enddo
+
+   expmupol(NC) = expmupol(NC)/totalcuantas(NC)  
+ 
+   xpol(:,:,NC) = xpol(:,:,NC)*expmupol(NC) ! GC components have variable npol
+
+else
+
+  xpol(:,:,NC) = xpol(:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fixed 
+
+
+  trans(:,NC) = 0.0
+  do iR = minntotR(NC), maxntotR(NC)
+  do iZ = minntotZ(NC), maxntotZ(NC)
+     select case (curvature)
+       case (0)
+        trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or chains/nm of belt (2D)
+       case(1)
+        trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*deltaZ*(float(iR+dimRini)-0.5)*deltaR*deltaR*2.0*pi ! final result in units of chains/nm (1D) or chains/fiber (2D)
+       case(2)
+        trans(:,NC) = trans(:,NC) + sumtrans(iR,iZ,:)/q(iR,iZ,NC)*xpol(iR,iZ,NC)*(((float(iR+dimRini)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
+      end select
+   enddo
+   enddo
+
+   trans(:,NC) = trans(:,NC)/npol/npolratio(NC)
+
+endif
 
 deallocate(pro)
 

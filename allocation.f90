@@ -7,6 +7,7 @@ use partfunc
 use mkai
 use transgauche
 use volume
+use bulk
 
 allocate (Xflag((npoorsv+2)*ntot))
 allocate (phi(0:dimR+1,dimZ))
@@ -24,7 +25,7 @@ allocate (xpol(dimR,dimZ,Ncomp))
 allocate (innZ(maxlong,cuantas_max,Ncomp),innR(maxlong,cuantas_max,maxntotR_max,Ncomp))
 allocate (xtotal(Npoorsv,dimR,dimZ))
 
-allocate (expmupol(Ncomp), rhopolbulk(Ncomp))
+allocate (expmupol(Ncomp), rhopolbulk(Ncomp), xpolbulk(Ncomp))
 allocate (fAmin_bulk(0:Nacids), fBHplus_bulk(0:Nbasics), rhoacidsbulk(0:Nacids), rhobasicsbulk(0:Nbasics))
 
 
@@ -33,7 +34,7 @@ Rini_kais=minntotR_min-10
 Rfin_kais=maxntotR_max+10
 if(Rini_kais.lt.1)Rini_kais = 1
 if(Rfin_kais.gt.dimR)Rfin_kais = dimR
-allocate (Xu(dimR,Rini_kais:Rfin_kais,-Xulimit:Xulimit,Npoorsv, Npoorsv))
+allocate (Xu(dimR,Rini_kais:Rfin_kais,-Xulimit:Xulimit,Npoorsv, Npoorsv), sumaXu(Npoorsv,Npoorsv))
 allocate (xsol(dimR,dimZ))
 allocate (pp((npoorsv+2)*ntot))
 ALLOCATE (epsfcn(0:dimR+1,dimZ))

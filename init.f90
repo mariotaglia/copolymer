@@ -8,6 +8,7 @@ use bulk
 use longs
 use MPI
 use pis
+use mkai
 implicit none
 
 
@@ -65,6 +66,7 @@ do NC = 1, Ncomp
      do i =1,long(NC)
        xpolbulk(NC) = xpolbulk(NC) + rhopolbulk(NC) * vpol(i) * vsol
      enddo
+   endif
 enddo   
 
 !! State of charge of titrable beads in the bulk !!
@@ -120,8 +122,7 @@ enddo
 if(chargebalance.gt.0) then  ! excess positive charge in bulk
   xposbulk= rhosalt*vsol*vpos
   xnegbulk= rhosalt*vsol*vneg + chargebalance * vsol * vneg ! NaCl + HCl + CompCl 
-else                         ! exce:$
-        ss negative charge in bulk  
+else                         ! excess negative charge in bulk  
   xposbulk= rhosalt*vsol*vpos + chargebalance * vsol * vpos ! NaCl+ NaOH + NaComp
   xnegbulk= rhosalt*vsol*vneg
 endif
@@ -158,31 +159,23 @@ expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
 ! expmupol calculation
 
 do NC=1,Ncomp
-  totalvol = 0.
-  if flagGC(NC).eq.0 then
+  if (flagGC(NC).eq.1) then
     expmupol(NC) = rhopolbulk(NC)*vsol
+    totalvolpol = 0.
     do i=1,long(NC)
        
       is = segpoorsv(i,NC)
-      ia = acidtype(i)
-      ib = basictype(i)
+      ia = acidtype(i,NC)
+      ib = basictype(i,NC)
 
-      if (ia.gt.0) expmupol(NC) = expmupol(NC) * fAmin(ia)
-      if (ib.gt.0) expmupol(NC) = expmupol(NC) * fBHplus(ib)
+      if (ia.gt.0) expmupol(NC) = expmupol(NC) * fAmin_bulk(ia)  
+      if (ib.gt.0) expmupol(NC) = expmupol(NC) * fBHplus_bulk(ib)   !! fraction of charged beads term of expmupol
 
-      totalvolpol = volpol + vpol(is)
+      totalvolpol = totalvolpol + vpol(is)
     enddo
 
-    do i=1,Nacids
-      expmupol(NC) = expmupol(NC) * fAmin(ia) ** nacidsbulk(NC,i) !! fraction of charged beads term of expmupol
-    enddo
-    do i=1,Nbasics
-      expmupol(NC) = expmupol(NC) * fBHplus(ib) ** nbasicsbulk(NC,i) !! fraction of charged bead term of expmupol
-    enddo
-
-    expmupol(NC) = expmupol(NC)/xsolbulk**volpol !! osmotic pressure term of expmupol
-
-
+    expmupol(NC) = expmupol(NC)/xsolbulk**totalvolpol !! osmotic pressure term of expmupol
+    endif
 
 enddo
 

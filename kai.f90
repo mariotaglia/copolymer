@@ -26,13 +26,10 @@ integer ix,iy,iz
 integer jR, jZ
 
 real*8 cutoff
-real*8, allocatable :: sumaXu(:,:)
 character*16 kaisfilename
 
 if(rank.eq.0)print*,'Kai calculation'
 
-
-allocate(sumaXu(Npoorsv,Npoorsv))
 
 cutoff = (float(Xulimit)+0.5)*deltaR
 
