@@ -123,10 +123,9 @@ if(chargebalance.gt.0) then  ! excess positive charge in bulk
   xposbulk= rhosalt*vsol*vpos
   xnegbulk= rhosalt*vsol*vneg + chargebalance * vsol * vneg ! NaCl + HCl + CompCl 
 else                         ! excess negative charge in bulk  
-  xposbulk= rhosalt*vsol*vpos + chargebalance * vsol * vpos ! NaCl+ NaOH + NaComp
+  xposbulk= rhosalt*vsol*vpos - chargebalance * vsol * vpos ! NaCl+ NaOH + NaComp
   xnegbulk= rhosalt*vsol*vneg
 endif
-
 
 !!! bulk volume fraction of the solvent !!!
 
