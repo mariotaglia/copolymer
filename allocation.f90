@@ -24,8 +24,8 @@ allocate (xpol(dimR,dimZ,Ncomp))
 allocate (innZ(maxlong,cuantas_max,Ncomp),innR(maxlong,cuantas_max,maxntotR_max,Ncomp))
 allocate (xtotal(Npoorsv,dimR,dimZ))
 
-allocate (Cpolbulk(Ncomp), expmupol(Ncomp), xpolbulk(Ncomp))
-allocate (fAmin_bulk(Nacids), fBHplus_bulk(Nbasics), Cacidsbulk(Nacids), Cbasicsbulk(Nbasics))
+allocate (expmupol(Ncomp), rhopolbulk(Ncomp))
+allocate (fAmin_bulk(0:Nacids), fBHplus_bulk(0:Nbasics), rhoacidsbulk(0:Nacids), rhobasicsbulk(0:Nbasics))
 
 
 

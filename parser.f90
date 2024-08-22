@@ -68,7 +68,8 @@ read(buffer, *, iostat=ios) Ncomp
 
 ! Allocate variables that depend on Ncomp
 
-allocate(flagMD(Ncomp),flagreflex(Ncomp))
+allocate(Cpolbulk(Ncomp))
+allocate(flagMD(Ncomp),flagreflex(Ncomp),flagGC(Ncomp))
 allocate(nrot(Ncomp),nrot_corr(Ncomp))
 allocate(totalcuantas(Ncomp),cuantas(Ncomp))
 allocate(minntotR(Ncomp),minntotZ(Ncomp),maxntotR(Ncomp),maxntotZ(Ncomp))
@@ -89,6 +90,7 @@ flagMD(:)=ndi
 nrot(:)=ndi
 flagreflex(:)=ndi
 PBCflag = ndi ! flag for PBC in z direction
+flagGC(:) = ndi
 
 r_pos = ndr
 r_neg = ndr
@@ -140,6 +142,7 @@ MCfactor = ndi
 
 pHbulk = ndr
 csalt = ndr
+Cpolbulk(:) = ndi
 
 nbranches = ndi
 
@@ -166,6 +169,14 @@ do while (ios == 0)
 
 
 select case (label)
+
+
+! flagGC : decides if components of the system are canonical (Default) or grand canonical 
+
+  case('flagGC')
+   do NC = 1,NComp
+     read(fh,*) flagGC(NC)
+   enddo
 
 ! flagMD : decides if conformations are read from MD file, see tutorial 
   case('flagMD')
@@ -427,6 +438,13 @@ select case (label)
    read(buffer, *, iostat=ios) pHbulk
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
+! Cpolbulk: bulk concentration of CG components in mol/L
+
+  case ('Cpolbulk')
+   do NC = 1, NComp
+     read(fh, *)Cpolbulk(NC)
+   enddo
+
 ! number and position of branches   
    case ('nbranches')
   
@@ -467,6 +485,13 @@ enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+! flagGC
+do NC=1,Ncomp
+  if(flagGC(NC).eq.ndi) then
+     flagGC(NC) = 0
+     if(rank.eq.0)write(stdout,*) 'Component ', NC, ' flagGC undefined, use default value (0 : component is canonical)'
+   endif
+enddo
 
 ! flagMD
 do NC=1,Ncomp
@@ -696,6 +721,14 @@ if(pHbulk.eq.ndr)call stopundef('pHbulk')
 
 ! Csalt
 if(csalt.eq.ndr)call stopundef('csalt')
+
+! Cpolbulk
+do NC=1,Ncomp
+  if(Cpolbulk(NC).eq.ndi) then
+     Cpolbulk(NC) = 0.0
+     if(rank.eq.0)write(stdout,*) 'Component ', NC, ' Cpolbulk undefined, use default value (0.)'
+   endif
+enddo
 
 ! nbranches
 do NC=1,Ncomp

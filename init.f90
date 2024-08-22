@@ -15,14 +15,15 @@ integer n                 ! number of lattice sites
 integer itmax             ! maximum number of iteration allowed for 
 
 external fcnelect         ! function containing the SCMFT eqs for solver
-integer i, iR, ia, ib ! dummy indice0s
+integer i, iR, ia, ib, is ! dummy indices
 integer NC
 character*10 lnqfile, rogfile
-real*8 chargebalance
+real*8 chargebalance, totalvolpol
 
 ! MPI
 integer tag
 parameter(tag = 0)
+
 
 error = 1e-6
 
@@ -54,13 +55,22 @@ cOHmin = 10**(-pOHbulk)   ! concentration OH- in bulk
 xOHminbulk = (cOHmin*Na/(1.0d24))*(vsol)  ! volume fraction H+ in bulk vH+=vsol  
 rhosalt = Csalt*Na/(1.0d24) !salt conc. in unit of nº of particles/nm³
 
+rhopolbulk = 0.
 xpolbulk = 0.
 
+
 do NC = 1, Ncomp
-   if (flagGC(NC).eq.1) xpolbulk(NC) = Cpolbulk(NC)*Na/(1.0d24) ! bulk conc. in units of n of particles/nm³ 
+   if (flagGC(NC).eq.1) then
+     rhopolbulk(NC) = Cpolbulk(NC)*Na/(1.0d24) ! bulk conc. in units of n of particles/nm³ 
+     do i =1,long(NC)
+       xpolbulk(NC) = xpolbulk(NC) + rhopolbulk(NC) * vpol(i) * vsol
+     enddo
 enddo   
 
 !! State of charge of titrable beads in the bulk !!
+
+fAmin_bulk = 0.
+fBHplus_bulk = 0.
 
 if (Nacids.gt.0) then
    do i=1,Nacids
@@ -78,17 +88,17 @@ endif
 
 !! number density of charged beads in bulk !!
 
-Cacidsbulk = 0.
+rhoacidsbulk = 0.
 
-Cbasicsbulk = 0.
+rhobasicsbulk = 0.
 
 do NC=1,Ncomp
   if (flagGC(NC).eq.1) then
     do i=1,long(NC)
       ia = acidtype(i,NC)
       ib = basictype(i,NC)
-      Cacidsbulk(ia) = Cpolbulk(NC) * fAmin_bulk(ia)  ! charged acid segments in bulk
-      Cbasicsbulk(ib) = Cpolbulk(NC) * fBHplus_bulk(ib)  ! charged basic segments in bulk
+      rhoacidsbulk(ia) = rhoacidsbulk(ia) + rhopolbulk(NC) * fAmin_bulk(ia)  ! charged acid segments in bulk
+      rhobasicsbulk(ib) = rhobasicsbulk(ib) + rhopolbulk(NC) * fBHplus_bulk(ib)  ! charged basic segments in bulk
     enddo
   endif
 enddo
@@ -99,25 +109,23 @@ enddo
 !!!
 
 chargebalance = (xHplusbulk - xOHminbulk)/vsol 
+
 do i=1,Nacids
-  chargebalance = chargebalance + Cacidsbulk(i)
+  chargebalance = chargebalance - rhoacidsbulk(i)
 enddo
 do i=1,Nbasics
-  chargebalance = chargebalance - Cbasicsbulk(i)
+  chargebalance = chargebalance + rhobasicsbulk(i)
 enddo
-
-print*,chargebalance
-
-stop
-
 
 if(chargebalance.gt.0) then  ! excess positive charge in bulk
   xposbulk= rhosalt*vsol*vpos
-  xnegbulk= rhosalt*vsol*vneg + (xHplusbulk-xOHminbulk)*vneg ! NaCl+ HCl  
-else                  ! excess negative charge in bulk  
-  xposbulk= rhosalt*vsol*vpos + (xOHminbulk-xHplusbulk)*vpos ! NaCl+ NaOH   
+  xnegbulk= rhosalt*vsol*vneg + chargebalance * vsol * vneg ! NaCl + HCl + CompCl 
+else                         ! exce:$
+        ss negative charge in bulk  
+  xposbulk= rhosalt*vsol*vpos + chargebalance * vsol * vpos ! NaCl+ NaOH + NaComp
   xnegbulk= rhosalt*vsol*vneg
 endif
+
 
 !!! bulk volume fraction of the solvent !!!
 
@@ -146,8 +154,38 @@ expmuneg=xnegbulk/vneg/xsolbulk**vneg
 expmuHplus=xHplusbulk/xsolbulk ! vHplus=vsol
 expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
 
-do NC=1,Ncomp 
-  expmupol(NC) = xpolbulk/xsolbulk 
+
+! expmupol calculation
+
+do NC=1,Ncomp
+  totalvol = 0.
+  if flagGC(NC).eq.0 then
+    expmupol(NC) = rhopolbulk(NC)*vsol
+    do i=1,long(NC)
+       
+      is = segpoorsv(i,NC)
+      ia = acidtype(i)
+      ib = basictype(i)
+
+      if (ia.gt.0) expmupol(NC) = expmupol(NC) * fAmin(ia)
+      if (ib.gt.0) expmupol(NC) = expmupol(NC) * fBHplus(ib)
+
+      totalvolpol = volpol + vpol(is)
+    enddo
+
+    do i=1,Nacids
+      expmupol(NC) = expmupol(NC) * fAmin(ia) ** nacidsbulk(NC,i) !! fraction of charged beads term of expmupol
+    enddo
+    do i=1,Nbasics
+      expmupol(NC) = expmupol(NC) * fBHplus(ib) ** nbasicsbulk(NC,i) !! fraction of charged bead term of expmupol
+    enddo
+
+    expmupol(NC) = expmupol(NC)/xsolbulk**volpol !! osmotic pressure term of expmupol
+
+
+
+enddo
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
