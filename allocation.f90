@@ -34,7 +34,7 @@ Rini_kais=minntotR_min-10
 Rfin_kais=maxntotR_max+10
 if(Rini_kais.lt.1)Rini_kais = 1
 if(Rfin_kais.gt.dimR)Rfin_kais = dimR
-allocate (Xu(dimR,Rini_kais:Rfin_kais,-Xulimit:Xulimit,Npoorsv, Npoorsv), sumaXu(Npoorsv,Npoorsv))
+allocate (Xu(dimR,Rini_kais:Rfin_kais,-Xulimit:Xulimit,Npoorsv, Npoorsv), sumaXu(0:Npoorsv,0:Npoorsv))
 allocate (xsol(dimR,dimZ))
 allocate (pp((npoorsv+2)*ntot))
 ALLOCATE (epsfcn(0:dimR+1,dimZ))

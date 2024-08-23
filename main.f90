@@ -5,6 +5,7 @@ call parser
 call allocation
 call init
 call kai
+call calc_expmupol
 call creador
 call solve
 

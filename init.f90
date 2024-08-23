@@ -19,7 +19,7 @@ external fcnelect         ! function containing the SCMFT eqs for solver
 integer i, iR, ia, ib, is ! dummy indices
 integer NC
 character*10 lnqfile, rogfile
-real*8 chargebalance, totalvolpol
+real*8 chargebalance
 
 ! MPI
 integer tag
@@ -64,7 +64,8 @@ do NC = 1, Ncomp
    if (flagGC(NC).eq.1) then
      rhopolbulk(NC) = Cpolbulk(NC)*Na/(1.0d24) ! bulk conc. in units of n of particles/nm³ 
      do i =1,long(NC)
-       xpolbulk(NC) = xpolbulk(NC) + rhopolbulk(NC) * vpol(i) * vsol
+       is = segpoorsv(i,NC)
+       xpolbulk(NC) = xpolbulk(NC) + rhopolbulk(NC) * vpol(is) * vsol
      enddo
    endif
 enddo   
@@ -104,11 +105,6 @@ do NC=1,Ncomp
     enddo
   endif
 enddo
-
-!!!
-! PARA HACER:
-! calcular actividad (expmupept)
-!!!
 
 chargebalance = (xHplusbulk - xOHminbulk)/vsol 
 
@@ -154,32 +150,6 @@ expmuneg=xnegbulk/vneg/xsolbulk**vneg
 expmuHplus=xHplusbulk/xsolbulk ! vHplus=vsol
 expmuOHmin=xOHminbulk/xsolbulk ! vOHminus=vsol
 
-
-! expmupol calculation
-
-do NC=1,Ncomp
-  if (flagGC(NC).eq.1) then
-    expmupol(NC) = rhopolbulk(NC)*vsol
-    totalvolpol = 0.
-    do i=1,long(NC)
-       
-      is = segpoorsv(i,NC)
-      ia = acidtype(i,NC)
-      ib = basictype(i,NC)
-
-      if (ia.gt.0) expmupol(NC) = expmupol(NC) * fAmin_bulk(ia)  
-      if (ib.gt.0) expmupol(NC) = expmupol(NC) * fBHplus_bulk(ib)   !! fraction of charged beads term of expmupol
-
-      totalvolpol = totalvolpol + vpol(is)
-    enddo
-
-    expmupol(NC) = expmupol(NC)/xsolbulk**totalvolpol !! osmotic pressure term of expmupol
-    endif
-
-enddo
-
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Files for multiple runs
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -189,5 +159,58 @@ open(unit=1533+NC,file=lnqfile)
 write(rogfile,'(A4,I2.2,A4)')'rog.',NC,'.dat'
 open(unit=2533+NC,file=rogfile)
 enddo
+
+end
+
+
+subroutine calc_expmupol
+
+use globals
+use mcharge
+use layer
+use volume
+use bulk
+use longs
+use MPI
+use pis
+use mkai
+
+implicit none
+
+integer NC, i, is, j, js, ia, ib !! dummy indices
+real*8 totalvolpol
+
+
+! expmupol calculation
+
+do NC=1,Ncomp
+  if (flagGC(NC).eq.1) then
+     expmupol(NC) = rhopolbulk(NC)*vsol
+    
+!     totalvolpol = 0.
+
+     do i=1,long(NC)
+
+       is = segpoorsv(i,NC)
+       ia = acidtype(i,NC)
+       ib = basictype(i,NC)
+
+       if (ia.gt.0) expmupol(NC) = expmupol(NC) * fAmin_bulk(ia)
+       if (ib.gt.0) expmupol(NC) = expmupol(NC) * fBHplus_bulk(ib)   !! fraction of charged beads term of expmupol
+       
+!       totalvolpol = totalvolpol + vpol(is)
+       expmupol(NC) = expmupol(NC)/xsolbulk**vpol(is)
+     
+!     expmupol(NC) = expmupol(NC)/xsolbulk**totalvolpol !! osmotic pressure term of expmupol
+     
+       do j=1,long(NC)
+         js = segpoorsv(j,NC)
+         expmupol(NC) = expmupol(NC) / exp(rhopolbulk(NC) * sumaXu(is,js) * st(is,js))
+       enddo
+     enddo    
+  endif
+   
+enddo
+
 
 end
