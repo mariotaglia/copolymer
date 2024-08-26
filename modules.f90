@@ -97,13 +97,14 @@ real*8, allocatable :: pKa(:), pKb(:), Ka(:), Kb(:)
 real*8, allocatable :: phi(:,:), avpos(:,:), avneg(:,:), avHplus(:,:), avOHmin(:,:), xcharge(:,:), fAmin(:,:,:), fBHplus(:,:,:)
 real*8 Csalt, wperm, rhosalt, expmupos, expmuneg, xposbulk, xnegbulk
 real*8 cHplus, cOHmin, pHbulk, pOHbulk, pKw, xHplusbulk, xOHminbulk, expmuHplus, expmuOHmin
-real*8, allocatable :: fAmin_bulk(:), fBHplus_bulk(:), rhoAcidsbulk(:), rhoBasicsbulk(:)
+real*8, allocatable :: fAmin_bulk(:), fBHplus_bulk(:), rhoAcidsbulk(:,:), rhoBasicsbulk(:,:)
 endmodule
 
 
 module bulk
 real*8 xsolbulk, phibulkpol           ! volume fraction of solvent in bulk
-real*8, allocatable :: Cpolbulk(:), expmupol(:), rhopolbulk(:), xpolbulk(:)
+real*8, allocatable :: Cpolbulk(:), expmupol(:), rhopolbulk(:), xpolbulk(:), xpot_bulk(:), xpota_bulk(:), xpotb_bulk(:)
+real*8, allocatable :: avpolbulk(:,:)
 endmodule
 
 module seed1

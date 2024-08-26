@@ -17,7 +17,7 @@ integer*4 ier2
 real*8 protemp
 real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
 real*8 xh(dimR+1,dimZ) 
-real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
+real*8 xpot(0:Npoorsv,dimR+20,dimZ), xpot_a(0:Nacids,2*dimR,dimZ), xpot_b(0:Nbasics,2*dimR,dimZ)
 real*8,allocatable :: pro(:)
 !real*8 time1, time2, duration, looptime1, looptime2, loopduration
 integer iR,iZ,kZ,kkZ,k,i,j,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
@@ -251,9 +251,15 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
          ia = acidtype(k,NC)
          ib = basictype(k,NC) 
                   
-         pro(i)= pro(i) * xpot(is,aR,aZ)
-         pro(i)= pro(i) * xpot_a(ia,aR,aZ) 
-         pro(i)= pro(i) * xpot_b(ib,aR,aZ)
+         if (aR.gt.dimR) then
+           pro(i) = pro(i) * xpot_bulk(is)
+           pro(i) = pro(i) * xpota_bulk(ia)
+           pro(i) = pro(i) * xpotb_bulk(ib)
+         else
+           pro(i)= pro(i) * xpot(is,aR,aZ)
+           pro(i)= pro(i) * xpot_a(ia,aR,aZ) 
+           pro(i)= pro(i) * xpot_b(ib,aR,aZ)
+         endif
 
       enddo !k
 
@@ -273,6 +279,7 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
          ib = basictype (j,NC)
 
          sumtrans_tosend(iiR,iiZ,j) =  sumtrans_tosend(iiR,iiZ,j) +  pro(i)*float(Ntrans(j,i,NC))
+
          avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
          avpola_tmp(ia,aR,aZ) = avpola_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpola_tmp is avg number of acid segments "ic" at position "j"
          avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
@@ -327,9 +334,9 @@ if (flagGC(NC).eq.0) then
    avpola(:,:,:,NC) = avpola(:,:,:,NC)/sumpol*npol*npolratio(NC)
    avpolb(:,:,:,NC) = avpolb(:,:,:,NC)/sumpol*npol*npolratio(NC)
 else
-   avpol(:,:,:,NC) = avpol(:,:,:,NC)*expmupol(NC)/totalcuantas(NC)
-   avpola(:,:,:,NC) = avpola(:,:,:,NC)*expmupol(NC)/totalcuantas(NC)  
-   avpolb(:,:,:,NC) = avpolb(:,:,:,NC)*expmupol(NC)/totalcuantas(NC)
+   avpol(:,:,:,NC) = avpol(:,:,:,NC)*expmupol(NC)/totalcuantas(NC)/vsol
+   avpola(:,:,:,NC) = avpola(:,:,:,NC)*expmupol(NC)/totalcuantas(NC)/vsol
+   avpolb(:,:,:,NC) = avpolb(:,:,:,NC)*expmupol(NC)/totalcuantas(NC)/vsol
 endif
 
 sumpol = 0.0

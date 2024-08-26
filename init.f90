@@ -58,14 +58,17 @@ rhosalt = Csalt*Na/(1.0d24) !salt conc. in unit of nº of particles/nm³
 
 rhopolbulk = 0.
 xpolbulk = 0.
+avpolbulk = 0.
 
+!! volume fraction of GC components and their beads
 
 do NC = 1, Ncomp
    if (flagGC(NC).eq.1) then
      rhopolbulk(NC) = Cpolbulk(NC)*Na/(1.0d24) ! bulk conc. in units of n of particles/nm³ 
      do i =1,long(NC)
        is = segpoorsv(i,NC)
-       xpolbulk(NC) = xpolbulk(NC) + rhopolbulk(NC) * vpol(is) * vsol
+       avpolbulk(is,NC) = avpolbulk(is,NC) + rhopolbulk(NC) * vpol(is) * vsol 
+       xpolbulk(NC) = xpolbulk(NC) + rhopolbulk(NC) * vpol(is) * vsol 
      enddo
    endif
 enddo   
@@ -95,24 +98,26 @@ rhoacidsbulk = 0.
 
 rhobasicsbulk = 0.
 
+chargebalance = (xHplusbulk - xOHminbulk)/vsol 
+
 do NC=1,Ncomp
   if (flagGC(NC).eq.1) then
+
     do i=1,long(NC)
       ia = acidtype(i,NC)
       ib = basictype(i,NC)
-      rhoacidsbulk(ia) = rhoacidsbulk(ia) + rhopolbulk(NC) * fAmin_bulk(ia)  ! charged acid segments in bulk
-      rhobasicsbulk(ib) = rhobasicsbulk(ib) + rhopolbulk(NC) * fBHplus_bulk(ib)  ! charged basic segments in bulk
+      rhoacidsbulk(ia,NC) = rhoacidsbulk(ia,NC) + rhopolbulk(NC) * fAmin_bulk(ia)  ! charged acid segments in bulk
+      rhobasicsbulk(ib,NC) = rhobasicsbulk(ib,NC) + rhopolbulk(NC) * fBHplus_bulk(ib)  ! charged basic segments in bulk
     enddo
+
+    do i=1,Nacids
+       chargebalance = chargebalance - rhoacidsbulk(i,NC)   
+    enddo
+    do i=1,Nbasics
+        chargebalance = chargebalance + rhobasicsbulk(i,NC)
+    enddo
+
   endif
-enddo
-
-chargebalance = (xHplusbulk - xOHminbulk)/vsol 
-
-do i=1,Nacids
-  chargebalance = chargebalance - rhoacidsbulk(i)
-enddo
-do i=1,Nbasics
-  chargebalance = chargebalance + rhobasicsbulk(i)
 enddo
 
 if(chargebalance.gt.0) then  ! excess positive charge in bulk
@@ -160,6 +165,8 @@ write(rogfile,'(A4,I2.2,A4)')'rog.',NC,'.dat'
 open(unit=2533+NC,file=rogfile)
 enddo
 
+print*,"charge balance is ",chargebalance
+
 end
 
 
@@ -181,6 +188,27 @@ integer NC, i, is, j, js, ia, ib !! dummy indices
 real*8 totalvolpol
 
 
+! bulk pro calculation
+
+
+xpota_bulk(0) = 1.
+xpotb_bulk(0) = 1.
+
+do ia = 1,Nacids
+  xpota_bulk(ia) = 1./fAmin_bulk(ia)
+enddo
+
+do ib = 1,Nbasics
+  xpotb_bulk(ib) = 1./fBHplus_bulk(ib)
+enddo
+
+do is = 0, Npoorsv
+  xpot_bulk(is) = xsolbulk**vpol(is)
+  do js = 0, Npoorsv
+    xpot_bulk(is) = xpot_bulk(is) * exp(rhopolbulk(NC) * sumaXu(is,js) * st(is,js))
+  enddo
+enddo
+
 ! expmupol calculation
 expmupol = 0.0
 
@@ -188,30 +216,20 @@ do NC=1,Ncomp
   if (flagGC(NC).eq.1) then
      expmupol(NC) = rhopolbulk(NC)*vsol
     
-!     totalvolpol = 0.
-
      do i=1,long(NC)
 
        is = segpoorsv(i,NC)
        ia = acidtype(i,NC)
        ib = basictype(i,NC)
 
-       if (ia.gt.0) expmupol(NC) = expmupol(NC) * fAmin_bulk(ia)
-       if (ib.gt.0) expmupol(NC) = expmupol(NC) * fBHplus_bulk(ib)   !! fraction of charged beads term of expmupol
-       
-!       totalvolpol = totalvolpol + vpol(is)
-       expmupol(NC) = expmupol(NC)/xsolbulk**vpol(is)
-     
-!     expmupol(NC) = expmupol(NC)/xsolbulk**totalvolpol !! osmotic pressure term of expmupol
-     
-       do j=1,long(NC)
-         js = segpoorsv(j,NC)
-         expmupol(NC) = expmupol(NC) / exp(rhopolbulk(NC) * sumaXu(is,js) * st(is,js))
-       enddo
+       expmupol(NC) = expmupol(NC) / xpota_bulk(ia)
+       expmupol(NC) = expmupol(NC) / xpotb_bulk(ib)   !! fraction of charged beads term of expmupol
+       expmupol(NC) = expmupol(NC) / xpot_bulk(is)
+  
      enddo    
   endif
    
 enddo
-
-
+print*, "expmupol is ",expmupol(3)
+stop
 end

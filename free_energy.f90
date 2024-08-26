@@ -81,7 +81,8 @@ F_Mix_p = 0.0
 do NC = 1, Ncomp
    do iR = minntotR(NC), maxntotR(NC)                                             
    do iZ = minntotZ(NC), maxntotZ(NC)
-      F_Mix_p = F_Mix_p + xpol(iR,iZ,NC)*(dlog(xpol(iR,iZ,NC))-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0) 
+      F_Mix_p = F_Mix_p + xpol(iR,iZ,NC)*(dlog(xpol(iR,iZ,NC)*vsol)-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0)
+      if (flagGC(NC).eq.1) F_Mix_p = F_Mix_p - rhopolbulk(NC) * dlog(rhopolbulk(NC)*vsol-1.0) * jacobian(iR)*deltaR*deltaZ ! bulk mix entropy for GC components
    enddo                                                            
    enddo
 enddo
@@ -148,6 +149,7 @@ do NC = 1, Ncomp
    do iR = minntotR(NC), maxntotR(NC)
    do iZ = minntotZ(NC), maxntotZ(NC)
      F_Conf = F_conf + (sumprolnpro(iR,iZ,NC)/q(iR,iZ,NC)-dlog(q(iR,iZ,NC)))*jacobian(iR)*deltaR*deltaZ*xpol(iR,iZ,NC)
+     if(flagGC(NC).eq.1) F_Conf = F_Conf + rhopolbulk(NC)*dlog(dble(totalcuantas(NC))) *jacobian(iR)*deltaR*deltaZ ! bulk conf free energy for GC components
    enddo 
    enddo
 
@@ -155,9 +157,11 @@ do NC = 1, Ncomp
 
    F_Uchain = 0.0
 
+   !!! U_chain not implemented for GC components !!!
+
    do iR=minntotR(NC), maxntotR(NC)
    do iZ=minntotZ(NC), maxntotZ(NC)
-     F_Uchain = F_Uchain + deltaR*deltaZ*xpol(iR,iZ,NC)*jacobian(iR)*(sumprouchain(iR,iZ,NC)/q(iR,iZ,NC))
+     F_Uchain = F_Uchain + deltaR*deltaZ*xpol(iR,iZ,NC)*jacobian(iR)*(sumprouchain(iR,iZ,NC)/q(iR,iZ,NC)) 
    enddo
    enddo
 
@@ -172,11 +176,22 @@ do NC = 1, Ncomp
  do iR=1,dimR
  do iZ=1,dimZ
   do is=1, Nacids
+   
    F_Eq = F_Eq + fAmin(is,iR,iZ)*dlog(fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
    F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(1.0-fAmin(is,iR,iZ))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ&
            /(vpol_a(is)*vsol)                                 
    F_Eq = F_Eq - (1.0-fAmin(is,iR,iZ))*dlog(expmuHplus)*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
    F_Eq = F_Eq + (1.0-fAmin(is,iR,iZ))*dlog(Ka(is))*avpola(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_a(is)*vsol)
+   
+   !! bulk chemical equilibrium for GC components !!
+
+   if (flagGC(NC).eq.1) then
+     F_Eq = F_Eq - fAmin_bulk(is)*dlog(fAmin_bulk(is)) * rhoacidsbulk(is,NC) * jacobian(iR)*deltaR*deltaZ
+     F_Eq = F_Eq - (1.0-fAmin_bulk(is))*dlog(1.0-fAmin_bulk(is)) * rhoacidsbulk(is,NC) * jacobian(iR)*deltaR*deltaZ
+     F_Eq = F_Eq + (1.0-fAmin_bulk(is))*dlog(expmuHplus) * rhoacidsbulk(is,NC) * jacobian(iR)*deltaR*deltaZ
+     F_Eq = F_Eq - (1.0-fAmin_bulk(is))*dlog(Ka(is)) * rhoacidsbulk(is,NC) * jacobian(iR)*deltaR*deltaZ
+   endif
+
   enddo
      
   do is=1, Nbasics
@@ -186,6 +201,16 @@ do NC = 1, Ncomp
           /(vpol_b(is)*vsol)
    F_Eq = F_Eq - (1.0-fBHplus(is,iR,iZ))*dlog(expmuOHmin)*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
    F_Eq = F_Eq + (1.0-fBHplus(is,iR,iZ))*dlog(Kb(is))*avpolb(is,iR,iZ,NC)*jacobian(iR)*deltaR*deltaZ/(vpol_b(is)*vsol)
+
+   !! bulk chemical equilibrium for GC components !!
+
+   if (flagGC(NC).eq.1) then
+     F_Eq = F_Eq - fBHplus_bulk(is)*dlog(fBHplus_bulk(is)) * rhobasicsbulk(is,NC) * jacobian(iR)*deltaR*deltaZ
+     F_Eq = F_Eq - (1.0-fBHplus_bulk(is))*dlog(1.0-fBHplus_bulk(is)) * rhobasicsbulk(is,NC) * jacobian(iR)*deltaR*deltaZ
+     F_Eq = F_Eq + (1.0-fBHplus_bulk(is))*dlog(expmuOHmin) * rhobasicsbulk(is,NC) * jacobian(iR)*deltaR*deltaZ
+     F_Eq = F_Eq - (1.0-fBHplus_bulk(is))*dlog(Kb(is)) * rhobasicsbulk(is,NC) * jacobian(iR)*deltaR*deltaZ
+   endif
+
   enddo   
  enddo
  enddo
@@ -241,6 +266,10 @@ do iZ = 1, dimZ
       F_vdW (is,js) = F_vdW(is,js) &
               - 0.5*Xu(iR,jR,jZ,is,js)*avpol(is,iR,iZ,NC)*avpol(js,jR,kkZ,MC)  &
               *st(is,js)/(vpol(is)*vpol(js)*vsol**2)*jacobian(iR)*deltaR*deltaZ
+      if (flagGC(NC).eq.1) F_vdW(is,js) = F_vdW(is,js) &
+              + 0.5*sumaXu(is,js)*avpolbulk(is,NC)*avpolbulk(js,NC)  &
+              *st(is,js)/(vpol(is)*vpol(js)*vsol**2) * jacobian(iR)*deltaR*deltaZ ! bulk F_vdw for GC components
+ 
     enddo ! jZ
     enddo ! jR
   enddo ! js
@@ -319,6 +348,7 @@ do NC = 1, NComp
    do iR=minntotR(NC),maxntotR(NC)
    do iZ=minntotZ(NC),maxntotZ(NC)
      sumrho = sumrho + (-xpol(iR,iZ,NC)*vsol*jacobian(iR)) ! sum over  rho_i i=+,-,si
+     if(flagGC(NC).eq.1) sumrho = sumrho - (-rhopolbulk(NC)*vsol*jacobian(iR)) ! bulk for GC components
    enddo
    enddo
 enddo
@@ -378,10 +408,12 @@ do is=1,Npoorsv
 enddo
 
 do NC = 1,Ncomp
-  mupol = dlog(xpol(minntotR(NC),minntotZ(NC),NC))-dlog(q(minntotR(NC),minntotZ(NC),NC))
+  mupol = dlog(xpol(minntotR(NC),minntotZ(NC),NC)*vsol)-dlog(q(minntotR(NC),minntotZ(NC),NC))
+  if (flagGC(NC).eq.1) print*,dexp(mupol),expmupol(NC)
   do iR = minntotR(NC), maxntotR(NC)
   do iZ = minntotZ(NC), maxntotZ(NC)
     sumpol = sumpol + xpol(iR,iZ,NC)*mupol*jacobian(iR)*deltaR*deltaZ
+    if (flagGC(NC).eq.1) sumpol = sumpol - rhopolbulk(NC)*mupol * jacobian(iR)*deltaR*deltaZ
   enddo
   enddo
 enddo

@@ -25,10 +25,10 @@ allocate (xpol(dimR,dimZ,Ncomp))
 allocate (innZ(maxlong,cuantas_max,Ncomp),innR(maxlong,cuantas_max,maxntotR_max,Ncomp))
 allocate (xtotal(Npoorsv,dimR,dimZ))
 
-allocate (expmupol(Ncomp), rhopolbulk(Ncomp), xpolbulk(Ncomp))
-allocate (fAmin_bulk(0:Nacids), fBHplus_bulk(0:Nbasics), rhoacidsbulk(0:Nacids), rhobasicsbulk(0:Nbasics))
+allocate (expmupol(Ncomp), rhopolbulk(Ncomp), xpolbulk(Ncomp), avpolbulk(0:Npoorsv,Ncomp))
+allocate (fAmin_bulk(0:Nacids), fBHplus_bulk(0:Nbasics), rhoacidsbulk(0:Nacids,Ncomp), rhobasicsbulk(0:Nbasics,Ncomp))
 
-
+allocate (xpot_bulk(0:Npoorsv),xpota_bulk(0:Nacids),xpotb_bulk(0:Nbasics))
 
 Rini_kais=minntotR_min-10
 Rfin_kais=maxntotR_max+10
