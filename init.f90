@@ -182,6 +182,7 @@ real*8 totalvolpol
 
 
 ! expmupol calculation
+expmupol = 0.0
 
 do NC=1,Ncomp
   if (flagGC(NC).eq.1) then

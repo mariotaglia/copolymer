@@ -191,7 +191,7 @@ endif
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                endselect
              
-               if(temp_R.gt.(dimR+dimRini)) then
+               if((temp_R.gt.(dimR+dimRini)).and.(flagGC(NC).eq.0)) then
                      print*, 'creador.f90: increase dimR', temp_R, chains(1,k,j), ii, j
                      do jj = 1, long(NC)
                         print*, jj, chains(:,jj,j)
@@ -207,6 +207,7 @@ endif
    enddo ! j
 
 enddo ! while
+
 
 if(flagMD(NC).eq.1) then
   close(7777)

@@ -276,8 +276,8 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
          avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
          avpola_tmp(ia,aR,aZ) = avpola_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpola_tmp is avg number of acid segments "ic" at position "j"
          avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
-
       enddo ! j
+      
    enddo ! i
 
 enddo ! iiR
@@ -348,7 +348,7 @@ enddo
 enddo
 
 if (flagGC(NC).eq.0) xpol(:,:,NC) = xpol(:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fixed 
-if (flagGC(NC).eq.1) xpol(:,:,NC) = xpol(:,:,NC)*expmupol(NC)/totalcuantas(NC)
+if (flagGC(NC).eq.1) xpol(:,:,NC) = xpol(:,:,NC)*expmupol(NC)/totalcuantas(NC)/vsol
 
 trans(:,NC) = 0.0
 
@@ -366,7 +366,7 @@ enddo
 enddo
 
 if (flagGC(NC).eq.0) trans(:,NC) = trans(:,NC)/npol/npolratio(NC)
-if (flagGC(NC).eq.1) trans(:,NC) = trans(:,NC)*expmupol(NC)/totalcuantas(NC)
+if (flagGC(NC).eq.1) trans(:,NC) = trans(:,NC)*expmupol(NC)/totalcuantas(NC)/vsol
 
 deallocate(pro)
 
