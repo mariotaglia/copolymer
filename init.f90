@@ -134,7 +134,7 @@ endif
 xsolbulk=1-xposbulk-xnegbulk-xHplusbulk-xOHminbulk
 
 do NC=1,Ncomp
-  xsolbulk = xsolbulk - xpolbulk(NC)
+   if (flagGC(NC).eq.1) xsolbulk = xsolbulk - xpolbulk(NC)
 enddo
 
 
