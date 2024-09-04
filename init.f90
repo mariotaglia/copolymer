@@ -40,8 +40,8 @@ vpol_a(:)=vpol_a(:)/vsol
 vpol_b(:)=vpol_b(:)/vsol
 
 
-vneg=4/3*pi*r_neg**3/vsol !volume of anion in units of vsol
-vpos=4/3*pi*r_pos**3/vsol !volume of cation in units of vsol 
+vneg=4./3.*pi*r_neg**3/vsol !volume of anion in units of vsol
+vpos=4./3.*pi*r_pos**3/vsol !volume of cation in units of vsol 
 
 pKw=14.0
 
@@ -201,11 +201,15 @@ do ib = 1,Nbasics
   xpotb_bulk(ib) = 1./fBHplus_bulk(ib)
 enddo
 
-do is = 0, Npoorsv
-  xpot_bulk(is) = xsolbulk**vpol(is)
-  do js = 0, Npoorsv
-    xpot_bulk(is) = xpot_bulk(is) * exp(rhopolbulk(NC) * sumaXu(is,js) * st(is,js))
+do NC=1,Ncomp
+if (flagGC(NC).eq.1) then
+  do is = 0, Npoorsv
+    xpot_bulk(is) = xsolbulk**vpol(is)
+    do js = 0, Npoorsv
+      xpot_bulk(is) = xpot_bulk(is) * exp(rhopolbulk(NC) * sumaXu(is,js) * st(is,js))
+    enddo
   enddo
+endif
 enddo
 
 ! expmupol calculation

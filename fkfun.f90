@@ -11,7 +11,7 @@ use pis
 use mkai
 use transgauche
 implicit none
-integer NC
+integer NC,lastlayer
 real*8 all_tosend(4*ntot), all_toreceive(4*ntot)
 integer*4 ier2
 real*8 protemp
@@ -234,9 +234,14 @@ avpola_tmp = 0.0
 avpolb_tmp = 0.0
 avpol_tmp = 0.0
 
-do iiR=minntotR(NC), maxntotR(NC) ! position of center of mass 
-do iiZ=minntotZ(NC), maxntotZ(NC)
-   do i=1, cuantas(NC) ! loop over conformations
+
+lastlayer = maxntotR(NC)
+if (flagGC(NC).eq.1) lastlayer = maxntotR(NC) + 20 ! bulk chains contribute to innR for grand canonical components.
+
+
+do i=1, cuantas(NC) ! loop over conformations
+   do iiR=minntotR(NC), maxntotR(NC) ! position of center of mass 
+   do iiZ=minntotZ(NC), maxntotZ(NC)
  
       pro(i) = exp(-Uchain(i, NC))
 
@@ -269,26 +274,54 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
       xpol_tosend(iiR,iiZ) = xpol_tosend(iiR,iiZ)+pro(i) ! all_tosend(ntot*3+ii) = all_tosend(ntot*3+ii) + pro(i)
       
       do j = 1, long(NC) ! loop over number of segments
+!
+!         iZ = innZ(j,i,NC)+iiZ
+!         if(PBCflag.eq.1)aZ = PBCSYMI(iZ,dimZ)
+!         if(PBCflag.eq.2)aZ = PBCREFI(iZ,dimZ)
+!         
+!         aR = innR(j,i,iiR,NC)
+!         is = segpoorsv (j,NC)
+!         ia = acidtype (j,NC)
+!         ib = basictype (j,NC)
+!
+         sumtrans_tosend(iiR,iiZ,j) =  sumtrans_tosend(iiR,iiZ,j) +  pro(i)*float(Ntrans(j,i,NC))
+!
+!         avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
+!         avpola_tmp(ia,aR,aZ) = avpola_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpola_tmp is avg number of acid segments "ic" at position "j"
+!         avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
+      enddo ! j
+
+
+
+
+   enddo ! iiR
+   enddo ! iiZ
+
+   do iiR = minntotR(NC),lastlayer
+   do iiZ = minntotZ(NC),maxntotZ(NC)
+
+      do j = 1, long(NC) ! loop over number of segments
 
          iZ = innZ(j,i,NC)+iiZ
          if(PBCflag.eq.1)aZ = PBCSYMI(iZ,dimZ)
          if(PBCflag.eq.2)aZ = PBCREFI(iZ,dimZ)
+
          aR = innR(j,i,iiR,NC)
          is = segpoorsv (j,NC)
          ia = acidtype (j,NC)
          ib = basictype (j,NC)
 
-         sumtrans_tosend(iiR,iiZ,j) =  sumtrans_tosend(iiR,iiZ,j) +  pro(i)*float(Ntrans(j,i,NC))
-
-         avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
+         avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j"
          avpola_tmp(ia,aR,aZ) = avpola_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpola_tmp is avg number of acid segments "ic" at position "j"
-         avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
+         avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j"
       enddo ! j
-      
-   enddo ! i
 
-enddo ! iiR
-enddo ! iiZ
+   enddo ! iiR
+   enddo ! iiZ
+
+enddo ! i
+
+
 
 avpol_tosend(:, 1:dimR, 1:dimZ)=avpol_tmp(:, 1:dimR, 1:dimZ) 
 avpola_tosend(:, 1:dimR, 1:dimZ)=avpola_tmp(:, 1:dimR, 1:dimZ)
@@ -337,11 +370,11 @@ else
    do is=0,Npoorsv
       avpol(is,:,:,NC) = avpol(is,:,:,NC)*expmupol(NC)*vpol(is) ! avpol = rho_pol * vpol = q * expmupol * vpol / vsol
    enddo
-   do ia=0,Nacids
+   do ia=1,Nacids
       avpola(ia,:,:,NC) = avpola(ia,:,:,NC)*expmupol(NC)*vpol_a(ia)
    enddo
-   do ib=0,Nbasics
-      avpolb(ib,:,:,NC) = avpolb(ib,:,:,NC)*expmupol(NC)*vpol_b(ia)
+   do ib=1,Nbasics
+      avpolb(ib,:,:,NC) = avpolb(ib,:,:,NC)*expmupol(NC)*vpol_b(ib)
    enddo
 endif
 

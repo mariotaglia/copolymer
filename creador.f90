@@ -26,7 +26,7 @@ integer*1 Ntconf(maxlong)
 real*8 sumUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
 !real*8 rog
 integer conf              ! counts number of conformations
-
+integer lastlayer
 
 character*80 line
 
@@ -176,8 +176,10 @@ endif
 !          write(9700+k,*)chains(2,k,j)
 !          write(9800+k,*)chains(3,k,j)
 
-
-            do ii = minntotR(NC),maxntotR(NC) ! position of first segment (or Center of mass?)
+            if (flagGC(NC).eq.1) lastlayer = maxntotR(NC) + 30
+            if (flagGC(NC).eq.0) lastlayer = maxntotR(NC)
+            
+            do ii = minntotR(NC),lastlayer ! position of first segment (or Center of mass?)
 
                select case (abs(curvature))
                  case (2)

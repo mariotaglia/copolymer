@@ -22,7 +22,7 @@ allocate (sumprouchain(dimR,dimZ,Ncomp))
 allocate (avpol(0:Npoorsv, dimR,dimZ,NComp))
 allocate (avpola(0:Nacids,dimR,dimZ,Ncomp), avpolb(0:Nbasics,dimR,dimZ,Ncomp))
 allocate (xpol(dimR,dimZ,Ncomp))
-allocate (innZ(maxlong,cuantas_max,Ncomp),innR(maxlong,cuantas_max,maxntotR_max,Ncomp))
+allocate (innZ(maxlong,cuantas_max,Ncomp),innR(maxlong,cuantas_max,2*maxntotR_max,Ncomp))
 allocate (xtotal(Npoorsv,dimR,dimZ))
 
 allocate (expmupol(Ncomp), rhopolbulk(Ncomp), xpolbulk(Ncomp), avpolbulk(0:Npoorsv,Ncomp))
