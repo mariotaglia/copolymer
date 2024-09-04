@@ -37,8 +37,8 @@ vpol_a(:)=vpol_a(:)/vsol
 vpol_b(:)=vpol_b(:)/vsol
 
 
-vneg=4/3*pi*r_neg**3/vsol !volume of anion in units of vsol
-vpos=4/3*pi*r_pos**3/vsol !volume of cation in units of vsol 
+vneg=4./3.*pi*r_neg**3/vsol !volume of anion in units of vsol
+vpos=4./3.*pi*r_pos**3/vsol !volume of cation in units of vsol 
 
 pKw=14.0
 
