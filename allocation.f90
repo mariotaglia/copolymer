@@ -26,6 +26,7 @@ allocate (innZ(maxlong,cuantas_max,Ncomp),innR(maxlong,cuantas_max,maxntotR_max,
 allocate (xtotal(Npoorsv,dimR,dimZ))
 
 allocate (expmupol(Ncomp), rhopolbulk(Ncomp), xpolbulk(Ncomp), avpolbulk(0:Npoorsv,Ncomp))
+allocate (probulk(Ncomp), sumprolnpro_bulk(Ncomp), qbulk(Ncomp))
 allocate (fAmin_bulk(0:Nacids), fBHplus_bulk(0:Nbasics), rhoacidsbulk(0:Nacids,Ncomp), rhobasicsbulk(0:Nbasics,Ncomp))
 
 allocate (xpot_bulk(0:Npoorsv),xpota_bulk(0:Nacids),xpotb_bulk(0:Nbasics))

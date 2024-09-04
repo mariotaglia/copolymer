@@ -82,7 +82,7 @@ do NC = 1, Ncomp
    do iR = minntotR(NC), maxntotR(NC)                                             
    do iZ = minntotZ(NC), maxntotZ(NC)
       F_Mix_p = F_Mix_p + xpol(iR,iZ,NC)*(dlog(xpol(iR,iZ,NC)*vsol)-1.0)*jacobian(iR)*deltaR*deltaZ ! mix entropy of chains with respect to bulk (xpolbulk=0)
-      if (flagGC(NC).eq.1) F_Mix_p = F_Mix_p - rhopolbulk(NC) * dlog(rhopolbulk(NC)*vsol-1.0) * jacobian(iR)*deltaR*deltaZ ! bulk mix entropy for GC components
+      if (flagGC(NC).eq.1) F_Mix_p = F_Mix_p - rhopolbulk(NC) * (dlog(rhopolbulk(NC)*vsol)-1.0) * jacobian(iR)*deltaR*deltaZ ! bulk mix entropy for GC components
    enddo                                                            
    enddo
 enddo
@@ -149,7 +149,10 @@ do NC = 1, Ncomp
    do iR = minntotR(NC), maxntotR(NC)
    do iZ = minntotZ(NC), maxntotZ(NC)
      F_Conf = F_conf + (sumprolnpro(iR,iZ,NC)/q(iR,iZ,NC)-dlog(q(iR,iZ,NC)))*jacobian(iR)*deltaR*deltaZ*xpol(iR,iZ,NC)
-     if(flagGC(NC).eq.1) F_Conf = F_Conf + rhopolbulk(NC)*dlog(dble(totalcuantas(NC))) *jacobian(iR)*deltaR*deltaZ ! bulk conf free energy for GC components
+     if(flagGC(NC).eq.1) then 
+         !F_Conf = F_Conf - (sumprolnpro_bulk(NC)/qbulk(NC)-dlog(qbulk(NC))) *jacobian(iR)*deltaR*deltaZ * rhopolbulk(NC)! bulk conf free energy for GC components
+         F_Conf = F_Conf - (-dlog(dble(totalcuantas(NC)))) *jacobian(iR)*deltaR*deltaZ * rhopolbulk(NC)
+     endif
    enddo 
    enddo
 
@@ -167,6 +170,7 @@ do NC = 1, Ncomp
 
    Free_Energy = Free_Energy + F_Uchain
 enddo
+
 
 ! 7. Chemical Equilibrium                                              
 
@@ -285,6 +289,7 @@ do is=1,Npoorsv
     Free_Energy = Free_Energy + F_vdW (is,js)
   enddo
 enddo                                
+
 
 !! 9. Electrostati -- no charge on surfaces                            
 !LOKE
@@ -409,11 +414,10 @@ enddo
 
 do NC = 1,Ncomp
   mupol = dlog(xpol(minntotR(NC),minntotZ(NC),NC)*vsol)-dlog(q(minntotR(NC),minntotZ(NC),NC))
-  if (flagGC(NC).eq.1) print*,dexp(mupol),expmupol(NC)
   do iR = minntotR(NC), maxntotR(NC)
   do iZ = minntotZ(NC), maxntotZ(NC)
     sumpol = sumpol + xpol(iR,iZ,NC)*mupol*jacobian(iR)*deltaR*deltaZ
-    if (flagGC(NC).eq.1) sumpol = sumpol - rhopolbulk(NC)*mupol * jacobian(iR)*deltaR*deltaZ
+    if (flagGC(NC).eq.1) sumpol = sumpol - rhopolbulk(NC)*dlog(expmupol(NC)) * jacobian(iR)*deltaR*deltaZ
   enddo
   enddo
 enddo

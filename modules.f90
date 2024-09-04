@@ -104,7 +104,7 @@ endmodule
 module bulk
 real*8 xsolbulk, phibulkpol           ! volume fraction of solvent in bulk
 real*8, allocatable :: Cpolbulk(:), expmupol(:), rhopolbulk(:), xpolbulk(:), xpot_bulk(:), xpota_bulk(:), xpotb_bulk(:)
-real*8, allocatable :: avpolbulk(:,:)
+real*8, allocatable :: avpolbulk(:,:), probulk(:), sumprolnpro_bulk(:), qbulk(:)
 endmodule
 
 module seed1

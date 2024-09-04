@@ -19,7 +19,7 @@ external fcnelect         ! function containing the SCMFT eqs for solver
 integer i, iR, ia, ib, is ! dummy indices
 integer NC
 character*10 lnqfile, rogfile
-real*8 chargebalance
+real*8 chargebalance 
 
 ! MPI
 integer tag
@@ -72,6 +72,7 @@ do NC = 1, Ncomp
      enddo
    endif
 enddo   
+
 
 !! State of charge of titrable beads in the bulk !!
 
@@ -165,8 +166,6 @@ write(rogfile,'(A4,I2.2,A4)')'rog.',NC,'.dat'
 open(unit=2533+NC,file=rogfile)
 enddo
 
-print*,"charge balance is ",chargebalance
-
 end
 
 
@@ -211,6 +210,7 @@ enddo
 
 ! expmupol calculation
 expmupol = 0.0
+probulk = 1.0
 
 do NC=1,Ncomp
   if (flagGC(NC).eq.1) then
@@ -222,14 +222,21 @@ do NC=1,Ncomp
        ia = acidtype(i,NC)
        ib = basictype(i,NC)
 
+       probulk(NC) = probulk(NC) / xpota_bulk(ia)
+       probulk(NC) = probulk(NC) / xpotb_bulk(ib)   !! fraction of charged beads term of expmupol
+       probulk(NC) = probulk(NC) / xpot_bulk(is)
+
        expmupol(NC) = expmupol(NC) / xpota_bulk(ia)
        expmupol(NC) = expmupol(NC) / xpotb_bulk(ib)   !! fraction of charged beads term of expmupol
        expmupol(NC) = expmupol(NC) / xpot_bulk(is)
-  
-     enddo    
+        
+     enddo
+     expmupol(NC) = expmupol(NC) / totalcuantas(NC)    
+     qbulk(NC) = probulk(NC) * totalcuantas(NC)
+     sumprolnpro_bulk(NC) = probulk(NC)*dlog(probulk(NC)) 
+     print*,expmupol(NC), qbulk(NC), sumprolnpro_bulk(NC)
   endif
    
 enddo
-print*, "expmupol is ",expmupol(3)
-stop
+
 end

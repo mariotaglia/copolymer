@@ -334,9 +334,15 @@ if (flagGC(NC).eq.0) then
    avpola(:,:,:,NC) = avpola(:,:,:,NC)/sumpol*npol*npolratio(NC)
    avpolb(:,:,:,NC) = avpolb(:,:,:,NC)/sumpol*npol*npolratio(NC)
 else
-   avpol(:,:,:,NC) = avpol(:,:,:,NC)*expmupol(NC)/totalcuantas(NC)/vsol
-   avpola(:,:,:,NC) = avpola(:,:,:,NC)*expmupol(NC)/totalcuantas(NC)/vsol
-   avpolb(:,:,:,NC) = avpolb(:,:,:,NC)*expmupol(NC)/totalcuantas(NC)/vsol
+   do is=0,Npoorsv
+      avpol(is,:,:,NC) = avpol(is,:,:,NC)*expmupol(NC)*vpol(is) ! avpol = rho_pol * vpol = q * expmupol * vpol / vsol
+   enddo
+   do ia=0,Nacids
+      avpola(ia,:,:,NC) = avpola(ia,:,:,NC)*expmupol(NC)*vpol_a(ia)
+   enddo
+   do ib=0,Nbasics
+      avpolb(ib,:,:,NC) = avpolb(ib,:,:,NC)*expmupol(NC)*vpol_b(ia)
+   enddo
 endif
 
 sumpol = 0.0
@@ -355,7 +361,7 @@ enddo
 enddo
 
 if (flagGC(NC).eq.0) xpol(:,:,NC) = xpol(:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fixed 
-if (flagGC(NC).eq.1) xpol(:,:,NC) = xpol(:,:,NC)*expmupol(NC)/totalcuantas(NC)/vsol
+if (flagGC(NC).eq.1) xpol(:,:,NC) = xpol(:,:,NC)*expmupol(NC)/vsol
 
 trans(:,NC) = 0.0
 
@@ -373,7 +379,7 @@ enddo
 enddo
 
 if (flagGC(NC).eq.0) trans(:,NC) = trans(:,NC)/npol/npolratio(NC)
-if (flagGC(NC).eq.1) trans(:,NC) = trans(:,NC)*expmupol(NC)/totalcuantas(NC)/vsol
+if (flagGC(NC).eq.1) trans(:,NC) = trans(:,NC)*expmupol(NC)/vsol
 
 deallocate(pro)
 

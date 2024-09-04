@@ -15,7 +15,7 @@ $(info USER is ${USER})
 SHELL = /bin/bash
 
 # FFLAGS= -Wall 
- FFLAGS= -O3 
+FFLAGS= -O3 
 # FFLAGS=-g -fbacktrace -fbounds-check -ffpe-trap=zero,overflow,underflow 
 
 ifeq ($(HOST),login.tusker.hcc.unl.edu)
