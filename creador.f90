@@ -176,7 +176,7 @@ endif
 !          write(9700+k,*)chains(2,k,j)
 !          write(9800+k,*)chains(3,k,j)
 
-            if (flagGC(NC).eq.1) lastlayer = maxntotR(NC) + 30
+            if (flagGC(NC).eq.1) lastlayer = maxntotR(NC) + 50
             if (flagGC(NC).eq.0) lastlayer = maxntotR(NC)
             
             do ii = minntotR(NC),lastlayer ! position of first segment (or Center of mass?)
@@ -201,6 +201,7 @@ endif
                      stop
                endif
               innR(k,conf,ii,NC)=temp_R-dimRini ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
+              !if ((ii.gt.maxntotR(NC)).and.(innR(k,conf,ii,NC).le.maxntotR(NC))) print*,k,conf,ii,NC,innR(k,conf,ii,NC)
             enddo ! ii
          tempr_Z=chains(3,k,j)
          innZ(k,conf,NC)=-int(anint(tempr_Z/deltaZ)) ! mirror conformation in Z

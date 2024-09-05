@@ -296,7 +296,7 @@ enddo ! iiZ
 
 if (flagGC(NC).eq.1) then
 
-  do iiR = maxntotR(NC)+1,maxntotR(NC)+30
+  do iiR = maxntotR(NC)+1,maxntotR(NC)+50
   do iiZ = minntotZ(NC),maxntotZ(NC)
     do i = 1,cuantas(NC)
       do j = 1, long(NC) ! loop over number of segments
@@ -310,9 +310,9 @@ if (flagGC(NC).eq.1) then
          ia = acidtype (j,NC)
          ib = basictype (j,NC)
 
-         avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ) + probulk(NC) 
+         avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ) + probulk(NC)  
          avpola_tmp(ia,aR,aZ) = avpola_tmp(ia,aR,aZ) + probulk(NC) 
-         avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ) + probulk(NC)
+         avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ) + probulk(NC) 
 
       enddo !j
     enddo !i 

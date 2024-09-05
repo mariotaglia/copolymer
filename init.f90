@@ -226,9 +226,9 @@ do NC=1,Ncomp
        ia = acidtype(i,NC)
        ib = basictype(i,NC)
 
-       probulk(NC) = probulk(NC) / xpota_bulk(ia)
-       probulk(NC) = probulk(NC) / xpotb_bulk(ib)   !! fraction of charged beads term of expmupol
-       probulk(NC) = probulk(NC) / xpot_bulk(is)
+       probulk(NC) = probulk(NC) * xpota_bulk(ia)
+       probulk(NC) = probulk(NC) * xpotb_bulk(ib)   !! fraction of charged beads term of expmupol
+       probulk(NC) = probulk(NC) * xpot_bulk(is)
 
        expmupol(NC) = expmupol(NC) / xpota_bulk(ia)
        expmupol(NC) = expmupol(NC) / xpotb_bulk(ib)   !! fraction of charged beads term of expmupol
