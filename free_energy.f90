@@ -272,7 +272,7 @@ do iZ = 1, dimZ
               *st(is,js)/(vpol(is)*vpol(js)*vsol**2)*jacobian(iR)*deltaR*deltaZ
       if ((flagGC(NC).eq.1).and.(flagGC(MC).eq.1)) then
               F_vdW(is,js) = F_vdW(is,js) &
-              + 0.5*sumaXu(is,js)*avpolbulk(is,NC)*avpolbulk(js,MC)  &
+              + 0.5*gtot(is,js)*avpolbulk(is,NC)*avpolbulk(js,MC)  &
               *st(is,js)/(vpol(is)*vpol(js)*vsol**2) * jacobian(iR)*deltaR*deltaZ ! bulk F_vdw for GC components
       endif
     enddo ! jZ

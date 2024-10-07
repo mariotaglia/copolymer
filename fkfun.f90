@@ -45,6 +45,10 @@ integer, external :: PBCREFI
 !   CALL MPI_BCAST(x, (Npoorsv+1)*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
 !endif
 
+print*,"-------------------------"
+print*,"entramos en fkfun"
+print*,"-------------------------"
+
 n = ntot 
 
 ! Recover xh and phi from input

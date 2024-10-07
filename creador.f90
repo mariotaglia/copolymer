@@ -176,10 +176,10 @@ endif
 !          write(9700+k,*)chains(2,k,j)
 !          write(9800+k,*)chains(3,k,j)
 
-            if (flagGC(NC).eq.1) lastlayer = maxntotR(NC) + 50
+            if (flagGC(NC).eq.1) lastlayer = maxntotR(NC) *2
             if (flagGC(NC).eq.0) lastlayer = maxntotR(NC)
             
-            do ii = minntotR(NC),lastlayer ! position of first segment (or Center of mass?)
+            do ii = 1,lastlayer ! position of first segment (or Center of mass?)
 
                select case (abs(curvature))
                  case (2)

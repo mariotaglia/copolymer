@@ -16,7 +16,7 @@ integer n                 ! number of lattice sites
 integer itmax             ! maximum number of iteration allowed for 
 
 external fcnelect         ! function containing the SCMFT eqs for solver
-integer i, iR, ia, ib, is ! dummy indices
+integer i, iR, ia, ib, is,js ! dummy indices
 integer NC
 character*10 lnqfile, rogfile
 real*8 chargebalance 
@@ -33,6 +33,17 @@ error = 1e-6
 pi=dacos(-1.0d0)          ! pi = arccos(-1) 
 itmax=200                 ! maximum number of iterations       
 n=ntot                    ! size of lattice
+
+do is=0,Npoorsv
+do js=0,Npoorsv
+   !if (dimf(is,js).eq.6.) then 
+   !  gtot(is,js) = 4./3. * pi * lsegkai**3 * (1. - (lsegkai/Xulimit/deltaR)**3) !generalize this according to dimf
+   !else
+     gtot(is,js) = sumaXu(is,js)
+   !endif
+enddo
+enddo
+
 
 vsol=0.030                ! volume solvent molecule in (nm)^3
 vpol(:)=vpol(:)/vsol  ! volume polymer segment in units of vsol
@@ -63,14 +74,12 @@ avpolbulk = 0.
 !! volume fraction of GC components and their beads
 
 do NC = 1, Ncomp
-   if (flagGC(NC).eq.1) then
-     rhopolbulk(NC) = Cpolbulk(NC)*Na/(1.0d24) ! bulk conc. in units of n of particles/nm³ 
-     do i =1,long(NC)
-       is = segpoorsv(i,NC)
-       avpolbulk(is,NC) = avpolbulk(is,NC) + rhopolbulk(NC) * vpol(is) * vsol 
-       xpolbulk(NC) = xpolbulk(NC) + rhopolbulk(NC) * vpol(is) * vsol 
-     enddo
-   endif
+   rhopolbulk(NC) = Cpolbulk(NC)*Na/(1.0d24) ! bulk conc. in units of n of particles/nm³ 
+   do i =1,long(NC)
+     is = segpoorsv(i,NC)
+     avpolbulk(is,NC) = avpolbulk(is,NC) + rhopolbulk(NC) * vpol(is) * vsol 
+     xpolbulk(NC) = xpolbulk(NC) + rhopolbulk(NC) * vpol(is) * vsol 
+   enddo
 enddo   
 
 
@@ -134,7 +143,7 @@ endif
 xsolbulk=1-xposbulk-xnegbulk-xHplusbulk-xOHminbulk
 
 do NC=1,Ncomp
-   if (flagGC(NC).eq.1) xsolbulk = xsolbulk - xpolbulk(NC)
+  xsolbulk = xsolbulk - xpolbulk(NC)
 enddo
 
 
@@ -185,10 +194,9 @@ implicit none
 
 integer NC, i, is, j, js, ia, ib !! dummy indices
 real*8 totalvolpol
-
+integer nbulk(0:Npoorsv,Ncomp)
 
 ! bulk pro calculation
-
 
 xpota_bulk(0) = 1.
 xpotb_bulk(0) = 1.
@@ -201,12 +209,27 @@ do ib = 1,Nbasics
   xpotb_bulk(ib) = 1./fBHplus_bulk(ib)
 enddo
 
+nbulk=0
+
+do NC=1,Ncomp
+do i=1,long(NC)
+   is = segpoorsv(i,NC)
+   nbulk(is,NC) = nbulk(is,NC) + 1
+enddo
+enddo
+
+
 do NC=1,Ncomp
 if (flagGC(NC).eq.1) then
   do is = 0, Npoorsv
     xpot_bulk(is) = xsolbulk**vpol(is)
     do js = 0, Npoorsv
-      xpot_bulk(is) = xpot_bulk(is) * exp(rhopolbulk(NC) * sumaXu(is,js) * st(is,js))
+      if (dimf(is,js).eq.6.) then
+         gtot(is,js) = 4./3. * pi * lsegkai** 3  * (1. - (lsegkai/Xulimit/deltaR)**3) !generalize this according to dimf
+      else
+         gtot(is,js) = sumaXu(is,js)
+      endif
+      xpot_bulk(is) = xpot_bulk(is) * exp(float(nbulk(js,NC)) * rhopolbulk(NC) * gtot(is,js) * st(is,js))
     enddo
   enddo
 endif
@@ -238,9 +261,15 @@ do NC=1,Ncomp
      expmupol(NC) = expmupol(NC) / totalcuantas(NC)    
      qbulk(NC) = probulk(NC) * totalcuantas(NC)
      sumprolnpro_bulk(NC) = probulk(NC)*dlog(probulk(NC)) 
-     print*,expmupol(NC), qbulk(NC), sumprolnpro_bulk(NC)
+
+     if (rank.eq.0) then
+         
+       print*,"---------------------------------------------"
+       print*,"number density at bulk is ",rhopolbulk(NC)
+       print*,"---------------------------------------------"
+ 
+     endif
   endif
-   
 enddo
 
 end
