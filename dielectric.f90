@@ -8,10 +8,10 @@ use globals, only : dimR,dimZ
 implicit none
 integer iR,iZ
 real*8 dielPr
-real*8 pol(dimR,dimZ)
+real*8 pol(dimR*2,dimZ)
 
-real*8 epsfcn(0:dimR+1,dimZ)
-real*8 Depsfcn(0:dimR+1,dimZ)
+real*8 epsfcn(0:dimR*2,dimZ)
+real*8 Depsfcn(0:dimR*2,dimZ)
 real*8 dielW
 
 dielW = 78.54
@@ -26,8 +26,12 @@ enddo
 epsfcn(0,:)=epsfcn(1,:)
 Depsfcn(0,:)=Depsfcn(1,:)
 
-epsfcn(dimR+1,:)=epsfcn(dimR,:)
-Depsfcn(dimR+1,:)=Depsfcn(dimR,:)
+do iZ=1,dimZ
+do iR=dimR+1,dimR*2
+  epsfcn(iR,:)=epsfcn(dimR,:)
+  Depsfcn(iR,:)=Depsfcn(dimR,:)
+enddo
+enddo
 
 !epsfcn(0) = epsfcn(1) 
 !epsfcn(ntot+1) = epsfcn(ntot) OJO boundary conditions  

@@ -12,7 +12,6 @@ use cadenaMD
 implicit none
 
 integer is
-
 integer kk, jj,i,j,k,ii ! dummy indice0s
 
 INTEGER temp_R
@@ -26,7 +25,6 @@ integer*1 Ntconf(maxlong)
 real*8 sumUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
 !real*8 rog
 integer conf              ! counts number of conformations
-integer lastlayer
 
 character*80 line
 
@@ -108,6 +106,7 @@ endif
 do while (conf.lt.cuantas(NC))
 
 if(flagMD(NC).eq.1) then
+   print*,"calling cadenasMD"
    call cadenasMD(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
 else 
    call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
@@ -176,10 +175,10 @@ endif
 !          write(9700+k,*)chains(2,k,j)
 !          write(9800+k,*)chains(3,k,j)
 
-            if (flagGC(NC).eq.1) lastlayer = maxntotR(NC) *2
-            if (flagGC(NC).eq.0) lastlayer = maxntotR(NC)
+            if (flagGC(NC).eq.1) lastlayer(NC) = maxntotR(NC) + 100
+            if (flagGC(NC).eq.0) lastlayer(NC) = maxntotR(NC)
             
-            do ii = 1,lastlayer ! position of first segment (or Center of mass?)
+            do ii = 1,lastlayer(NC) ! position of first segment (or Center of mass?)
 
                select case (abs(curvature))
                  case (2)

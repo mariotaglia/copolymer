@@ -50,7 +50,7 @@ CHARACTER nada
 real*8 norma
 INTEGER adsmax
 integer ntot, dimRini, dimR, dimZ, maxntotR_all, maxntotZ_all, minntotR_min, maxntotR_max ! lattice sites
-integer, allocatable :: maxntotR(:), maxntotZ(:), minntotR(:), minntotZ(:) ! translational constraints
+integer, allocatable :: maxntotR(:), maxntotZ(:), minntotR(:), minntotZ(:),lastlayer(:) ! translational constraints
 integer Rini_kais, Rfin_kais, minntotRkais, maxntotRkais ! kai limits
 real*8, allocatable :: avpol(:,:,:,:) ! volume fraction of chains 
 real*8, allocatable :: avpola(:,:,:,:), avpolb(:,:,:,:) ! volume fraction of acid and basic segments 
@@ -103,7 +103,8 @@ endmodule
 
 module bulk
 real*8 xsolbulk, phibulkpol           ! volume fraction of solvent in bulk
-real*8, allocatable :: Cpolbulk(:), expmupol(:), rhopolbulk(:), xpolbulk(:), xpot_bulk(:), xpota_bulk(:), xpotb_bulk(:)
+real*8, allocatable :: Cpolbulk(:), expmupol(:), rhopolbulk(:), xpolbulk(:)
+real*8, allocatable :: xpot_bulk(:), xpota_bulk(:), xpotb_bulk(:)
 real*8, allocatable :: avpolbulk(:,:), probulk(:), sumprolnpro_bulk(:), qbulk(:)
 endmodule
 

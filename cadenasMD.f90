@@ -86,7 +86,6 @@ do j = 1, natoms ! current position in MD atom list
     endif
  enddo ! i
 enddo ! j
-
 if(jj.ne.long(NC)) then
   if(rank.eq.0)print*,'Error in MD input file, check long in DEFINITIONS', j
   stop

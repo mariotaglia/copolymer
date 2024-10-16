@@ -74,12 +74,14 @@ avpolbulk = 0.
 !! volume fraction of GC components and their beads
 
 do NC = 1, Ncomp
-   rhopolbulk(NC) = Cpolbulk(NC)*Na/(1.0d24) ! bulk conc. in units of n of particles/nm³ 
-   do i =1,long(NC)
-     is = segpoorsv(i,NC)
-     avpolbulk(is,NC) = avpolbulk(is,NC) + rhopolbulk(NC) * vpol(is) * vsol 
-     xpolbulk(NC) = xpolbulk(NC) + rhopolbulk(NC) * vpol(is) * vsol 
-   enddo
+   if (flagGC(NC).eq.1) then
+     rhopolbulk(NC) = Cpolbulk(NC)*Na/(1.0d24) ! bulk conc. in units of n of particles/nm³ 
+     do i =1,long(NC)
+       is = segpoorsv(i,NC)
+       avpolbulk(is,NC) = avpolbulk(is,NC) + rhopolbulk(NC) * vpol(is) * vsol 
+       xpolbulk(NC) = xpolbulk(NC) + rhopolbulk(NC) * vpol(is) * vsol 
+     enddo
+   endif
 enddo   
 
 
@@ -143,7 +145,7 @@ endif
 xsolbulk=1-xposbulk-xnegbulk-xHplusbulk-xOHminbulk
 
 do NC=1,Ncomp
-  xsolbulk = xsolbulk - xpolbulk(NC)
+  if(flagGC(NC).eq.1)xsolbulk = xsolbulk - xpolbulk(NC)
 enddo
 
 
@@ -196,6 +198,10 @@ integer NC, i, is, j, js, ia, ib !! dummy indices
 real*8 totalvolpol
 integer nbulk(0:Npoorsv,Ncomp)
 
+print*,"--------------------------------"
+print*,"Starting expmupol calculation"
+print*,"--------------------------------"
+
 ! bulk pro calculation
 
 xpota_bulk(0) = 1.
@@ -214,10 +220,9 @@ nbulk=0
 do NC=1,Ncomp
 do i=1,long(NC)
    is = segpoorsv(i,NC)
-   nbulk(is,NC) = nbulk(is,NC) + 1
+   nbulk(is,NC) = nbulk(is,NC) + 1 
 enddo
 enddo
-
 
 do NC=1,Ncomp
 if (flagGC(NC).eq.1) then
@@ -227,16 +232,15 @@ if (flagGC(NC).eq.1) then
       if (dimf(is,js).eq.6.) then
          gtot(is,js) = 4./3. * pi * lsegkai** 3  * (1. - (lsegkai/Xulimit/deltaR)**3) !generalize this according to dimf
       else
-         gtot(is,js) = sumaXu(is,js)
+      gtot(is,js) = sumaXu(is,js)
       endif
-      xpot_bulk(is) = xpot_bulk(is) * exp(float(nbulk(js,NC)) * rhopolbulk(NC) * gtot(is,js) * st(is,js))
+      xpot_bulk(is) = xpot_bulk(is) * exp(nbulk(js,NC) * rhopolbulk(NC) * gtot(is,js) * st(is,js))
     enddo
   enddo
 endif
 enddo
 
 ! expmupol calculation
-expmupol = 0.0
 probulk = 1.0
 
 do NC=1,Ncomp
@@ -270,6 +274,7 @@ do NC=1,Ncomp
  
      endif
   endif
+
 enddo
 
 end

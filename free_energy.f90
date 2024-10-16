@@ -258,11 +258,11 @@ F_VdW = 0.0
 
 do MC = 1, Ncomp
 do NC = 1, Ncomp
-do iR = 1, dimR
+do iR = 1, 100
 do iZ = 1, dimZ
   do is = 1, Npoorsv
   do js = 1, Npoorsv
-    do jR= Rini_kais, Rfin_kais
+    do jR= Rini_kais, dimR
     do jZ= -Xulimit, Xulimit    
       kZ = jZ + iZ
       if(PBCflag.eq.1)kkZ = PBCSYMI (kZ,dimZ)
@@ -284,6 +284,17 @@ enddo ! iR
 enddo ! NC
 enddo ! MC
 
+!do MC=1,Ncomp
+!do NC=1,Ncomp
+!  do is = 1, Npoorsv
+!  do js = 1, Npoorsv
+!        F_vdW(is,js) = F_vdW(is,js) &
+!            + 0.5*gtot(is,js)*avpolbulk(is,NC)*avpolbulk(js,MC) &
+!            *st(is,js)/(vpol(is)*vpol(js)*vsol**2) ! bulk F_vdw for GC components
+!  enddo
+!  enddo
+!enddo
+!enddo
 
 do is=1,Npoorsv
   do js=1,Npoorsv
