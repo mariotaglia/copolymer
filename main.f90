@@ -6,7 +6,7 @@ call allocation
 call init
 call kai
 call creador
-call calc_expmupol
+call calc_bulk
 call solve
 
 end

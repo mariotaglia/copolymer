@@ -36,11 +36,11 @@ n=ntot                    ! size of lattice
 
 do is=0,Npoorsv
 do js=0,Npoorsv
-   !if (dimf(is,js).eq.6.) then 
-   !  gtot(is,js) = 4./3. * pi * lsegkai**3 * (1. - (lsegkai/Xulimit/deltaR)**3) !generalize this according to dimf
-   !else
+   if (dimf(is,js).eq.6.) then 
+     gtot(is,js) = 4./3. * pi * lsegkai**3 * (1. - (lsegkai/Xulimit/deltaR)**3) !generalize this according to dimf
+   else
      gtot(is,js) = sumaXu(is,js)
-   !endif
+   endif
 enddo
 enddo
 
@@ -180,7 +180,7 @@ enddo
 end
 
 
-subroutine calc_expmupol
+subroutine calc_bulk
 
 use globals
 use mcharge
@@ -197,10 +197,6 @@ implicit none
 integer NC, i, is, j, js, ia, ib !! dummy indices
 real*8 totalvolpol
 integer nbulk(0:Npoorsv,Ncomp)
-
-print*,"--------------------------------"
-print*,"Starting expmupol calculation"
-print*,"--------------------------------"
 
 ! bulk pro calculation
 
@@ -241,40 +237,40 @@ endif
 enddo
 
 ! expmupol calculation
-probulk = 1.0
+! probulk = 1.0
 
-do NC=1,Ncomp
-  if (flagGC(NC).eq.1) then
-     expmupol(NC) = rhopolbulk(NC)*vsol
-    
-     do i=1,long(NC)
-
-       is = segpoorsv(i,NC)
-       ia = acidtype(i,NC)
-       ib = basictype(i,NC)
-
-       probulk(NC) = probulk(NC) * xpota_bulk(ia)
-       probulk(NC) = probulk(NC) * xpotb_bulk(ib)   !! fraction of charged beads term of expmupol
-       probulk(NC) = probulk(NC) * xpot_bulk(is)
-
-       expmupol(NC) = expmupol(NC) / xpota_bulk(ia)
-       expmupol(NC) = expmupol(NC) / xpotb_bulk(ib)   !! fraction of charged beads term of expmupol
-       expmupol(NC) = expmupol(NC) / xpot_bulk(is)
-        
-     enddo
-     expmupol(NC) = expmupol(NC) / totalcuantas(NC)    
-     qbulk(NC) = probulk(NC) * totalcuantas(NC)
-     sumprolnpro_bulk(NC) = probulk(NC)*dlog(probulk(NC)) 
-
-     if (rank.eq.0) then
-         
-       print*,"---------------------------------------------"
-       print*,"number density at bulk is ",rhopolbulk(NC)
-       print*,"---------------------------------------------"
- 
-     endif
-  endif
-
-enddo
+! do NC=1,Ncomp
+!  if (flagGC(NC).eq.1) then
+!     expmupol(NC) = rhopolbulk(NC)*vsol
+!    
+!     do i=1,long(NC)
+!
+!       is = segpoorsv(i,NC)
+!       ia = acidtype(i,NC)
+!       ib = basictype(i,NC)
+!
+!       probulk(NC) = probulk(NC) * xpota_bulk(ia)
+!       probulk(NC) = probulk(NC) * xpotb_bulk(ib)   !! fraction of charged beads term of expmupol
+!       probulk(NC) = probulk(NC) * xpot_bulk(is)
+!
+!       expmupol(NC) = expmupol(NC) / xpota_bulk(ia)
+!       expmupol(NC) = expmupol(NC) / xpotb_bulk(ib)   !! fraction of charged beads term of expmupol
+!       expmupol(NC) = expmupol(NC) / xpot_bulk(is)
+!        
+!     enddo
+!     expmupol(NC) = expmupol(NC) / totalcuantas(NC)    
+!     qbulk(NC) = probulk(NC) * totalcuantas(NC)
+!     sumprolnpro_bulk(NC) = probulk(NC)*dlog(probulk(NC)) 
+!
+!     if (rank.eq.0) then
+!         
+!       print*,"---------------------------------------------"
+!       print*,"number density at bulk is ",rhopolbulk(NC)
+!       print*,"---------------------------------------------"
+! 
+!     endif
+!  endif
+!
+!enddo
 
 end

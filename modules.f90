@@ -49,7 +49,7 @@ integer infile             ! inputfile control variable for reading input files 
 CHARACTER nada
 real*8 norma
 INTEGER adsmax
-integer ntot, dimRini, dimR, dimZ, maxntotR_all, maxntotZ_all, minntotR_min, maxntotR_max ! lattice sites
+integer ntot, dimRini, dimR, dimZ, maxntotR_all, maxntotZ_all, minntotR_min, maxntotR_max, dimbulk ! lattice sites
 integer, allocatable :: maxntotR(:), maxntotZ(:), minntotR(:), minntotZ(:),lastlayer(:) ! translational constraints
 integer Rini_kais, Rfin_kais, minntotRkais, maxntotRkais ! kai limits
 real*8, allocatable :: avpol(:,:,:,:) ! volume fraction of chains 

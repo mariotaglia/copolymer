@@ -175,7 +175,7 @@ endif
 !          write(9700+k,*)chains(2,k,j)
 !          write(9800+k,*)chains(3,k,j)
 
-            if (flagGC(NC).eq.1) lastlayer(NC) = maxntotR(NC) + 100
+            if (flagGC(NC).eq.1) lastlayer(NC) = maxntotR(NC) + int(dimbulk/2)
             if (flagGC(NC).eq.0) lastlayer(NC) = maxntotR(NC)
             
             do ii = 1,lastlayer(NC) ! position of first segment (or Center of mass?)

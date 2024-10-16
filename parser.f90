@@ -90,7 +90,8 @@ flagMD(:)=ndi
 nrot(:)=ndi
 flagreflex(:)=ndi
 PBCflag = ndi ! flag for PBC in z direction
-flagGC(:) = ndi
+flagGC(:) = ndi ! flag for Grand Canonical components
+dimbulk = ndi ! dimension for bulk
 
 r_pos = ndr
 r_neg = ndr
@@ -335,6 +336,12 @@ select case (label)
    maxntotZ(:)=maxntotZ_all
    maxntotR_max=maxntotR_all
 
+
+! dimbulk : number of layers out of the box to consider for GC components
+  case('dimbulk')
+   read(buffer, *,iostat=ios) dimbulk
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
 ! mintot (minimum values of R and Z for the CM)
   case('minntot')
   if((dimR.eq.ndi).or.(dimZ.eq.ndi))call stopparser('Define dimR and dimZ before minntot')
@@ -492,6 +499,12 @@ do NC=1,Ncomp
      if(rank.eq.0)write(stdout,*) 'Component ', NC, ' flagGC undefined, use default value (0 : component is canonical)'
    endif
 enddo
+
+! dimbulk
+if(dimbulk.eq.ndi) then
+   dimbulk = 0
+   if(rank.eq.0)write(stdout,*) 'dimbulk undefined, use default value (0 : no layers beyond dimR are considered)'
+endif
 
 ! flagMD
 do NC=1,Ncomp

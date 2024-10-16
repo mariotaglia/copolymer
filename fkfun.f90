@@ -16,24 +16,25 @@ real*8 all_tosend(4*ntot), all_toreceive(4*ntot)
 integer*4 ier2
 real*8 protemp
 real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
-real*8 xh(dimR+100,dimZ) 
-real*8 xpot(0:Npoorsv,dimR+100,dimZ), xpot_a(0:Nacids,dimR+100,dimZ), xpot_b(0:Nbasics,dimR+100,dimZ)
+real*8 xh(dimR+dimbulk,dimZ) 
+real*8 xpot(0:Npoorsv,dimR+dimbulk,dimZ), xpot_a(0:Nacids,dimR+dimbulk,dimZ), xpot_b(0:Nbasics,dimR+dimbulk,dimZ)
 real*8,allocatable :: pro(:)
 !real*8 time1, time2, duration, looptime1, looptime2, loopduration
 integer iR,iZ,kZ,kkZ,k,i,j,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
 integer is, js,ia,ib,iiR,iiZ,jR,jZ
 integer err
 integer n
-real*8 avpol_tmp(0:Npoorsv,dimR+100,dimZ), avpola_tmp(0:Nacids,dimR+100,dimZ), avpolb_tmp(0:Nbasics,dimR+100,dimZ) ! overdim R coordinate just in case
-real*8 avpol_tosend(0:Npoorsv,dimR+100,dimZ), avpola_tosend(0:Nacids,dimR+100,dimZ), avpolb_tosend(0:Nbasics,dimR+100,dimZ)
-real*8 xpol_tosend(2*dimR,dimZ)
+real*8 avpol_tmp(0:Npoorsv,dimR+dimbulk,dimZ), avpola_tmp(0:Nacids,dimR+dimbulk,dimZ), avpolb_tmp(0:Nbasics,dimR+dimbulk,dimZ) ! overdim R coordinate just in case
+real*8 avpol_tosend(0:Npoorsv,dimR+dimbulk,dimZ) 
+real*8 avpola_tosend(0:Nacids,dimR+dimbulk,dimZ), avpolb_tosend(0:Nbasics,dimR+dimbulk,dimZ)
+real*8 xpol_tosend(dimR+dimbulk,dimZ)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
 real*8 sumpol
 real*8 q_tosend(2*dimR,dimZ)
-real*8 sumprolnpro_tosend(2*dimR,dimZ), sumprouchain_tosend(2*dimR,dimZ)
-real*8 sumtrans_tosend(2*dimR,dimZ,maxlong)
-real*8 sumtrans(2*dimR,dimZ,maxlong)
+real*8 sumprolnpro_tosend(dimR+dimbulk,dimZ), sumprouchain_tosend(dimR+dimbulk,dimZ)
+real*8 sumtrans_tosend(dimR+dimbulk,dimZ,maxlong)
+real*8 sumtrans(dimR+dimbulk,dimZ,maxlong)
 real*8 gradphi2
 integer, external :: PBCSYMI
 integer, external :: PBCREFI
@@ -57,8 +58,11 @@ do iZ=1,dimZ
 enddo
 enddo !OJO boundary conditions?
 
-xh(dimR+1:dimR+100,:) = xsolbulk
-!xh(dimR+1,:) = xsolbulk
+
+xh(dimR+1,:) = xsolbulk
+
+xh(dimR+2:dimR+dimbulk,:) = xsolbulk
+
 
 do iR=1,dimR
 do iZ=1,dimZ
@@ -67,7 +71,8 @@ enddo
 enddo
 
 phi(0,:)=phi(1,:) ! symmetry at r = 0
-phi(dimR+1:dimR+100,:)=0.0 ! bulk for r -> inf
+phi(dimR+1,:)=0.0 ! bulk for r -> inf
+phi(dimR+2:dimR+dimbulk,:)=0.0
 
 ! Recover xtotal from input
 do is = 1,Npoorsv
@@ -77,7 +82,7 @@ do is = 1,Npoorsv
     xtotal(is,iR,iZ) = x(n*is+dimR*(iZ-1)+iR) !  segments volume fractions (xtotal) are read from the x provided by kinsol
   enddo
   
-  do iR = dimR+1,dimR+100
+  do iR = dimR+1,dimR+dimbulk
     xtotal(is,iR,iZ) = xtotal(is,dimR,iZ)
   enddo
   
@@ -106,7 +111,7 @@ do iR=1,dimR
 enddo
    
 
-do iR=dimR+1,dimR+100
+do iR=dimR+1,dimR+dimbulk
    avpos(iR,:) = xposbulk
    avneg(iR,:) = xnegbulk
    avHplus(iR,:) = xHplusbulk
@@ -127,7 +132,7 @@ enddo
 ! Caculation of dielectric function
 ! Everything that it is not water or ions has dielectric dielP
 
-do iR = 1, dimR+100
+do iR = 1, dimR+dimbulk
 do iZ = 1, dimZ
   dielpol(iR,iZ) = 1.0 - xh(iR,iZ) - avpos(iR,iZ) - avneg(iR,iZ) - avHplus(iR,iZ) - avOHmin(iR,iZ)
 enddo
@@ -138,7 +143,7 @@ call dielectfcn(dielpol,epsfcn,Depsfcn)
 ! Calculation of xpot
 
 do iZ = 1, dimZ
-do iR = 1, dimR+100
+do iR = 1, dimR+dimbulk
 ! osmotic pressure
    xpot(0,iR,iZ) = xh(iR,iZ)**vpol(0) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
 enddo   
@@ -157,8 +162,7 @@ do iZ = 1,dimZ
       iZm=PBCREFI(jZm,dimZ)
    endif
 
-do iR = 1,dimR+100
-
+do iR = 1,dimR+dimbulk
    gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/2.0/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
    xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
 enddo 
@@ -166,7 +170,7 @@ enddo
 
 
 do iZ = 1, dimZ
-do iR = 1, dimR+100
+do iR = 1, dimR+dimbulk
 
   do is = 1, Npoorsv
 !   calculate xpot(i, is)
@@ -175,7 +179,7 @@ do iR = 1, dimR+100
     protemp = 0.0
     
       do js = 1, Npoorsv 
-         do jR = Rini_kais, dimR+100
+         do jR = Rini_kais, dimR+dimbulk
          do jZ = -Xulimit, Xulimit
             kZ=jZ+iZ
 
@@ -218,14 +222,14 @@ do is= 1, Npoorsv
    endif
 
 
-    do iR= 1, dimR+100
+    do iR= 1, dimR+dimbulk
       gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/2.0/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
       xpot(is,iR,iZ) = xpot(is,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(is)*vsol*wperm/2.0)
     enddo
   enddo
 enddo
 
-do iR = 1, dimR+100
+do iR = 1, dimR+dimbulk
 do iZ = 1, dimZ
   do ic = 1,Nacids
     xpot_a(ic,iR,iZ) = 1.0/fAmin(ic,iR,iZ)*exp(phi(iR,iZ))
@@ -269,7 +273,6 @@ avpola_tmp = 0.0
 avpolb_tmp = 0.0
 avpol_tmp = 0.0
 
-if(flagGC(NC).eq.1) lastlayer(NC)=dimR+50
 do iiR=minntotR(NC), lastlayer(NC) ! position of center of mass 
 do iiZ=minntotZ(NC), maxntotZ(NC)
  
@@ -288,23 +291,19 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
          ia = acidtype(k,NC)
          ib = basictype(k,NC) 
                   
-         !if (aR.gt.dimR) then
-         !  pro(i) = pro(i) * xpot_bulk(is)
-         !  pro(i) = pro(i) * xpota_bulk(ia)
-         !  pro(i) = pro(i) * xpotb_bulk(ib)
-         !else
-          pro(i)= pro(i) * xpot(is,aR,aZ)
-          pro(i)= pro(i) * xpot_a(ia,aR,aZ) 
-          pro(i)= pro(i) * xpot_b(ib,aR,aZ)
-         !endif
+         pro(i)= pro(i) * xpot(is,aR,aZ)
+         pro(i)= pro(i) * xpot_a(ia,aR,aZ) 
+         pro(i)= pro(i) * xpot_b(ib,aR,aZ)
 
       enddo !k
 
-      q_tosend(iiR,iiZ) = q_tosend(iiR,iiZ) + pro(i) ! all_tosend(ii) = all_tosend(ii) + pro(i) 
-      sumprolnpro_tosend(iiR,iiZ) = sumprolnpro_tosend(iiR,iiZ) + pro(i)*dlog(pro(i)) ! all_tosend(ntot+ii) = all_tosend(ntot+ii) + pro(i)*dlog(pro(i))
-      sumprouchain_tosend(iiR,iiZ) = sumprouchain_tosend(iiR,iiZ) + pro(i)*Uchain(i,NC) !all_tosend(ntot*2+ii) = all_tosend(ntot*2+ii) + pro(i)*Uchain(i) 
-      xpol_tosend(iiR,iiZ) = xpol_tosend(iiR,iiZ)+pro(i) ! all_tosend(ntot*3+ii) = all_tosend(ntot*3+ii) + pro(i)
-      
+      if (iiR.le.dimR) then
+        q_tosend(iiR,iiZ) = q_tosend(iiR,iiZ) + pro(i) ! all_tosend(ii) = all_tosend(ii) + pro(i) 
+        sumprolnpro_tosend(iiR,iiZ) = sumprolnpro_tosend(iiR,iiZ) + pro(i)*dlog(pro(i)) ! all_tosend(ntot+ii) = all_tosend(ntot+ii) + pro(i)*dlog(pro(i))
+        sumprouchain_tosend(iiR,iiZ) = sumprouchain_tosend(iiR,iiZ) + pro(i)*Uchain(i,NC) !all_tosend(ntot*2+ii) = all_tosend(ntot*2+ii) + pro(i)*Uchain(i) 
+        xpol_tosend(iiR,iiZ) = xpol_tosend(iiR,iiZ)+pro(i) ! all_tosend(ntot*3+ii) = all_tosend(ntot*3+ii) + pro(i)
+      endif
+
       do j = 1, long(NC) ! loop over number of segments
 
          iZ = innZ(j,i,NC)+iiZ
@@ -316,11 +315,13 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
          ia = acidtype (j,NC)
          ib = basictype (j,NC)
 
-         sumtrans_tosend(iiR,iiZ,j) =  sumtrans_tosend(iiR,iiZ,j) +  pro(i)*float(Ntrans(j,i,NC))
-
-         avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
-         avpola_tmp(ia,aR,aZ) = avpola_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpola_tmp is avg number of acid segments "ic" at position "j"
-         avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
+         if (iiR.le.dimR)sumtrans_tosend(iiR,iiZ,j) =  sumtrans_tosend(iiR,iiZ,j) +  pro(i)*float(Ntrans(j,i,NC))
+         
+         if (ar.le.dimR) then
+           avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
+           avpola_tmp(ia,aR,aZ) = avpola_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpola_tmp is avg number of acid segments "ic" at position "j"
+           avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
+         endif
       enddo ! j:
 
    enddo ! i
@@ -407,7 +408,7 @@ else
    do iR=1,dimR
    do iZ=1,dimZ
            do is=0,Npoorsv
-              avpol(is,iR,iZ,NC) = avpol(is,iR,iZ,NC)*expmupol(NC)*vpol(is)*vsol ! avpol = rho_pol * vpol = q * expmupol * vpol / vsol
+              avpol(is,iR,iZ,NC) = avpol(is,iR,iZ,NC)*expmupol(NC)*vpol(is)*vsol 
            enddo
            do ia=1,Nacids
               avpola(ia,iR,iZ,NC) = avpola(ia,iR,iZ,NC)*expmupol(NC)*vpol_a(ia)*vsol
@@ -435,7 +436,7 @@ enddo
 enddo
 
 if (flagGC(NC).eq.0) xpol(:,:,NC) = xpol(:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fixed 
-if (flagGC(NC).eq.1) xpol(:,:,NC) = xpol(:,:,NC)*expmupol(NC)!/vsol
+if (flagGC(NC).eq.1) xpol(:,:,NC) = xpol(:,:,NC)*expmupol(NC)
 
 trans(:,NC) = 0.0
 
@@ -453,7 +454,7 @@ enddo
 enddo
 
 if (flagGC(NC).eq.0) trans(:,NC) = trans(:,NC)/npol/npolratio(NC)
-if (flagGC(NC).eq.1) trans(:,NC) = trans(:,NC)*expmupol(NC)/vsol
+if (flagGC(NC).eq.1) trans(:,NC) = trans(:,NC)*expmupol(NC)
 
 deallocate(pro)
 

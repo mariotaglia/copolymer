@@ -258,11 +258,11 @@ F_VdW = 0.0
 
 do MC = 1, Ncomp
 do NC = 1, Ncomp
-do iR = 1, 100
+do iR = 1, dimR!+dimbulk
 do iZ = 1, dimZ
   do is = 1, Npoorsv
   do js = 1, Npoorsv
-    do jR= Rini_kais, dimR
+    do jR= Rini_kais, dimR+dimbulk
     do jZ= -Xulimit, Xulimit    
       kZ = jZ + iZ
       if(PBCflag.eq.1)kkZ = PBCSYMI (kZ,dimZ)
@@ -270,11 +270,11 @@ do iZ = 1, dimZ
       F_vdW (is,js) = F_vdW(is,js) &
               - 0.5*Xu(iR,jR,jZ,is,js)*avpol(is,iR,iZ,NC)*avpol(js,jR,kkZ,MC)  &
               *st(is,js)/(vpol(is)*vpol(js)*vsol**2)*jacobian(iR)*deltaR*deltaZ
-      if ((flagGC(NC).eq.1).and.(flagGC(MC).eq.1)) then
-              F_vdW(is,js) = F_vdW(is,js) &
-              + 0.5*gtot(is,js)*avpolbulk(is,NC)*avpolbulk(js,MC)  &
-              *st(is,js)/(vpol(is)*vpol(js)*vsol**2) * jacobian(iR)*deltaR*deltaZ ! bulk F_vdw for GC components
-      endif
+!      if ((flagGC(NC).eq.1).and.(flagGC(MC).eq.1)) then
+!              F_vdW(is,js) = F_vdW(is,js) &
+!              + 0.5*gtot(is,js)*avpolbulk(is,NC)*avpolbulk(js,MC)  &
+!              *st(is,js)/(vpol(is)*vpol(js)*vsol**2) * jacobian(iR)*deltaR*deltaZ ! bulk F_vdw for GC components
+!      endif
     enddo ! jZ
     enddo ! jR
   enddo ! js
@@ -284,17 +284,17 @@ enddo ! iR
 enddo ! NC
 enddo ! MC
 
-!do MC=1,Ncomp
-!do NC=1,Ncomp
-!  do is = 1, Npoorsv
-!  do js = 1, Npoorsv
-!        F_vdW(is,js) = F_vdW(is,js) &
-!            + 0.5*gtot(is,js)*avpolbulk(is,NC)*avpolbulk(js,MC) &
-!            *st(is,js)/(vpol(is)*vpol(js)*vsol**2) ! bulk F_vdw for GC components
-!  enddo
-!  enddo
-!enddo
-!enddo
+do MC=1,Ncomp
+do NC=1,Ncomp
+  do is = 1, Npoorsv
+  do js = 1, Npoorsv
+        F_vdW(is,js) = F_vdW(is,js) &
+            + 0.5*gtot(is,js)*avpolbulk(is,NC)*avpolbulk(js,MC) &
+            *st(is,js)/(vpol(is)*vpol(js)*vsol**2) ! bulk F_vdw for GC components
+  enddo
+  enddo
+enddo
+enddo
 
 do is=1,Npoorsv
   do js=1,Npoorsv

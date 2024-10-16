@@ -3,15 +3,15 @@ subroutine dielectfcn(pol,epsfcn,Depsfcn)
 ! determines the dielectric function using an average mixing rule
 
 use mcharge
-use globals, only : dimR,dimZ
+use globals, only : dimR,dimZ,dimbulk
 
 implicit none
 integer iR,iZ
 real*8 dielPr
-real*8 pol(dimR*2,dimZ)
+real*8 pol(dimR+dimbulk,dimZ)
 
-real*8 epsfcn(0:dimR*2,dimZ)
-real*8 Depsfcn(0:dimR*2,dimZ)
+real*8 epsfcn(0:dimR+dimbulk,dimZ)
+real*8 Depsfcn(0:dimR+dimbulk,dimZ)
 real*8 dielW
 
 dielW = 78.54
@@ -27,7 +27,7 @@ epsfcn(0,:)=epsfcn(1,:)
 Depsfcn(0,:)=Depsfcn(1,:)
 
 do iZ=1,dimZ
-do iR=dimR+1,dimR*2
+do iR=dimR+1,dimR+dimbulk
   epsfcn(iR,:)=epsfcn(dimR,:)
   Depsfcn(iR,:)=Depsfcn(dimR,:)
 enddo
