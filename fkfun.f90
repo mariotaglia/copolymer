@@ -321,17 +321,13 @@ xsegb_tosend(:, 1:dimR, 1:dimZ)=xsegb_tmp(:, 1:dimR, 1:dimZ)
 
 !!! Normalize acid and basic segments
 
-xsega(:,:,:,NC) = xsega(:,:,:,NC)/sumpol*npol*npolratio(NC)*float(long(NC)) ! density of acid segments (nm-3) 
-xsegb(:,:,:,NC) = xsegb(:,:,:,NC)/sumpol*npol*npolratio(NC)*float(long(NC)) ! density of basic segments (nm-3)
 
-!!! normalize volume fractions for each different poor sv
-
-do is = 0, Npoorsv
 
 sumpol = 0.0
 
 do iR = 1, dimR
 do iZ = 1, dimZ
+   do is = 0, Npoorsv
       select case (curvature)
        case (0,3)
         sumpol = sumpol + avpol(is,iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or in units of chains/nm of belt (2D)
@@ -340,9 +336,17 @@ do iZ = 1, dimZ
        case(2)
         sumpol = sumpol + avpol(is,iR,iZ,NC)*(((float(iR+dimRini)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
       end select
+   enddo ! is
 enddo
 enddo
-if(sumpol.ne.0.0)avpol(is,:,:,NC) = avpol(is,:,:,NC)/sumpol*vpol(is)*vsol*npol*npolratio(NC) ! integral of avpol is fixed
+
+xsega(:,:,:,NC) = xsega(:,:,:,NC)/sumpol*npol*npolratio(NC)*float(long(NC)) ! density of acid segments (nm-3) 
+xsegb(:,:,:,NC) = xsegb(:,:,:,NC)/sumpol*npol*npolratio(NC)*float(long(NC)) ! density of basic segments (nm-3)
+
+!!! normalize volume fractions for each different poor sv
+
+do is = 0, Npoorsv
+   avpol(is,:,:,NC) = avpol(is,:,:,NC)/sumpol*vpol(is)*vsol*npol*npolratio(NC)*long(NC) ! integral of avpol is fixed
 enddo ! is
 
 !!! normalize number of chains
