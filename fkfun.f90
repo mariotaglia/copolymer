@@ -337,9 +337,9 @@ enddo
 
 avpol(:,:,:,NC) = avpol(:,:,:,NC)/sumpol*vchain(NC)*vsol*npol*npolratio(NC) ! integral of avpol is fixed
 
-xsega(:,:,:,NC) = xsega(:,:,:,NC)/sumpol*npol*npolratio(NC) ! density of acid segments (nm-3) 
-xsegb(:,:,:,NC) = xsegb(:,:,:,NC)/sumpol*npol*npolratio(NC) ! density of basic segments (nm-3)
-
+xsega(:,:,:,NC) = xsega(:,:,:,NC)/sumpol*npol*npolratio(NC)*float(long(NC)) ! density of acid segments (nm-3) 
+xsegb(:,:,:,NC) = xsegb(:,:,:,NC)/sumpol*npol*npolratio(NC)*float(long(NC)) ! density of basic segments (nm-3)
+     
 sumpol = 0.0
 
 do iR = 1, dimR
