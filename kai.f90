@@ -208,7 +208,7 @@ do js=1,Npoorsv
   if (flagkai.eq.0) then
 
     read(is*110+js,*)nada
-    read(is*110+js,*)curvkais,dimRkais,dimRinikais,Xulimitkais,dimfkais(is,js),MCfactorkais
+    read(is*110+js,*)curvkais,dimRkais,dimRinikais,Xulimitkais,dimfkais(is,js),lsegkaikais(is,js),MCfactorkais
   
     if (curvkais.ne.curvature) then
       print*,"curvature of kais non equal curvature of DEFINITIONS.txt"
@@ -230,6 +230,12 @@ do js=1,Npoorsv
       stop
     endif
 
+    if (lsegkaikais(is,js).ne.lsegkai(is,js)) then
+      print*,"lsegkai of kais non equal dimf of DEFINITIONS.txt"
+      stop
+    endif
+
+
     if (MCfactorkais.ne.MCfactor) then
       print*,"MCsteps prefactor of kais.XXX.XXX.in non equal to MCsteps prefactor defined in kai.f90"
       stop
@@ -245,7 +251,7 @@ do js=1,Npoorsv
   if (flagkai.eq.1) then
 
     write(is*110+js,*)'#curvature dimR dimRini Xulimit dimf factorMCsteps#'
-    write(is*110+js,*)curvature,dimR,dimRini,Xulimit,dimf(is,js),MCfactor
+    write(is*110+js,*)curvature,dimR,dimRini,Xulimit,dimf(is,js),lsegkai(is,js),MCfactor
 
   endif
 

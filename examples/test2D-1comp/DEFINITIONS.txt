@@ -29,19 +29,17 @@ Nacids 1
 Nbasics 1
 -5
 
-vpol_a 1 
-0.113097335529233
-vpol_b 1
-0.113097335529233
-
-infile 	1
-flagkai 1
+infile 	2
+flagkai 0
 
 npol 104.5 104.5 104.5 0.1
 
 Xulimit 5
 lseg 0.5
-lsegkai 0.5
+lsegkai 2
+0.5
+0.5 0.5
+
 Utg 2
 0.0 0.0
 0.0 0.0

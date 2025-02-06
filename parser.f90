@@ -210,7 +210,7 @@ select case (label)
    allocate(dimfkais(Npoorsv,Npoorsv),dimf(Npoorsv,Npoorsv))
    dimf(:,:) = ndr
 
-   allocate(lsegkai(Npoorsv,Npoorsv))
+   allocate(lsegkai(Npoorsv,Npoorsv),lsegkaikais(Npoorsv,Npoorsv))
    lsegkai(:,:) = ndr
 
 

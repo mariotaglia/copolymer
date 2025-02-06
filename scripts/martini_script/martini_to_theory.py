@@ -19,7 +19,7 @@ vol_th=numpy.zeros(n)
 for i in range(0,n):
    print("Name of bead #%s: " %i)
    name_tmp = input()
-   print("Martini type: (P4 for water, C1 for HC) ")
+   print("Martini type: (P4 for water, C1 for HC, P5 for BB) ")
    type_tmp = input()
    vol_th[i] = input("Molecular theory volume (nm3): ")
    print("")

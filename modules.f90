@@ -23,7 +23,7 @@ integer Npoorsv ! number of different types of poor solvent
 REAL*8, allocatable ::  xtotal(:,:,:)
 real*8, allocatable :: st(:,:)
 real*8, allocatable :: dimf(:,:), dimfkais(:,:)
-real*8, allocatable :: lsegkai(:,:)
+real*8, allocatable :: lsegkai(:,:), lsegkaikais(:,:)
 real*8, allocatable :: Xu(:,:,:,:,:)
 integer Xulimit, Xulimitkais
 integer MCfactor, MCfactorkais
