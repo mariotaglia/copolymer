@@ -250,7 +250,7 @@ do js=1,Npoorsv
 
   if (flagkai.eq.1) then
 
-    write(is*110+js,*)'#curvature dimR dimRini Xulimit dimf factorMCsteps#'
+    write(is*110+js,*)'#curvature dimR dimRini Xulimit dimf lsegkai factorMCsteps#'
     write(is*110+js,*)curvature,dimR,dimRini,Xulimit,dimf(is,js),lsegkai(is,js),MCfactor
 
   endif
