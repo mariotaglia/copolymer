@@ -98,7 +98,6 @@ Nacids = ndi
 Nbasics = ndi
 
 lseg = ndr
-lsegkai = ndr
 curvature = ndi
 
 dielP = ndr
@@ -210,6 +209,9 @@ select case (label)
    allocate(dimfkais(0:Npoorsv,0:Npoorsv),dimf(0:Npoorsv,0:Npoorsv))
    dimf(:,:) = ndr
 
+   allocate(lsegkai(0:Npoorsv,0:Npoorsv))
+   lsegkai(:,:) = ndr
+
 
 ! dimf : exponent of vdW interactions
   case ('dimf')
@@ -232,6 +234,19 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    do i = 0, Npoorsv
      read(fh,*) Ut(i), Ug(i)
+   enddo
+
+! lsegkai : exponent of vdW interactions
+  case ('lsegkai')
+  if(Npoorsv.eq.ndi)call stopparser('Define Npoorsv before reading lsegkai')
+  read(buffer, *, iostat=ios) temp
+  if(Npoorsv.ne.temp)call stopparser('Check number of lsegkai data')
+  if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   do i = 1, Npoorsv
+   read(fh,*)(lsegkai(i,j), j = 1, i)
+     do j = 1, i
+      lsegkai(j,i) = lsegkai(i,j)
+     enddo
    enddo
 
 ! vpol : segment volumens defined according poor-sv
@@ -297,12 +312,6 @@ select case (label)
   case ('lseg')
    read(buffer, *, iostat=ios) lseg
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
-! lsegkai : segment length for chi calculations
-  case ('lsegkai')
-   read(buffer, *, iostat=ios) lsegkai
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-
 
 ! curvature
 ! 0 = plane, 1: cylinder, 2 : micelle, 3 : plane with PBC
@@ -529,6 +538,13 @@ do i=0,Npoorsv
   enddo          
 enddo          
 
+! dimf
+do i=0,Npoorsv
+  do j=0,Npoorsv
+     if(lsegkai(i,j).eq.ndr)call stopundef('lsegkai')
+  enddo          
+enddo          
+
 ! Ut / Ug
 do i=0,Npoorsv
      if(Ut(i).eq.ndr) then
@@ -558,9 +574,6 @@ enddo
 
 ! lseg
 if(lseg.eq.ndr)call stopundef('lseg')
-
-! lsegkai
-if(lsegkai.eq.ndr)call stopundef('lsegkai')
 
 ! curvature
 if(curvature.eq.ndi)call stopundef('curvature')

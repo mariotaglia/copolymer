@@ -98,14 +98,14 @@ case(0,1,2)
          if(vect.le.(cutoff)) then ! esta dentro de la esfera del cut-off   
          
 
-         if(vect.ge.lsegkai) then ! esta dentro de la esfera del segmento
 
            do is=1,Npoorsv
            do js=1,Npoorsv
-              Xu(ii, jR, jZ, is, js) = Xu(ii, jR, jZ, is, js) + ((lsegkai/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
+             if(vect.ge.lsegkai(is,js)) then ! esta dentro de la esfera del segmento
+              Xu(ii, jR, jZ, is, js) = Xu(ii, jR, jZ, is, js) + ((lsegkai(is,js)/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
+             endif
            enddo
            enddo
-         endif
          endif
 
          endif
@@ -164,13 +164,13 @@ case(3) ! lamella con PBC
          jR = PBCSYMI(jR,dimR) !  puts the segment within the calculation box using PBC,
 
          if(vect.le.(cutoff)) then ! esta dentro de la esfera del cut-off   
-         if(vect.ge.lsegkai) then ! esta dentro de la esfera del segmento
            do is=1,Npoorsv
            do js=1,Npoorsv
-              Xu(ii, jR, jZ, is, js) = Xu(ii, jR, jZ, is, js) + ((lsegkai/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
+             if(vect.ge.lsegkai(is,js)) then ! esta dentro de la esfera del segmento
+              Xu(ii, jR, jZ, is, js) = Xu(ii, jR, jZ, is, js) + ((lsegkai(is,js)/vect)**dimf(is, js)) ! incluye el jacobiano R(segmento)
+             endif
            enddo
            enddo
-         endif
          endif
 
       enddo!iz
