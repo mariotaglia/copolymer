@@ -34,6 +34,7 @@ vpol_b 1
 0.113097335529233
 
 infile 2
+
 flagkai 0
 
 npol 0.9 5.0 5.0 0.1

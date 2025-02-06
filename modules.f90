@@ -52,7 +52,7 @@ INTEGER adsmax
 integer ntot, dimRini, dimR, dimZ, maxntotR_all, maxntotZ_all, minntotR_min, maxntotR_max ! lattice sites
 integer, allocatable :: maxntotR(:), maxntotZ(:), minntotR(:), minntotZ(:) ! translational constraints
 real*8, allocatable :: avpol(:,:,:,:) ! volume fraction of chains 
-real*8, allocatable :: avpola(:,:,:,:), avpolb(:,:,:,:) ! volume fraction of acid and basic segments 
+real*8, allocatable :: xsega(:,:,:,:), xsegb(:,:,:,:) ! density of acid and basic segments, nm-3
 real*8, allocatable :: xpol(:,:,:) ! volume fraction polymers already adsorbed
 real*8, allocatable :: xsol(:,:)
 INTEGER, allocatable :: totalcuantas(:), cuantas(:), nrot(:), nrot_corr(:)
@@ -84,7 +84,7 @@ endmodule
 module volume
 real*8, allocatable :: vchain(:)
 real*8 vsol, vpos, vneg, r_neg, r_pos
-real*8, allocatable :: vpol(:), vpol_a(:), vpol_b(:)
+real*8, allocatable :: vpol(:), vpol0(:)
 endmodule
 
 module mcharge

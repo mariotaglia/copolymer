@@ -190,8 +190,8 @@ write(densAcidfilename,'(A11,BZ,I3.3,A1,I3.3, A1, I3.3,A1,I3.3,A4)')'densityacid
 open(unit=1780, file=densAcidfilename)
 do iR=1,dimR
    do iZ=1,dimZ
-   if(dimz.ne.1)write(1780,*)zc(iR),iz,avpola(ic,iR,iZ,NC)
-   if(dimz.eq.1)write(1780,*)zc(iR),avpola(ic,iR,iZ,NC)
+   if(dimz.ne.1)write(1780,*)zc(iR),iz,xsega(ic,iR,iZ,NC)
+   if(dimz.eq.1)write(1780,*)zc(iR),xsegb(ic,iR,iZ,NC)
    enddo
 enddo
 close(1780)
@@ -218,8 +218,8 @@ write(densBasicfilename,'(A11,BZ,I3.3,A1,I3.3,A1,I3.3,A1,I3.3,A4)')'densitybasic
 open(unit=1780, file=densBasicfilename)
 do iR=1,dimR
    do iZ=1,dimZ
-   if(dimz.ne.1)write(1780,*)zc(iR),iz,avpolb(ic,iR,iZ,NC)
-   if(dimz.eq.1)write(1780,*)zc(iR),avpolb(ic,iR,iZ,NC)
+   if(dimz.ne.1)write(1780,*)zc(iR),iz,xsegb(ic,iR,iZ,NC)
+   if(dimz.eq.1)write(1780,*)zc(iR),xsegb(ic,iR,iZ,NC)
    enddo
 enddo
 close(1780)

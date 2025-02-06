@@ -200,16 +200,17 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
    allocate(vpol(0:Npoorsv))
-   vpol = ndr
+   allocate(vpol0(0:Npoorsv))
+   vpol0 = ndr
 
    allocate(Ut(0:Npoorsv),Ug(0:Npoorsv))
    Ut=ndr
    Ug=ndr
 
-   allocate(dimfkais(0:Npoorsv,0:Npoorsv),dimf(0:Npoorsv,0:Npoorsv))
+   allocate(dimfkais(Npoorsv,Npoorsv),dimf(Npoorsv,Npoorsv))
    dimf(:,:) = ndr
 
-   allocate(lsegkai(0:Npoorsv,0:Npoorsv))
+   allocate(lsegkai(Npoorsv,Npoorsv))
    lsegkai(:,:) = ndr
 
 
@@ -256,7 +257,7 @@ select case (label)
   if(Npoorsv.ne.temp)call stopparser('Check number of vpol data')
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    do i=0,npoorsv
-     read(fh, *) vpol(i)
+     read(fh, *) vpol0(i)
    enddo
 
 
@@ -265,9 +266,6 @@ select case (label)
    read(buffer, *, iostat=ios) Nacids
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    allocate(pKa(Nacids),Ka(Nacids))
-
-   allocate(vpol_a(Nacids))
-   vpol_a(:) = ndr
 
    do i=1,Nacids
      read(fh,*)pKa(i) ! acid constants of each acid segment
@@ -280,32 +278,8 @@ select case (label)
    allocate(Kb(Nbasics),pKb(Nbasics))
 
 
-   allocate(vpol_b(Nbasics))
-   vpol_b(:) = ndr
-
    do i=1,Nbasics
      read(fh,*)pKb(i) ! acid constants of each acid segment
-   enddo
-
- 
-! vpol_a : segment volumens defined according acid-base
-  case('vpol_a')
-  if(Nacids.eq.ndi)call stopparser('Define Nacids before reading vpol_a')
-   read(buffer, *, iostat=ios) temp
-  if(Nacids.ne.temp)call stopparser('Check number of vpol_a data')
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   do i=1,Nacids
-     read(fh,*) vpol_a(i)
-   enddo
-
-! vpol_b : segment volumens defined according acid-base
-  case('vpol_b')
-  if(Nbasics.eq.ndi)call stopparser('Define Nbasics before reading vpol_a')
-   read(buffer, *, iostat=ios) temp
-  if(Nbasics.ne.temp)call stopparser('Check number of vpol_b data')
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   do i=1,Nbasics
-     read(fh,*) vpol_b(i)
    enddo
 
 ! lseg : segment length for chain generation
@@ -529,8 +503,8 @@ if(Nacids.eq.ndi)call stopundef('Nacids')
 if(Nbasics.eq.ndi)call stopundef('Nbasics')
 
 ! dimf
-do i=0,Npoorsv
-  do j=0,Npoorsv
+do i=1,Npoorsv
+  do j=1,Npoorsv
      if(dimf(i,j).eq.ndr) then
         dimf(i,j) = 6.0
         if(rank.eq.0)write(stdout,*) 'dimf ', i,j, ' undefined, use default value (6.0)'
@@ -538,9 +512,9 @@ do i=0,Npoorsv
   enddo          
 enddo          
 
-! dimf
-do i=0,Npoorsv
-  do j=0,Npoorsv
+! lsegkai
+do i=1,Npoorsv
+  do j=1,Npoorsv
      if(lsegkai(i,j).eq.ndr)call stopundef('lsegkai')
   enddo          
 enddo          
@@ -559,17 +533,7 @@ enddo
 
 ! vpol
 do i=0,Npoorsv
-  if(vpol(i).eq.ndr)call stopundef('vpol')
-enddo          
-
-! vpol_a
-do i=1,Nacids
-  if(vpol_a(i).eq.ndr)call stopundef('vpol_a')
-enddo          
-
-! vpol_b
-do i=1,Nbasics
-  if(vpol_b(i).eq.ndr)call stopundef('vpol_b')
+  if(vpol0(i).eq.ndr)call stopundef('vpol')
 enddo          
 
 ! lseg

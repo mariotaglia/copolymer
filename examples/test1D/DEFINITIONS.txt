@@ -34,13 +34,17 @@ vpol_b 1
 0.113097335529233
 
 infile 2
-flagkai 0 
+flagkai 1
 
 npol 1.21 1.21 1.21 0.025
 
 Xulimit 5
 lseg 0.5
-lsegkai 0.5
+
+lsegkai 3
+0.5
+0.5 0.5
+0.5 0.5 0.5
 
 csalt 0.1
 pHbulk 12
