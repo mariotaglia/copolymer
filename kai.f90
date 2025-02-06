@@ -231,7 +231,7 @@ do js=1,Npoorsv
     endif
 
     if (lsegkaikais(is,js).ne.lsegkai(is,js)) then
-      print*,"lsegkai of kais non equal dimf of DEFINITIONS.txt"
+      print*,"lsegkai of kais non equal lsegkai of DEFINITIONS.txt"
       stop
     endif
 
