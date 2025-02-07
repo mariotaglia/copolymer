@@ -130,7 +130,7 @@ use globals
 use mkai
 use longs
 implicit none
-integer i,state,j,k1,k2,ncha, is, jj, k, kk
+integer i,state,j,k1,k2,ncha, is, js, jj, k, kk
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3), m_branch(3,3,50)
@@ -143,6 +143,7 @@ real*8 distance(maxlong,maxlong)
 integer state_branch(50)
 real*8 xendt(3)
 integer NC
+
 
 tolerancia = 1.0e-5
 
@@ -172,14 +173,13 @@ m(3,1)=sin(angle)*sitheta
 m(3,2)=-sin(angle)*cotheta
 m(3,3)=-cos(angle)
 
-x(1)=m(1,1)*lseg     
-x(2)=m(2,1)*lseg
-x(3)=m(3,1)*lseg
+x(1)=m(1,1)*lsegs(1,NC) 
+x(2)=m(2,1)*lsegs(1,NC)
+x(3)=m(3,1)*lsegs(1,NC)
 
 xend(1,2)=xend(1,1)+x(1)  ! second postion
 xend(2,2)=xend(2,1)+x(2)
 xend(3,2)=xend(3,1)+x(3)
-
 
 do i=3,long(NC)-long_branches(NC)          ! loop over remaining positions!
 
@@ -230,9 +230,9 @@ enddo
 
 m = mm ! update rotation matrix
 
-x(1)=m(1,1)*lseg
-x(2)=m(2,1)*lseg
-x(3)=m(3,1)*lseg
+x(1)=m(1,1)*lsegs(i-1,NC)
+x(2)=m(2,1)*lsegs(i-1,NC)
+x(3)=m(3,1)*lsegs(i-1,NC)
 
 xend(1,i)=xend(1,i-1)+x(1)   ! ith postion chain
 xend(2,i)=xend(2,i-1)+x(2)
@@ -314,9 +314,9 @@ enddo
 
 m = mm ! update rotation matrix
 
-x(1)=m(1,1)*lseg
-x(2)=m(2,1)*lseg
-x(3)=m(3,1)*lseg
+x(1)=m(1,1)*lsegs(i-1,NC)
+x(2)=m(2,1)*lsegs(i-1,NC)
+x(3)=m(3,1)*lsegs(i-1,NC)
 
 xend(1,i)=xendt(1)+x(1)   ! ith postion chain
 xend(2,i)=xendt(2)+x(2)
@@ -335,7 +335,11 @@ do k1=1,long(NC)
     dista=dista+(xend(2,k2)-xend(2,k1))**(2.0)
     dista=dista+(xend(3,k2)-xend(3,k1))**(2.0)
     dista=sqrt(dista)+tolerancia
-    if (dista.lt.lseg) then
+  
+    is = segpoorsv(k1,NC) ! types of poorsv for k1 and k2
+    js = segpoorsv(k2,NC)
+
+    if (dista.lt.lseg(is,js)) then
        goto 223
     endif
   enddo
@@ -345,12 +349,16 @@ do i=1,long(NC)
   seglength(segpoorsv(i,NC))=seglength(segpoorsv(i,NC))+1
   do j=1,long(NC)
 
+    is = segpoorsv(i,NC) ! types of poorsv for i and j
+    js = segpoorsv(j,NC)
+
+
     if (i.ne.j) then
       distance(i,j)=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-xend(3,j))**2.0)
       distance(i,j)=sqrt(distance(i,j))
       if (segpoorsv(i,NC).eq.segpoorsv(j,NC))Rgyr(segpoorsv(i,NC))=Rgyr(segpoorsv(i,NC))+distance(i,j)**2.0
       Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)+distance(i,j)**2.0
-      Ugyr=Ugyr-0.5*st(segpoorsv(i,NC),segpoorsv(j,NC))*(lseg/distance(i,j))**(dimf(segpoorsv(i,NC),segpoorsv(j,NC)))
+      Ugyr=Ugyr-0.5*st(segpoorsv(i,NC),segpoorsv(j,NC))*(lseg(is,js)/distance(i,j))**(dimf(segpoorsv(i,NC),segpoorsv(j,NC)))
     endif
 
   enddo
@@ -442,14 +450,23 @@ enddo
 end subroutine
 
 subroutine print_ent2(xend, indexncha, NC)
-
+use mkai
 use longs
 implicit none
 
 real*8 xend(3,200)
 integer i,j,jj, indexncha, NC
 character*25 filename
+character*1, dimension(8) :: atomnames
 
+atomnames(1) = 'C'
+atomnames(2) = 'O'
+atomnames(3) = 'S'
+atomnames(4) = 'N'
+atomnames(5) = 'F'
+atomnames(6) = 'K'
+atomnames(7) = 'B'
+atomnames(8) = 'H'
 
 ! Imprime cadenas en formato ENT
 
@@ -459,7 +476,7 @@ open(unit=4400, file=filename)
 
 do i=1, long(NC) ! Imprime todo
 WRITE(4400,'(A6,I5,A3,I12,A4,F8.3,F8.3,F8.3)') &
-"HETATM",i,"  C",i,"    ",xend(1, i)*10,  &
+"HETATM",i,"  "//atomnames(segpoorsv(i,NC)),i,"    ",xend(1, i)*10,  &
 xend(2, i)*10,xend(3, i)*10
 end do
 

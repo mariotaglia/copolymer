@@ -19,6 +19,7 @@ endmodule
 
 module mkai
 integer, allocatable :: segpoorsv(:,:)
+real*8, allocatable :: lsegs(:,:)
 integer Npoorsv ! number of different types of poor solvent
 REAL*8, allocatable ::  xtotal(:,:,:)
 real*8, allocatable :: st(:,:)
@@ -39,7 +40,7 @@ real*8 Na
 parameter (Na=6.02d23)
 integer Ncomp
 integer, parameter :: base = 80
-real*8 lseg
+real*8, allocatable :: lseg(:,:)
 INTEGER actionflag
 real*8 npolini, npolfirst, npollast, npolstep
 real*8, allocatable :: npolratio(:) 

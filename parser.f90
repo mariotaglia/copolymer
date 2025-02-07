@@ -33,7 +33,7 @@ integer, parameter :: fh = 15
 integer, parameter :: stdout = 6
 integer ios
 integer line
-integer i, j
+integer i, j, k
 character(len=50) :: filename = 'DEFINITIONS.txt'
 integer ndi ! undetermined integer
 real*8 ndr ! undetermined real
@@ -97,7 +97,6 @@ Npoorsv = ndi ! zero by default
 Nacids = ndi
 Nbasics = ndi
 
-lseg = ndr
 curvature = ndi
 
 dielP = ndr
@@ -213,6 +212,8 @@ select case (label)
    allocate(lsegkai(Npoorsv,Npoorsv),lsegkaikais(Npoorsv,Npoorsv))
    lsegkai(:,:) = ndr
 
+   allocate(lseg(Npoorsv,Npoorsv))
+   lseg(:,:) = ndr
 
 ! dimf : exponent of vdW interactions
   case ('dimf')
@@ -237,7 +238,7 @@ select case (label)
      read(fh,*) Ut(i), Ug(i)
    enddo
 
-! lsegkai : exponent of vdW interactions
+! lsegkai : segment length for vdW
   case ('lsegkai')
   if(Npoorsv.eq.ndi)call stopparser('Define Npoorsv before reading lsegkai')
   read(buffer, *, iostat=ios) temp
@@ -249,6 +250,20 @@ select case (label)
       lsegkai(j,i) = lsegkai(i,j)
      enddo
    enddo
+
+! lseg : segment length for RIS
+  case ('lseg')
+  if(Npoorsv.eq.ndi)call stopparser('Define Npoorsv before reading lseg')
+  read(buffer, *, iostat=ios) temp
+  if(Npoorsv.ne.temp)call stopparser('Check number of lseg data')
+  if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+   do i = 1, Npoorsv
+   read(fh,*)(lseg(i,j), j = 1, i)
+     do j = 1, i
+      lseg(j,i) = lseg(i,j)
+     enddo
+   enddo
+
 
 ! vpol : segment volumens defined according poor-sv
   case ('vpol')
@@ -281,11 +296,6 @@ select case (label)
    do i=1,Nbasics
      read(fh,*)pKb(i) ! acid constants of each acid segment
    enddo
-
-! lseg : segment length for chain generation
-  case ('lseg')
-   read(buffer, *, iostat=ios) lseg
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
 ! curvature
 ! 0 = plane, 1: cylinder, 2 : micelle, 3 : plane with PBC
@@ -519,6 +529,14 @@ do i=1,Npoorsv
   enddo          
 enddo          
 
+! lseg
+do i=1,Npoorsv
+  do j=1,Npoorsv
+     if(lseg(i,j).eq.ndr)call stopundef('lseg')
+  enddo          
+enddo          
+
+
 ! Ut / Ug
 do i=0,Npoorsv
      if(Ut(i).eq.ndr) then
@@ -535,9 +553,6 @@ enddo
 do i=0,Npoorsv
   if(vpol0(i).eq.ndr)call stopundef('vpol')
 enddo          
-
-! lseg
-if(lseg.eq.ndr)call stopundef('lseg')
 
 ! curvature
 if(curvature.eq.ndi)call stopundef('curvature')
@@ -743,6 +758,9 @@ allocate(segpoorsv(maxlong,Ncomp))
 allocate(acidtype(maxlong,Ncomp))
 allocate(basictype(maxlong,Ncomp))
 allocate(torsionstate(maxlong,Ncomp))
+allocate(lsegs(maxlong, Ncomp))
+lsegs = ndr
+
 
 do NC = 1, Ncomp
 
@@ -769,6 +787,18 @@ do NC = 1, Ncomp
   endif
 
   close(9)
+
+if (flagMD(NC).eq.0) then ! RIS conformation
+   do k = 1, long(NC)-1
+       do i = 1, Npoorsv
+          do j = 1, Npoorsv
+           if((segpoorsv(k,NC).eq.i).and.(segpoorsv(k+1,NC).eq.j)) then
+                   lsegs(k,NC) = lseg(i,j) ! generate list of segment lengths
+           endif
+       enddo
+   enddo
+ enddo
+endif
 
 enddo ! NC
 
