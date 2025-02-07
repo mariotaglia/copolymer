@@ -198,11 +198,11 @@ select case (label)
    read(buffer, *, iostat=ios) Npoorsv
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
-   allocate(vpol(0:Npoorsv))
-   allocate(vpol0(0:Npoorsv))
+   allocate(vpol(Npoorsv))
+   allocate(vpol0(Npoorsv))
    vpol0 = ndr
 
-   allocate(Ut(0:Npoorsv),Ug(0:Npoorsv))
+   allocate(Ut(Npoorsv),Ug(Npoorsv))
    Ut=ndr
    Ug=ndr
 
@@ -234,7 +234,7 @@ select case (label)
    read(buffer, *, iostat=ios) temp
    if(Npoorsv.ne.temp)call stopparser('Check number of Utg data')
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   do i = 0, Npoorsv
+   do i = 1, Npoorsv
      read(fh,*) Ut(i), Ug(i)
    enddo
 
@@ -271,7 +271,7 @@ select case (label)
    read(buffer, *, iostat=ios) temp
   if(Npoorsv.ne.temp)call stopparser('Check number of vpol data')
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   do i=0,npoorsv
+   do i=1,npoorsv
      read(fh, *) vpol0(i)
    enddo
 
@@ -538,7 +538,7 @@ enddo
 
 
 ! Ut / Ug
-do i=0,Npoorsv
+do i=1,Npoorsv
      if(Ut(i).eq.ndr) then
         Ut(i) = 0.0
         if(rank.eq.0)write(stdout,*) 'Ut ', i,' undefined, use default value (0.0)'
@@ -550,7 +550,7 @@ do i=0,Npoorsv
 enddo          
 
 ! vpol
-do i=0,Npoorsv
+do i=1,Npoorsv
   if(vpol0(i).eq.ndr)call stopundef('vpol')
 enddo          
 
@@ -772,6 +772,10 @@ do NC = 1, Ncomp
       do i = 1, long(NC)
         read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC) ! , torsionstate(i,NC)
         torsionstate(i,NC)=3
+        if(segpoorsv(i,NC).eq.0) then
+                print*, 'Poor sv type cannot be 0, check structure'
+                stop
+        endif
       enddo
     else 
       do i = 1, long(NC)

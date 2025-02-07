@@ -17,15 +17,15 @@ integer*4 ier2
 real*8 protemp
 real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
 real*8 xh(dimR+1,dimZ) 
-real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
+real*8 xpot(Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
 real*8,allocatable :: pro(:)
 !real*8 time1, time2, duration, looptime1, looptime2, loopduration
 integer iR,iZ,kZ,kkZ,k,i,j,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
 integer is, js,ia,ib,iiR,iiZ,jR,jZ
 integer err
 integer n
-real*8 avpol_tmp(0:Npoorsv,2*dimR,dimZ), xsega_tmp(0:Nacids,2*dimR,dimZ), xsegb_tmp(0:Nbasics,2*dimR,dimZ) ! overdim R coordinate just in case
-real*8 avpol_tosend(0:Npoorsv,dimR,dimZ), xsega_tosend(0:Nacids,dimR,dimZ), xsegb_tosend(0:Nbasics,dimR,dimZ)
+real*8 avpol_tmp(Npoorsv,2*dimR,dimZ), xsega_tmp(0:Nacids,2*dimR,dimZ), xsegb_tmp(0:Nbasics,2*dimR,dimZ) ! overdim R coordinate just in case
+real*8 avpol_tosend(Npoorsv,dimR,dimZ), xsega_tosend(0:Nacids,dimR,dimZ), xsegb_tosend(0:Nbasics,dimR,dimZ)
 real*8 xpol_tosend(dimR,dimZ)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
@@ -119,35 +119,6 @@ call dielectfcn(dielpol,epsfcn,Depsfcn)
 
 ! Calculation of xpot
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! is = 0 (solvent) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-do iZ = 1, dimZ
-do iR = 1, dimR
-! osmotic pressure
-   xpot(0,iR,iZ) = xh(iR,iZ)**vpol(0) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
-enddo   
-enddo
-
-! dielectrics
-do iZ = 1,dimZ
-   jZp=iZ+1 ! jZ plus one
-   jZm=iZ-1 ! jZ minus one
-
-   if(PBCflag.eq.1) then
-      iZp=PBCSYMI(jZp,dimZ)
-      iZm=PBCSYMI(jZm,dimZ)
-   else if(PBCflag.eq.2) then
-      iZp=PBCREFI(jZp,dimZ)
-      iZm=PBCREFI(jZm,dimZ)
-   endif
-
-do iR = 1,dimR  ! phi(0) and phi(dimR) are defined for all curvatures above, no need to analyze PBC here
-   gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/2.0/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
-   xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
-enddo 
-enddo
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! is =! 0 (not solvent) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! xpot
 do iZ = 1, dimZ
 do iR = 1, dimR
@@ -309,7 +280,7 @@ xsegb_tosend(:, 1:dimR, 1:dimZ)=xsegb_tmp(:, 1:dimR, 1:dimZ)
 
    call MPI_ALLREDUCE(xsega_tosend, xsega(:,:,:,NC), (Nacids+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(xsegb_tosend, xsegb(:,:,:,NC), (Nbasics+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(avpol_tosend, avpol(:,:,:,NC), (Npoorsv+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(avpol_tosend, avpol(:,:,:,NC), Npoorsv*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(xpol_tosend, xpol(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(q_tosend, q(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(sumprolnpro_tosend, sumprolnpro(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
@@ -327,7 +298,7 @@ sumpol = 0.0
 
 do iR = 1, dimR
 do iZ = 1, dimZ
-   do is = 0, Npoorsv
+   do is = 1, Npoorsv
       select case (curvature)
        case (0,3)
         sumpol = sumpol + avpol(is,iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or in units of chains/nm of belt (2D)
@@ -345,7 +316,7 @@ xsegb(:,:,:,NC) = xsegb(:,:,:,NC)/sumpol*npol*npolratio(NC)*float(long(NC)) ! de
 
 !!! normalize volume fractions for each different poor sv
 
-do is = 0, Npoorsv
+do is = 1, Npoorsv
    avpol(is,:,:,NC) = avpol(is,:,:,NC)/sumpol*vpol(is)*vsol*npol*npolratio(NC)*long(NC) ! integral of avpol is fixed
 enddo ! is
 
@@ -401,7 +372,7 @@ do iZ = 1, dimZ
    f(dimR*(iZ-1)+iR)=xh(iR,iZ)+avneg(iR,iZ)+avpos(iR,iZ)+avHplus(iR,iZ)+avOHmin(iR,iZ)-1.0d0
 
    do NC = 1,Ncomp
-   do is=0, Npoorsv
+   do is=1, Npoorsv
       f(dimR*(iZ-1)+iR) = f(dimR*(iZ-1)+iR) + avpol(is,iR,iZ,NC)
    enddo
    enddo

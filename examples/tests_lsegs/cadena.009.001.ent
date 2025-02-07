@@ -1,0 +1,24 @@
+HETATM    1  C           1       5.520  -9.907   4.721
+HETATM    2  C           2       3.403  -7.210   1.506
+HETATM    3  C           3       5.826  -3.279   0.634
+HETATM    4  C           4       3.709  -0.582  -2.581
+HETATM    5  O           5      -0.588   0.744  -1.213
+HETATM    6  O           6      -0.507   2.587   1.761
+HETATM    7  O           7      -3.706   3.574   2.779
+HETATM    8  S           8      -5.807   0.832   3.344
+HETATM    9  N           9      -2.164   2.752  -3.607
+HETATM   10  N          10      -2.455   1.473  -5.967
+HETATM   11  N          11      -4.633   3.513  -2.822
+HETATM   12  S          12       1.401   5.504   1.444
+CONECT    1    2
+CONECT    2    3
+CONECT    3    4
+CONECT    4    5
+CONECT    5    6
+CONECT    6    7
+CONECT    7    8
+CONECT    5    9
+CONECT    9   10
+CONECT    9   11
+CONECT    6   12
+ END
