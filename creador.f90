@@ -23,7 +23,7 @@ integer ncha
 real*8 chains(3,maxlong,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
 real*8 Uconf
 integer*1 Ntconf(maxlong)
-real*8 sumUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
+real*8 sumUgyr, meanUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
 !real*8 rog
 integer conf              ! counts number of conformations
 
@@ -76,6 +76,7 @@ do NC = 1, Ncomp
 
 sumRgyr=0.
 sumUgyr=0.
+meanUgyr=0.
 Rgyrprom=0.
 Uconf=0.
 Ntconf=0.
@@ -130,6 +131,7 @@ endif
    enddo
 
    sumUgyr=sumUgyr+exp(-Ugyr)
+   meanUgyr=meanUgyr+Ugyr*exp(-Ugyr)
 
    do j=1,ncha
       if(conf.lt.cuantas(NC)) then
@@ -243,11 +245,11 @@ call MPI_BARRIER(MPI_COMM_WORLD, ierr)
 if(rank.eq.0) then
      print*," chains component ", NC, " out of ", Ncomp, " ready"
      do is=0,Npoorsv+1
-       print*,is, Rgyrprom(is), sumRgyr(is), sumUgyr
+       print*,is, Rgyrprom(is), sumRgyr(is)
      enddo
 endif
 
-
+print*, "componente",NC,"qvdW: ",SumUgyr, "<UvdW>", meanUgyr/sumUgyr 
 ! print Rgyr 
 
 do is=0,Npoorsv+1
