@@ -1,5 +1,5 @@
 !*************************************************************
-subroutine cadenasMD(chains,ncha,Uconf, Ntconf,Ugyr, Rgyr, NC)
+subroutine cadenasMD(chains,ncha,Uconf, Ntconf,UvdW, Uyuk, NC)
 use seed1
 use pis
 use matrices
@@ -20,7 +20,7 @@ real*8 x(3),xend(3,maxlong+5),xendr(3,maxlong+5), xendcom(3,maxlong+5), xend_bra
 REAL*8 chains(3,maxlong,ncha_max), Uconf
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
 integer*1 Ntconf(maxlong), seglength(0:Npoorsv)
-real*8 Ugyr, Rgyr(0:Npoorsv+1)
+real*8 UvdW, Uyuk
 real*8 distance(maxlong,maxlong)
 integer state_branch(50)
 real*8 xendt(3)
@@ -36,8 +36,8 @@ integer k,kk
 
 Uconf = 0.0
 Ntconf = 0
-Ugyr = 0.0
-Rgyr = 0.0
+UvdW = 0.0
+Uyuk = 0.0
 
 ! read one conformation
 !ITEM: TIMESTEP

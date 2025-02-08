@@ -121,7 +121,7 @@ end
 !* on a three state RIS-model see Flory book                 *
 !* GENERA CADENAS DE PAH-Os                                  *
 !*************************************************************
-subroutine cadenas(chains,ncha,Uconf, Ntconf,Ugyr, Rgyr, NC)
+subroutine cadenas(chains,ncha,Uconf, Ntconf,UvdW, Uyuk, NC)
 use seed1
 use pis
 use matrices
@@ -129,6 +129,7 @@ use senos
 use globals
 use mkai
 use longs
+use mcharge, only : basictype, acidtype, csalt
 implicit none
 integer i,state,j,k1,k2,ncha, is, js, jj, k, kk
 real*8 rn,dista
@@ -137,13 +138,18 @@ real*8 m(3,3), mm(3,3), m_branch(3,3,50)
 real*8 x(3),xend(3,maxlong+5),xendr(3,maxlong+5), xendcom(3,maxlong+5), xend_branch(3,50)
 REAL*8 chains(3,maxlong,ncha_max), Uconf
 REAL*8 tolerancia    !tolerancia en el calculo de selfavoiding
-integer*1 Ntconf(maxlong), seglength(0:Npoorsv)
-real*8 Ugyr, Rgyr(0:Npoorsv+1)
-real*8 distance(maxlong,maxlong)
+integer*1 Ntconf(maxlong)
+real*8 UvdW, Uyuk
+real*8 dist
 integer state_branch(50)
 real*8 xendt(3)
 integer NC
+real*8 DBL ! Approximate Debye length of the system
+real*8 BL  ! Bjerrum length
+real*8 z1, z2
 
+DBL = 0.304/sqrt(csalt) ! approximate DB in nm
+BL = 0.71 ! Bjerrum length in nm
 
 tolerancia = 1.0e-5
 
@@ -151,10 +157,8 @@ tolerancia = 1.0e-5
 223 Uconf=0.0
 Ntconf(:) = 0
 
-seglength=0
-Ugyr=0.0
-Rgyr=0.0
-distance(:,:)=0.0
+UvdW=0.0
+Uyuk=0.0
  
 xend(1,1)=0.0      ! first position 
 xend(2,1)=0.0
@@ -346,31 +350,34 @@ do k1=1,long(NC)
 enddo
 
 do i=1,long(NC)
-  seglength(segpoorsv(i,NC))=seglength(segpoorsv(i,NC))+1
-  do j=1,long(NC)
+   do j=i+1,long(NC) ! do not count twice
 
     is = segpoorsv(i,NC) ! types of poorsv for i and j
     js = segpoorsv(j,NC)
 
-
-    if (i.ne.j) then
-      distance(i,j)=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-xend(3,j))**2.0)
-      distance(i,j)=sqrt(distance(i,j))
-      if (segpoorsv(i,NC).eq.segpoorsv(j,NC))Rgyr(segpoorsv(i,NC))=Rgyr(segpoorsv(i,NC))+distance(i,j)**2.0
-      Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)+distance(i,j)**2.0
-      Ugyr=Ugyr-0.5*st(segpoorsv(i,NC),segpoorsv(j,NC))*(lseg(is,js)/distance(i,j))**(dimf(segpoorsv(i,NC),segpoorsv(j,NC)))
-    endif
-
+    dist=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-xend(3,j))**2.0)
+    dist=sqrt(dist)
+! 0.5 is not used because int are counted once
+    UvdW=UvdW-st(segpoorsv(i,NC),segpoorsv(j,NC))*(lseg(is,js)/dist)**(dimf(segpoorsv(i,NC),segpoorsv(j,NC)))
   enddo
 enddo
 
-do is=0,Npoorsv
-  Rgyr(is)=sqrt(Rgyr(is)/2.0)
-  Rgyr(is)=Rgyr(is)/float(seglength(is))
-enddo 
 
-Rgyr(Npoorsv+1)=sqrt(Rgyr(Npoorsv+1)/2.0)
-Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)/float(long(NC))
+do i=1,long(NC)
+   z1 = 0.
+   if(acidtype(i,NC).ne.0)z1=z1-1.
+   if(basictype(i,NC).ne.0)z1=z1+1.
+      do j=i+1,long(NC) ! do not count twice
+         z2 = 0.
+         if(acidtype(j,NC).ne.0)z2=z2-1.
+         if(basictype(j,NC).ne.0)z2=z2+1.
+ 
+         dist=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-xend(3,j))**2.0)
+         dist=sqrt(dist)
+
+         Uyuk=Uyuk+z1*z2*BL/dist*exp(-dist/DBL) ! Yukawa interaction
+  enddo
+enddo
 
 ncha=0
 

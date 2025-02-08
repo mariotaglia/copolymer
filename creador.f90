@@ -9,6 +9,7 @@ use MPI
 use transgauche
 use mkai
 use cadenaMD
+use mcharge, only : flagstrong
 implicit none
 
 integer is
@@ -21,9 +22,9 @@ real*8 tempr_R, tempr_Z
 integer ncha
 !character*20 filename
 real*8 chains(3,maxlong,ncha_max) ! chains(x,i,l)= coordinate x of segement i ,x=2 y=3,z=1
-real*8 Uconf
+real*8 Uconf, UvdW, Uyuk
 integer*1 Ntconf(maxlong)
-real*8 sumUgyr, meanUgyr, sumRgyr(0:Npoorsv+1), Rgyr(0:Npoorsv+1), Ugyr, Rgyrprom(0:Npoorsv+1)
+real*8 sumexpB, meanUvdW, meanUyuk, meanUconf
 !real*8 rog
 integer conf              ! counts number of conformations
 
@@ -74,10 +75,10 @@ Ntrans = 0
 
 do NC = 1, Ncomp
 
-sumRgyr=0.
-sumUgyr=0.
-meanUgyr=0.
-Rgyrprom=0.
+sumexpB=0.
+meanUvdW=0.
+meanUconf=0.
+meanUyuk=0.
 Uconf=0.
 Ntconf=0.
 
@@ -111,9 +112,9 @@ endif
 do while (conf.lt.cuantas(NC))
 
 if(flagMD(NC).eq.1) then
-   call cadenasMD(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
+   call cadenasMD(chains,ncha,Uconf,Ntconf,UvdW,Uyuk,NC)
 else 
-   call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
+   call cadenas(chains,ncha,Uconf,Ntconf,UvdW,Uyuk,NC)
 endif
 
 !   open(unit=100000,file='chains.dat')
@@ -126,17 +127,13 @@ endif
 !   enddo
 
 
-   do is=0,Npoorsv+1
-      sumRgyr(is)=sumRgyr(is)+Rgyr(is)*exp(-Ugyr)
-   enddo
-
-   sumUgyr=sumUgyr+exp(-Ugyr)
-   meanUgyr=meanUgyr+Ugyr*exp(-Ugyr)
+   sumexpB=sumexpB+exp(-UvdW-Uconf-Uyuk)
+   meanUvdW=meanUvdW+UvdW*exp(-UvdW-Uconf-Uyuk)
+   meanUconf=meanUconf+Uconf*exp(-UvdW-Uconf-Uyuk)
+   meanUyuk=meanUyuk+Uyuk*exp(-UvdW-Uconf-Uyuk)
 
    do j=1,ncha
       if(conf.lt.cuantas(NC)) then
-
-
 
 ! DEBUG
 !      rog = 0.0
@@ -234,27 +231,20 @@ else
   endif
 endif
 
-do is=0,Npoorsv+1
-   Rgyrprom(is)=sumRgyr(is)/sumUgyr
-enddo
-
-
 call MPI_BARRIER(MPI_COMM_WORLD, ierr)
-
 
 if(rank.eq.0) then
      print*," chains component ", NC, " out of ", Ncomp, " ready"
-     do is=0,Npoorsv+1
-       print*,is, Rgyrprom(is), sumRgyr(is)
-     enddo
+
+if(flagstrong.eq.0) then
+        print*, 'Use flagstrong = 0 to print information of single-chain reference'
+else if(flagstrong.eq.1) then
+         print*, "component",NC
+         print*, "F", -log(sumexpB)
+         print*, "<UvdW>", meanUvdW/sumexpB, "<Uconf>", meanUconf/sumexpB, "<Uyuk>", meanUyuk/sumexpB 
+endif
 endif
 
-print*, "componente",NC,"qvdW: ",SumUgyr, "<UvdW>", meanUgyr/sumUgyr 
-! print Rgyr 
-
-do is=0,Npoorsv+1
-   write(2533+NC,*) is, Rgyrprom(is)
-enddo
 close(2533+NC)
 
 enddo ! NC
