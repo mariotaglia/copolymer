@@ -166,8 +166,10 @@ enddo
 
 ! 7. Chemical Equilibrium                                              
 
+
 F_Eq = 0.0                                                       
 
+if (flagstrong.eq.0) then ! weak acid/based
 do NC = 1, Ncomp
  do iR=1,dimR
  do iZ=1,dimZ
@@ -187,6 +189,7 @@ do NC = 1, Ncomp
  enddo
  enddo
 enddo ! NC
+endif
 
 Free_Energy = Free_Energy + F_Eq     
 

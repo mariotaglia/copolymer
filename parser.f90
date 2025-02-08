@@ -125,6 +125,7 @@ maxT = ndi
 entflag = ndi
 
 flagkai = ndi
+flagstrong = ndi
 
 flagtorsionstate = ndi ! zero by defaul
 
@@ -390,6 +391,10 @@ select case (label)
 ! flagkai: 0: read kai from files, 1: generate new kai tables
   case ('flagkai')
    read(buffer, *, iostat=ios) flagkai
+
+   ! flagstrong: 0: weak acid/bases, 1: strongacid bases, neglect pKas
+  case ('flagstrong')
+   read(buffer, *, iostat=ios) flagstrong
 
 ! flagtorsionstate: 0: random dihedral, 1: read dihedrals from file 
   case ('flagtorsionstate')
@@ -660,6 +665,13 @@ if(flagkai.eq.ndi) then
   flagkai = 0
   if(rank.eq.0)write(stdout,*) 'flagkai undefined, use default value (0 : read kais from file, do not generate)'
 endif
+
+! flagstron
+if(flagstrong.eq.ndi) then
+  flagstrong = 0
+  if(rank.eq.0)write(stdout,*) 'flagstrong undefined, use default value (0 : read kais from file, do not generate)'
+endif
+
 
 ! flagtorsionstate
 if(flagtorsionstate.eq.ndi) then

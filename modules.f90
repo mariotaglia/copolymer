@@ -89,6 +89,7 @@ real*8, allocatable :: vpol(:), vpol0(:)
 endmodule
 
 module mcharge
+integer flagstrong ! 1 = strong acid/bases, neglect Kas and Kbs
 real*8 dielP
 integer electroflag
 integer Nacids, Nbasics
