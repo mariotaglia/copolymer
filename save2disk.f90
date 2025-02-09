@@ -95,7 +95,10 @@ open(unit=310,file=sysfilename)
       write(310,*)'torsion angle =',ta
 
       close(310)
- 
+
+
+      if(saveflag.eq.1) then
+      
 ! Electrostatic potential
 
 write(phifilename,'(A18,BZ,I3.3,A1,I3.3,A4)')'electricpotential.', counter,'.',counter2,'.dat'
@@ -321,6 +324,9 @@ do i = 3, long(NC)-1
 enddo
 close(327)
 enddo ! NC
+
+endif ! saveflag
+
 
 ! lnq
 

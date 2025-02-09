@@ -358,8 +358,12 @@ do i=1,long(NC)
     dist=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-xend(3,j))**2.0)
     dist=sqrt(dist)
 ! 0.5 is not used because int are counted once
-    UvdW=UvdW-st(segpoorsv(i,NC),segpoorsv(j,NC))*(lseg(is,js)/dist)**(dimf(segpoorsv(i,NC),segpoorsv(j,NC)))
-  enddo
+    
+    if((dist+tolerancia).gt.lsegkai(is,js)) then
+    UvdW=UvdW-st(segpoorsv(i,NC),segpoorsv(j,NC))*(lsegkai(is,js)/dist)**(dimf(segpoorsv(i,NC),segpoorsv(j,NC)))
+    endif
+  
+    enddo
 enddo
 
 

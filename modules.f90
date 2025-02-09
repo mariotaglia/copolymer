@@ -33,7 +33,7 @@ real*8 dimRkais, dimRinikais
 endmodule
 
 module globals
-integer vtkflag, maxT
+integer vtkflag, maxT, saveflag
 integer PBCflag
 real*8, allocatable :: xflag(:)
 real*8 Na
@@ -112,6 +112,7 @@ endmodule
 
 
 module longs
+integer, allocatable :: connect(:,:,:)        
 integer entflag
 integer, allocatable :: long(:)            ! length of polymer
 integer maxlong

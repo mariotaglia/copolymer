@@ -33,7 +33,7 @@ integer, parameter :: fh = 15
 integer, parameter :: stdout = 6
 integer ios
 integer line
-integer i, j, k
+integer i, j, jj, k
 character(len=50) :: filename = 'DEFINITIONS.txt'
 integer ndi ! undetermined integer
 real*8 ndr ! undetermined real
@@ -121,6 +121,7 @@ flagonekais = ndi
 infile = ndi
 
 vtkflag = ndi
+saveflag = ndi
 maxT = ndi
 entflag = ndi
 
@@ -377,6 +378,12 @@ select case (label)
   case ('vtkflag')
    read(buffer, *, iostat=ios) vtkflag
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
+! saveflag : save results as dat?   
+  case ('saveflag')
+   read(buffer, *, iostat=ios) saveflag
+   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
+
 
 ! entflag : save chain conformations as *.ent files for visualization
   case ('entflag')
@@ -648,6 +655,13 @@ if(vtkflag.eq.ndi) then
   if(rank.eq.0)write(stdout,*) 'vtkflag undefined, use default value (0 : do not save vtk)'
 endif
 
+! saveflag
+if(saveflag.eq.ndi) then
+  saveflag = 1
+  if(rank.eq.0)write(stdout,*) 'saveflag undefined, use default value (1 : save dat)'
+endif
+
+
 ! maxT
 if(maxT.eq.ndi) then
   maxT = 1
@@ -771,6 +785,7 @@ allocate(acidtype(maxlong,Ncomp))
 allocate(basictype(maxlong,Ncomp))
 allocate(torsionstate(maxlong,Ncomp))
 allocate(lsegs(maxlong, Ncomp))
+allocate(connect(maxlong,maxlong,Ncomp))
 lsegs = ndr
 
 
@@ -817,6 +832,32 @@ if (flagMD(NC).eq.0) then ! RIS conformation
 endif
 
 enddo ! NC
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Build chain connectivity !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Imprime cadenas en formato ENT
+
+connect=0
+do NC = 1, Ncomp
+
+i = 1
+do j = 1, long(NC)-long_branches(NC)-1 ! backbone segments
+  connect(i,i+1,NC) = 1
+  connect(i+1,i,NC) = 1
+   i = i + 1
+end do
+
+do j = 1, nbranches(NC) ! loop over branches
+  connect(branch_pos(j,NC),i+1,NC) = 1
+  connect(i+1,branch_pos(j,NC),NC) = 1
+  i = i + 1
+   do jj = 1, branch_long(j,NC)-1
+      connect(i,i+1,NC) = 1
+      connect(i+1,i,NC) = 1
+      i = i + 1
+   enddo
+enddo
+enddo
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                     Read st(i,j) from epsilon.in
