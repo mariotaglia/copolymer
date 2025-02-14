@@ -84,7 +84,7 @@ endmodule
 module volume
 real*8, allocatable :: vchain(:)
 real*8 vsol, vpos, vneg, r_neg, r_pos
-real*8, allocatable :: vpol(:), vpol_a(:), vpol_b(:)
+real*8, allocatable :: vpol(:)
 endmodule
 
 module mcharge

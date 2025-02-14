@@ -251,9 +251,6 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    allocate(pKa(Nacids),Ka(Nacids))
 
-   allocate(vpol_a(Nacids))
-   vpol_a(:) = ndr
-
    do i=1,Nacids
      read(fh,*)pKa(i) ! acid constants of each acid segment
    enddo
@@ -264,33 +261,8 @@ select case (label)
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
    allocate(Kb(Nbasics),pKb(Nbasics))
 
-
-   allocate(vpol_b(Nbasics))
-   vpol_b(:) = ndr
-
    do i=1,Nbasics
      read(fh,*)pKb(i) ! acid constants of each acid segment
-   enddo
-
- 
-! vpol_a : segment volumens defined according acid-base
-  case('vpol_a')
-  if(Nacids.eq.ndi)call stopparser('Define Nacids before reading vpol_a')
-   read(buffer, *, iostat=ios) temp
-  if(Nacids.ne.temp)call stopparser('Check number of vpol_a data')
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   do i=1,Nacids
-     read(fh,*) vpol_a(i)
-   enddo
-
-! vpol_b : segment volumens defined according acid-base
-  case('vpol_b')
-  if(Nbasics.eq.ndi)call stopparser('Define Nbasics before reading vpol_a')
-   read(buffer, *, iostat=ios) temp
-  if(Nbasics.ne.temp)call stopparser('Check number of vpol_b data')
-   if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
-   do i=1,Nbasics
-     read(fh,*) vpol_b(i)
    enddo
 
 ! lseg : segment length for chain generation
@@ -544,16 +516,6 @@ enddo
 ! vpol
 do i=0,Npoorsv
   if(vpol(i).eq.ndr)call stopundef('vpol')
-enddo          
-
-! vpol_a
-do i=1,Nacids
-  if(vpol_a(i).eq.ndr)call stopundef('vpol_a')
-enddo          
-
-! vpol_b
-do i=1,Nbasics
-  if(vpol_b(i).eq.ndr)call stopundef('vpol_b')
 enddo          
 
 ! lseg

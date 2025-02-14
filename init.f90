@@ -33,8 +33,6 @@ n=ntot                    ! size of lattice
 
 vsol=0.030                ! volume solvent molecule in (nm)^3
 vpol(:)=vpol(:)/vsol  ! volume polymer segment in units of vsol
-vpol_a(:)=vpol_a(:)/vsol
-vpol_b(:)=vpol_b(:)/vsol
 
 
 vneg=4/3*pi*r_neg**3/vsol !volume of anion in units of vsol

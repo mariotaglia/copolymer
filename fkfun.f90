@@ -173,7 +173,6 @@ do is= 1, Npoorsv
   enddo
 enddo
 
-if(flagstrong.eq.0) then
 ! acid base
 do iR = 1, dimR
 do iZ = 1, dimZ
@@ -185,19 +184,6 @@ do iZ = 1, dimZ
   enddo
 enddo
 enddo
-else if(flagstrong.eq.1) then
-!fixed charge 
-do iR = 1, dimR
-do iZ = 1, dimZ
-  do ic = 1,Nacids
-    xpot_a(ic,iR,iZ) = exp(phi(iR,iZ))
-  enddo
-  do ic = 1,Nbasics
-    xpot_b(ic,iR,iZ)= exp(-phi(iR,iZ))
-  enddo
-enddo
-enddo
-endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !    probability distribution
@@ -401,7 +387,6 @@ do iR = 1, dimR
 do iZ = 1, dimZ
 
 
-if(flagstrong.eq.0) then ! weak acid/base
    do NC = 1, Ncomp
    do ic= 1,Nacids
      xcharge(iR,iZ)=xcharge(iR,iZ)-xsega(ic,iR,iZ,NC)*fAmin(ic,iR,iZ)
@@ -411,17 +396,6 @@ if(flagstrong.eq.0) then ! weak acid/base
      xcharge(iR,iZ)=xcharge(iR,iZ)+xsegb(ic,iR,iZ,NC)*fBHplus(ic,iR,iZ)
    enddo
    enddo ! NC
-else if(flagstrong.eq.1) then
-   do NC = 1, Ncomp
-   do ic= 1,Nacids
-     xcharge(iR,iZ)=xcharge(iR,iZ)-xsega(ic,iR,iZ,NC)
-   enddo
-
-   do ic= 1,Nbasics
-     xcharge(iR,iZ)=xcharge(iR,iZ)+xsegb(ic,iR,iZ,NC)
-   enddo
-   enddo ! NC
-endif
 
 
 
