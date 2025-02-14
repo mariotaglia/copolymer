@@ -17,15 +17,15 @@ integer*4 ier2
 real*8 protemp
 real*8 x((Npoorsv+2)*ntot),f((Npoorsv+2)*ntot)
 real*8 xh(dimR+1,dimZ) 
-real*8 xpot(0:Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
+real*8 xpot(Npoorsv,dimR,dimZ), xpot_a(0:Nacids,dimR,dimZ), xpot_b(0:Nbasics,dimR,dimZ)
 real*8,allocatable :: pro(:)
 !real*8 time1, time2, duration, looptime1, looptime2, loopduration
 integer iR,iZ,kZ,kkZ,k,i,j,ic,aR,aZ,iZm,iZp,jZp,jZm        ! dummy indices
 integer is, js,ia,ib,iiR,iiZ,jR,jZ
 integer err
 integer n
-real*8 avpol_tmp(0:Npoorsv,2*dimR,dimZ), avpola_tmp(0:Nacids,2*dimR,dimZ), avpolb_tmp(0:Nbasics,2*dimR,dimZ) ! overdim R coordinate just in case
-real*8 avpol_tosend(0:Npoorsv,dimR,dimZ), avpola_tosend(0:Nacids,dimR,dimZ), avpolb_tosend(0:Nbasics,dimR,dimZ)
+real*8 avpol_tmp(Npoorsv,2*dimR,dimZ), xsega_tmp(0:Nacids,2*dimR,dimZ), xsegb_tmp(0:Nbasics,2*dimR,dimZ) ! overdim R coordinate just in case
+real*8 avpol_tosend(Npoorsv,dimR,dimZ), xsega_tosend(0:Nacids,dimR,dimZ), xsegb_tosend(0:Nbasics,dimR,dimZ)
 real*8 xpol_tosend(dimR,dimZ)
 real*8 algo, algo1,algo2
 double precision, external :: factorcurv
@@ -119,35 +119,6 @@ call dielectfcn(dielpol,epsfcn,Depsfcn)
 
 ! Calculation of xpot
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! is = 0 (solvent) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-do iZ = 1, dimZ
-do iR = 1, dimR
-! osmotic pressure
-   xpot(0,iR,iZ) = xh(iR,iZ)**vpol(0) ! exp(-pi(r)v_pol) / units of v_pol: nm^3
-enddo   
-enddo
-
-! dielectrics
-do iZ = 1,dimZ
-   jZp=iZ+1 ! jZ plus one
-   jZm=iZ-1 ! jZ minus one
-
-   if(PBCflag.eq.1) then
-      iZp=PBCSYMI(jZp,dimZ)
-      iZm=PBCSYMI(jZm,dimZ)
-   else if(PBCflag.eq.2) then
-      iZp=PBCREFI(jZp,dimZ)
-      iZm=PBCREFI(jZm,dimZ)
-   endif
-
-do iR = 1,dimR  ! phi(0) and phi(dimR) are defined for all curvatures above, no need to analyze PBC here
-   gradphi2 = ((phi(iR+1,iZ)-phi(iR-1,iZ))/2.0/deltaR)**2+((phi(iR,iZp)-phi(iR,iZm))/2.0/deltaZ)**2
-   xpot(0,iR,iZ) = xpot(0,iR,iZ)*exp(Depsfcn(iR,iZ)*gradphi2*vpol(0)*vsol*wperm/2.0)
-enddo 
-enddo
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! is =! 0 (not solvent) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! xpot
 do iZ = 1, dimZ
 do iR = 1, dimR
@@ -202,6 +173,7 @@ do is= 1, Npoorsv
   enddo
 enddo
 
+if(flagstrong.eq.0) then
 ! acid base
 do iR = 1, dimR
 do iZ = 1, dimZ
@@ -213,13 +185,26 @@ do iZ = 1, dimZ
   enddo
 enddo
 enddo
+else if(flagstrong.eq.1) then
+!fixed charge 
+do iR = 1, dimR
+do iZ = 1, dimZ
+  do ic = 1,Nacids
+    xpot_a(ic,iR,iZ) = exp(phi(iR,iZ))
+  enddo
+  do ic = 1,Nbasics
+    xpot_b(ic,iR,iZ)= exp(-phi(iR,iZ))
+  enddo
+enddo
+enddo
+endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !    probability distribution
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-avpola = 0.0
-avpolb = 0.0
+xsega = 0.0
+xsegb = 0.0
 avpol = 0.0
 xpol = 0.0
 q = 0.0
@@ -236,15 +221,15 @@ do NC = 1, Ncomp ! loop over components
 allocate(pro(cuantas(NC)))
 
 q_tosend=0.0d0                   ! init q to zero for each component
-avpola_tosend = 0.0
-avpolb_tosend = 0.0
+xsega_tosend = 0.0
+xsegb_tosend = 0.0
 avpol_tosend = 0.0
 xpol_tosend = 0.0
 sumprolnpro_tosend = 0.0
 sumprouchain_tosend=0.0
 all_tosend = 0.0
-avpola_tmp = 0.0
-avpolb_tmp = 0.0
+xsega_tmp = 0.0
+xsegb_tmp = 0.0
 avpol_tmp = 0.0
 
 do iiR=minntotR(NC), maxntotR(NC) ! position of center of mass 
@@ -289,8 +274,8 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
 
          sumtrans_tosend(iiR,iiZ,j) =  sumtrans_tosend(iiR,iiZ,j) +  pro(i)*float(Ntrans(j,i,NC))
          avpol_tmp(is,aR,aZ) = avpol_tmp(is,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpol_tmp is avg number of segments "is" at position "j" 
-         avpola_tmp(ia,aR,aZ) = avpola_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpola_tmp is avg number of acid segments "ic" at position "j"
-         avpolb_tmp(ib,aR,aZ) = avpolb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! avpolb_tmp is avg number of basic segments "ic" at position "j" 
+         xsega_tmp(ia,aR,aZ) = xsega_tmp(ia,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! xsega_tmp is avg density of acid segments "ic" at position "j"
+         xsegb_tmp(ib,aR,aZ) = xsegb_tmp(ib,aR,aZ)+pro(i)*factorcurv(iiR,aR) ! xesegb_tmp is avg density of basic segments "ic" at position "j" 
 
       enddo ! j
    enddo ! i
@@ -300,16 +285,16 @@ enddo ! iiZ
 
 
 avpol_tosend(:, 1:dimR, 1:dimZ)=avpol_tmp(:, 1:dimR, 1:dimZ) 
-avpola_tosend(:, 1:dimR, 1:dimZ)=avpola_tmp(:, 1:dimR, 1:dimZ)
-avpolb_tosend(:, 1:dimR, 1:dimZ)=avpolb_tmp(:, 1:dimR, 1:dimZ)
+xsega_tosend(:, 1:dimR, 1:dimZ)=xsega_tmp(:, 1:dimR, 1:dimZ)
+xsegb_tosend(:, 1:dimR, 1:dimZ)=xsegb_tmp(:, 1:dimR, 1:dimZ)
 
 !------------------ MPI -----------------`-----------------------------
 
 !call MPI_Barrier(MPI_COMM_WORLD, err)
 
-   call MPI_ALLREDUCE(avpola_tosend, avpola(:,:,:,NC), (Nacids+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(avpolb_tosend, avpolb(:,:,:,NC), (Nbasics+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
-   call MPI_ALLREDUCE(avpol_tosend, avpol(:,:,:,NC), (Npoorsv+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(xsega_tosend, xsega(:,:,:,NC), (Nacids+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(xsegb_tosend, xsegb(:,:,:,NC), (Nbasics+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
+   call MPI_ALLREDUCE(avpol_tosend, avpol(:,:,:,NC), Npoorsv*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(xpol_tosend, xpol(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(q_tosend, q(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(sumprolnpro_tosend, sumprolnpro(:,:,NC), ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
@@ -318,11 +303,16 @@ avpolb_tosend(:, 1:dimR, 1:dimZ)=avpolb_tmp(:, 1:dimR, 1:dimZ)
 
 !----------------------- Norm -----------------------------------------
 
+
+!!! Normalize acid and basic segments
+
+
+
 sumpol = 0.0
 
 do iR = 1, dimR
 do iZ = 1, dimZ
-   do is = 0, Npoorsv
+   do is = 1, Npoorsv
       select case (curvature)
        case (0,3)
         sumpol = sumpol + avpol(is,iR,iZ,NC)*deltaR*deltaZ ! final result in units of chains/nm^2 (1D) or in units of chains/nm of belt (2D)
@@ -331,14 +321,20 @@ do iZ = 1, dimZ
        case(2)
         sumpol = sumpol + avpol(is,iR,iZ,NC)*(((float(iR+dimRini)-0.5)*deltaR)**2)*deltaR*4.0*pi ! final result in units of chains/micelle
       end select
-   enddo
+   enddo ! is
 enddo
 enddo
 
-sumpol = sumpol/(vchain(NC)*vsol) 
-avpol(:,:,:,NC) = avpol(:,:,:,NC)/sumpol*npol*npolratio(NC) ! integral of avpol is fixed
-avpola(:,:,:,NC) = avpola(:,:,:,NC)/sumpol*npol*npolratio(NC)
-avpolb(:,:,:,NC) = avpolb(:,:,:,NC)/sumpol*npol*npolratio(NC)
+xsega(:,:,:,NC) = xsega(:,:,:,NC)/sumpol*npol*npolratio(NC)*float(long(NC)) ! density of acid segments (nm-3) 
+xsegb(:,:,:,NC) = xsegb(:,:,:,NC)/sumpol*npol*npolratio(NC)*float(long(NC)) ! density of basic segments (nm-3)
+
+!!! normalize volume fractions for each different poor sv
+
+do is = 1, Npoorsv
+   avpol(is,:,:,NC) = avpol(is,:,:,NC)/sumpol*vpol(is)*vsol*npol*npolratio(NC)*long(NC) ! integral of avpol is fixed
+enddo ! is
+
+!!! normalize number of chains
 
 sumpol = 0.0
 
@@ -390,7 +386,7 @@ do iZ = 1, dimZ
    f(dimR*(iZ-1)+iR)=xh(iR,iZ)+avneg(iR,iZ)+avpos(iR,iZ)+avHplus(iR,iZ)+avOHmin(iR,iZ)-1.0d0
 
    do NC = 1,Ncomp
-   do is=0, Npoorsv
+   do is=1, Npoorsv
       f(dimR*(iZ-1)+iR) = f(dimR*(iZ-1)+iR) + avpol(is,iR,iZ,NC)
    enddo
    enddo
@@ -404,15 +400,30 @@ xcharge(:,:) = avpos(:,:)/(vpos*vsol)-avneg(:,:)/(vneg*vsol)+avHplus(:,:)/vsol-a
 do iR = 1, dimR
 do iZ = 1, dimZ
 
+
+if(flagstrong.eq.0) then ! weak acid/base
    do NC = 1, Ncomp
    do ic= 1,Nacids
-     xcharge(iR,iZ)=xcharge(iR,iZ)-avpola(ic,iR,iZ,NC)*fAmin(ic,iR,iZ)/(vpol_a(ic)*vsol)
+     xcharge(iR,iZ)=xcharge(iR,iZ)-xsega(ic,iR,iZ,NC)*fAmin(ic,iR,iZ)
    enddo
 
    do ic= 1,Nbasics
-     xcharge(iR,iZ)=xcharge(iR,iZ)+avpolb(ic,iR,iZ,NC)*fBHplus(ic,iR,iZ)/(vpol_b(ic)*vsol)
+     xcharge(iR,iZ)=xcharge(iR,iZ)+xsegb(ic,iR,iZ,NC)*fBHplus(ic,iR,iZ)
    enddo
    enddo ! NC
+else if(flagstrong.eq.1) then
+   do NC = 1, Ncomp
+   do ic= 1,Nacids
+     xcharge(iR,iZ)=xcharge(iR,iZ)-xsega(ic,iR,iZ,NC)
+   enddo
+
+   do ic= 1,Nbasics
+     xcharge(iR,iZ)=xcharge(iR,iZ)+xsegb(ic,iR,iZ,NC)
+   enddo
+   enddo ! NC
+endif
+
+
 
    iZp=iZ+1
    iZm=iZ-1
