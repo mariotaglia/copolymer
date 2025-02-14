@@ -24,7 +24,7 @@ for i in range(0,n):
    vol_th[i] = input("Molecular theory volume (nm3): ")
    print("")
    bead_type_index[i]=beadslist.index(type_tmp)
-   name= name+str(i)+": "+name_tmp+"	"
+   name= name+str(i)+": "+name_tmp+"    "+type_tmp+"    "
 
 data=numpy.loadtxt("table_martini.dat", skiprows=1, usecols=(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20))
 epslist=data[:][20]
