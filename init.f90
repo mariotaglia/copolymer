@@ -31,7 +31,8 @@ pi=dacos(-1.0d0)          ! pi = arccos(-1)
 itmax=200                 ! maximum number of iterations       
 n=ntot                    ! size of lattice
 
-vsol=0.030                ! volume solvent molecule in (nm)^3
+!vsol=0.030                ! volume solvent molecule in (nm)^3
+vsol = 0.113
 vpol(:)=vpol(:)/vsol  ! volume polymer segment in units of vsol
 vpol_a(:)=vpol_a(:)/vsol
 vpol_b(:)=vpol_b(:)/vsol
