@@ -9,6 +9,7 @@ use longs
 use MPI
 use pis
 use mkai
+use cadenaMD
 implicit none
 
 
@@ -16,10 +17,16 @@ integer n                 ! number of lattice sites
 integer itmax             ! maximum number of iteration allowed for 
 
 external fcnelect         ! function containing the SCMFT eqs for solver
-integer i, iR, ia, ib, is,js ! dummy indices
+integer i,jj, iR, ia, ib, is,js ! dummy indices
 integer NC
 character*10 lnqfile, rogfile
 real*8 chargebalance 
+
+CHARACTER*50 filename
+character*50 line
+integer natoms
+integer MDid(2000), MDmol(2000), MDtype(2000)
+real*8 trash
 
 ! MPI
 integer tag
@@ -74,6 +81,31 @@ avpolbulk = 0.
 !! volume fraction of GC components and their beads
 
 do NC = 1, Ncomp
+   if (flagMD(NC).eq.1) then
+      write(filename,'(A3,I3.3,A3)')'MD.',NC,'.in'
+      open(7779,file=filename)
+      do i = 1, 3
+         read (7779, '(A)') line
+         print*,line
+      enddo
+      read(7779, *) natoms
+      print*,natoms
+      do i = 1, 5
+         read (7779, '(A)') line
+         print*,line
+      enddo
+      jj = 0 ! current position in MOLT bead list
+      do i = 1, natoms ! current position in MD atom list
+         read(7779,*) MDid(i), MDmol(i), MDtype(i), trash,trash,trash
+         if(MDHs(MDtype(i),NC).eq.1) then ! atom j is a heavy atom
+           jj = jj + 1 ! advance one MOLT bead list
+           segpoorsv(jj,NC) = MDsegpoorsv(MDtype(i),NC)
+           acidtype(jj,NC) = MDacidtype(MDtype(i),NC)
+           basictype(jj,NC) = MDbasictype(MDtype(i),NC)
+         endif
+      enddo ! i
+   endif
+
    if (flagGC(NC).eq.1) then
      rhopolbulk(NC) = Cpolbulk(NC)*Na/(1.0d24) ! bulk conc. in units of n of particles/nm³ 
      do i =1,long(NC)
@@ -83,7 +115,6 @@ do NC = 1, Ncomp
      enddo
    endif
 enddo   
-
 
 !! State of charge of titrable beads in the bulk !!
 

@@ -18,10 +18,15 @@ SHELL = /bin/bash
  FFLAGS= -O3 
 # FFLAGS=-g -fbacktrace -fbounds-check -ffpe-trap=zero,overflow,underflow 
 
+ifeq ($(HOST),midway3-login3.rcc.local)
+ifeq ($(USER),gzaldivar)
+LFLAGS = -L/home/gzaldivar/Software/kinsol-2.9.0/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/home/gzaldivar/Software/kinsol-2.9.0/lib
+endif
+endif
+
 ifeq ($(HOST),login.tusker.hcc.unl.edu)
 LFLAGS = -L/home/conda/gzaldivar/bin/kinsol/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/home/conda/gzaldivar/bin/kinsol/lib
 endif
-
 
 ifeq ($(HOST),mdq)
 LFLAGS = -lm /usr/lib/x86_64-linux-gnu/librt.so  -L/usr/local/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/usr/local/lib
