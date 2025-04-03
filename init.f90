@@ -86,13 +86,10 @@ do NC = 1, Ncomp
       open(7779,file=filename)
       do i = 1, 3
          read (7779, '(A)') line
-         print*,line
       enddo
       read(7779, *) natoms
-      print*,natoms
       do i = 1, 5
          read (7779, '(A)') line
-         print*,line
       enddo
       jj = 0 ! current position in MOLT bead list
       do i = 1, natoms ! current position in MD atom list
@@ -104,6 +101,7 @@ do NC = 1, Ncomp
            basictype(jj,NC) = MDbasictype(MDtype(i),NC)
          endif
       enddo ! i
+      close(7779)
    endif
 
    if (flagGC(NC).eq.1) then
