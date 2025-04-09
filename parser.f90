@@ -23,6 +23,7 @@ use volume
 use layer
 use cadenaMD
 use senos
+use blockiness
 implicit none
 integer block_cuantas, restcuantas
 
@@ -40,7 +41,8 @@ real*8 ndr ! undetermined real
 integer NC
 character*16 filename2
 integer temp
-
+real*8, allocatable :: blockiness(:)
+integer, allocatable :: beadcount1(:), beadcount2(:), segpoorsv1(:), segpoorsv2(:)
 
 ! Control file variables
 line = 0
@@ -76,6 +78,8 @@ allocate(long(NComp))
 allocate(nbranches(NComp))
 allocate(long_branches(NComp))
 allocate(npolratio(NComp))
+allocate(blockiness(Ncomp), beadcount1(Ncomp), beadcount2(Ncomp), segpoorsv1(Ncomp), segpoorsv2(NComp))
+allocate(chainstrcount(Ncomp))
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! values for not defined variables, change if any variable can take the value
@@ -144,7 +148,12 @@ csalt = ndr
 nbranches = ndi
 
 ta = ndr ! 112
-
+blockiness = ndr 
+beadcount1 = ndi
+beadcount2 = ndi
+segpoorsv1 = ndi
+segpoorsv2 = ndi
+chainstrcount = ndi
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Start reading DEFINITIONS.txt here
@@ -451,6 +460,15 @@ select case (label)
    read(buffer, *, iostat=ios) ta
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
 
+! blockiness
+  case('blockiness')
+   do NC = 1, NComp
+     read(fh, *) blockiness(NC), beadcount1(NC), beadcount2(NC), segpoorsv1(NC), segpoorsv2(NC)
+   enddo
+   do NC = 1, NComp
+     read(fh, *) chainstrcount(NC)
+   enddo
+
 endselect
 
 endif
@@ -670,7 +688,7 @@ if(flagkai.eq.ndi) then
 endif
 
 ! flagtorsionstate
-if(flagtorsionstate.eq.ndi) then
+if(flagtorsionstate.eq.ndr) then
   flagtorsionstate = 0
   if(rank.eq.0)write(stdout,*) 'flagtorsionstate undefined, use default value (0 : do not read torsion states, use random)'
 endif
@@ -706,10 +724,20 @@ do NC=1,Ncomp
 enddo          
 
 ! ta
-if(ta.eq.ndr) then
+if(ta.eq.ndi) then
   ta = 112.0
   if(rank.eq.0)write(stdout,*) 'torsion-angle undefined, use default value (112.0)'
 endif
+
+! blockiness
+do NC=1,Ncomp
+  if(blockiness(NC).eq.ndr) then
+    if(ranq.eq.0)write(stdout,*) 'Component ', NC, ' blockiness undefined. Chain structure read from structure file'
+
+do NC=1,Ncomp
+  if(chainstrcount(NC).eq.ndi) then
+    chainstrcount(NC) = 1
+    if(ranq.eq.0)write(stdout,*) 'Component ', NC, ' chainstrcount undefined, use default value (1)'
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -751,6 +779,7 @@ allocate(acidtype(maxlong,Ncomp))
 allocate(basictype(maxlong,Ncomp))
 allocate(torsionstate(maxlong,Ncomp))
 
+
 do NC = 1, Ncomp
 
   write(filename2,'(A10,I3.3,A3)')'structure.',NC,'.in'
@@ -777,7 +806,19 @@ do NC = 1, Ncomp
 
   close(9)
 
+  if (blockiness(NC).ne.ndr) then
+    if ((blockiness(NC).gt.1.).or.((blockiness(NC).lt.-1.)) then
+      print*,"Blockiness must be [-1,1]."
+      stop
+    endif
+    seedblck = 1000
+    do i = 1, chainstrcount(NC)
+      call genchains(seedblck,blockiness(NC),beadcount1(NC),beadcount2(NC)) 
+       
+    !!! ESCRIBIR RUTINA GENERADORA DE CADENAS !!! 
+  
 enddo ! NC
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                     Read st(i,j) from epsilon.in
