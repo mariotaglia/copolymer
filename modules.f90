@@ -16,10 +16,13 @@ module mkinsol
 double precision, allocatable :: pp(:)
 endmodule
 
-module blockiness
+module modblockiness
 real*8, allocatable :: blockiness(:)
-integer, allocatable :: beadcount1(:), beadcount2(:), segpoorsv1(:), segpoorsv2(:)
+integer, allocatable :: beadcount1(:), beadcount2(:), segpoorsv1(:), segpoorsv2(:), beadtype(:)
 integer, allocatable :: chainstrcount(:)
+integer, allocatable :: chainsegpoorsv(:,:,:)
+integer Ntotal
+integer maxchains
 endmodule
 
 module mkai

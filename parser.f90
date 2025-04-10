@@ -23,7 +23,7 @@ use volume
 use layer
 use cadenaMD
 use senos
-use blockiness
+use modblockiness
 implicit none
 integer block_cuantas, restcuantas
 
@@ -40,9 +40,8 @@ integer ndi ! undetermined integer
 real*8 ndr ! undetermined real
 integer NC
 character*16 filename2
-integer temp
-real*8, allocatable :: blockiness(:)
-integer, allocatable :: beadcount1(:), beadcount2(:), segpoorsv1(:), segpoorsv2(:)
+character*23 filename3
+integer temp, seedblck
 
 ! Control file variables
 line = 0
@@ -688,7 +687,7 @@ if(flagkai.eq.ndi) then
 endif
 
 ! flagtorsionstate
-if(flagtorsionstate.eq.ndr) then
+if(flagtorsionstate.eq.ndi) then
   flagtorsionstate = 0
   if(rank.eq.0)write(stdout,*) 'flagtorsionstate undefined, use default value (0 : do not read torsion states, use random)'
 endif
@@ -732,13 +731,15 @@ endif
 ! blockiness
 do NC=1,Ncomp
   if(blockiness(NC).eq.ndr) then
-    if(ranq.eq.0)write(stdout,*) 'Component ', NC, ' blockiness undefined. Chain structure read from structure file'
-
+    if(rank.eq.0)write(stdout,*) 'Component ', NC, ' blockiness undefined. Chain structure read from structure file'
+  endif
+enddo
 do NC=1,Ncomp
   if(chainstrcount(NC).eq.ndi) then
     chainstrcount(NC) = 1
-    if(ranq.eq.0)write(stdout,*) 'Component ', NC, ' chainstrcount undefined, use default value (1)'
-
+    if(rank.eq.0)write(stdout,*) 'Component ', NC, ' chainstrcount undefined, use default value (1)'
+  endif
+enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !                                        Auxiliary calculations
@@ -778,7 +779,8 @@ allocate(segpoorsv(maxlong,Ncomp))
 allocate(acidtype(maxlong,Ncomp))
 allocate(basictype(maxlong,Ncomp))
 allocate(torsionstate(maxlong,Ncomp))
-
+maxchains = maxval(chainstrcount)
+allocate(chainsegpoorsv(maxlong,Ncomp,maxchains))
 
 do NC = 1, Ncomp
 
@@ -786,6 +788,7 @@ do NC = 1, Ncomp
   open(file=filename2, unit = 9)
 
   if (flagMD(NC).eq.0) then ! RIS conformation
+    print*,"flag torsion state is ",flagtorsionstate
     if (flagtorsionstate.eq.0) then
       do i = 1, long(NC)
         read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC) ! , torsionstate(i,NC)
@@ -807,18 +810,43 @@ do NC = 1, Ncomp
   close(9)
 
   if (blockiness(NC).ne.ndr) then
-    if ((blockiness(NC).gt.1.).or.((blockiness(NC).lt.-1.)) then
+    if ((blockiness(NC).gt.1.).or.(blockiness(NC).lt.-1.)) then
       print*,"Blockiness must be [-1,1]."
       stop
     endif
-    seedblck = 1000
-    do i = 1, chainstrcount(NC)
-      call genchains(seedblck,blockiness(NC),beadcount1(NC),beadcount2(NC)) 
-       
-    !!! ESCRIBIR RUTINA GENERADORA DE CADENAS !!! 
-  
-enddo ! NC
+    
+    write(filename3,'(A17,I3.3,A3)')'chainsfromlambda.',NC,'.in'
+    open(file=filename3, unit=9)
 
+    seedblck = 1000
+    
+    Ntotal = beadcount1(NC) + beadcount2(NC)
+    
+    allocate(beadtype(Ntotal))
+    
+    print*,"Generate ",chainstrcount(NC)," chains from blockiness ",blockiness(NC)," for compound ",NC
+
+    do j = 1, chainstrcount(NC)
+      call genchains(seedblck, blockiness(NC), beadcount1(NC), beadcount2(NC), beadtype) 
+      print*,"Chain ",j," of ",chainstrcount(NC)
+      write(9,*)"Chain ",j," of ",chainstrcount(NC)
+      do i = 1, long(NC)
+         if (beadtype(i).eq.0) then
+           chainsegpoorsv(i,NC,j) = segpoorsv1(NC)
+           write(9,*)segpoorsv1(NC)
+         elseif (beadtype(i).eq.1) then
+           chainsegpoorsv(i,NC,j) = segpoorsv2(NC)
+           write(9,*)segpoorsv2(NC)
+         endif
+      enddo
+    enddo
+    close(9)
+    acidtype(:,NC) = 0
+    basictype(:,NC) = 0
+       
+  endif
+
+enddo ! NC
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                     Read st(i,j) from epsilon.in
