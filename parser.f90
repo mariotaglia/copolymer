@@ -831,6 +831,7 @@ do NC = 1, Ncomp
 
     do j = 1, chainstrcount(NC)
       call genchains(seedblck, blockiness(NC), beadcount1(NC), beadcount2(NC), beadtype) 
+      print*,"seedblck is ",seedblck
       if (rank.eq.0) then
           write(9,*)"Chain ",j," of ",chainstrcount(NC)
           print*,"Chain ",j," of ",chainstrcount(NC)

@@ -107,6 +107,8 @@ endif
 
 cc_initial = rank * chainstrcount(NC) / size + 1
 cc = cc_initial
+if(rank.eq.0)print*, "Seed is ",seed
+
 
 do while (conf.lt.cuantas(NC))
 
