@@ -121,7 +121,7 @@ end
 !* on a three state RIS-model see Flory book                 *
 !* GENERA CADENAS DE PAH-Os                                  *
 !*************************************************************
-subroutine cadenas(chains,ncha,Uconf, Ntconf,Ugyr, Rgyr, NC)
+subroutine cadenas(chains,ncha,Uconf, Ntconf,Ugyr, Rgyr, NC, cc)
 use seed1
 use pis
 use matrices
@@ -130,7 +130,7 @@ use globals
 use mkai
 use longs
 implicit none
-integer i,state,j,k1,k2,ncha, is, jj, k, kk
+integer i,state,j,k1,k2,ncha, is, jj, k, kk, cc
 real*8 rn,dista
 real*8 rands,angle
 real*8 m(3,3), mm(3,3), m_branch(3,3,50)
@@ -203,7 +203,7 @@ endif
   if (state.eq.0) then
 !*********************************** TRANS     
     call mrrrr(m,tt,mm)
-    if(i.gt.3)Uconf=Uconf+Ut(segpoorsv(i-1,NC)) ! first segment to have a dihedral angle is i = 4
+    if(i.gt.3)Uconf=Uconf+Ut(segpoorsv(i-1,NC,cc)) ! first segment to have a dihedral angle is i = 4
                                            ! OJO : the order of chain grown changes the assigment of diehdral angles
     if(i.gt.3)Ntconf(i-1) = 1   
 
@@ -211,12 +211,12 @@ endif
 
 !********************************** GAUCHE +
     call mrrrr(m,tp,mm)
-    if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1,NC))
+    if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1,NC,cc))
 
   elseif (state.eq.2) then
 !********************************** GAUCHE -
     call mrrrr(m,tm,mm)
-    if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1,NC))
+    if(i.gt.3)Uconf=Uconf+Ug(segpoorsv(i-1,NC,cc))
 
   endif
 
@@ -342,15 +342,15 @@ do k1=1,long(NC)
 enddo
 
 do i=1,long(NC)
-  seglength(segpoorsv(i,NC))=seglength(segpoorsv(i,NC))+1
+  seglength(segpoorsv(i,NC,cc))=seglength(segpoorsv(i,NC,cc))+1
   do j=1,long(NC)
 
     if (i.ne.j) then
       distance(i,j)=((xend(1,i)-xend(1,j))**2.0+(xend(2,i)-xend(2,j))**2.0+(xend(3,i)-xend(3,j))**2.0)
       distance(i,j)=sqrt(distance(i,j))
-      if (segpoorsv(i,NC).eq.segpoorsv(j,NC))Rgyr(segpoorsv(i,NC))=Rgyr(segpoorsv(i,NC))+distance(i,j)**2.0
+      if (segpoorsv(i,NC,cc).eq.segpoorsv(j,NC,cc))Rgyr(segpoorsv(i,NC,cc))=Rgyr(segpoorsv(i,NC,cc))+distance(i,j)**2.0
       Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)+distance(i,j)**2.0
-      Ugyr=Ugyr-0.5*st(segpoorsv(i,NC),segpoorsv(j,NC))*(lseg/distance(i,j))**(dimf(segpoorsv(i,NC),segpoorsv(j,NC)))
+      Ugyr=Ugyr-0.5*st(segpoorsv(i,NC,cc),segpoorsv(j,NC,cc))*(lseg/distance(i,j))**(dimf(segpoorsv(i,NC,cc),segpoorsv(j,NC,cc)))
     endif
 
   enddo

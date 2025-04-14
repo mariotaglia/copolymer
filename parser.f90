@@ -775,12 +775,11 @@ cuantas_max=cuantas(1)
 !                             Read chain structure from structure.in
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-allocate(segpoorsv(maxlong,Ncomp))
+maxchains = maxval(chainstrcount)
+allocate(segpoorsv(maxlong,Ncomp,maxchains))
 allocate(acidtype(maxlong,Ncomp))
 allocate(basictype(maxlong,Ncomp))
 allocate(torsionstate(maxlong,Ncomp))
-maxchains = maxval(chainstrcount)
-allocate(chainsegpoorsv(maxlong,Ncomp,maxchains))
 
 do NC = 1, Ncomp
 
@@ -791,12 +790,12 @@ do NC = 1, Ncomp
     print*,"flag torsion state is ",flagtorsionstate
     if (flagtorsionstate.eq.0) then
       do i = 1, long(NC)
-        read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC) ! , torsionstate(i,NC)
+        read(9,*)segpoorsv(i,NC,1), acidtype(i,NC), basictype(i,NC) ! , torsionstate(i,NC)
         torsionstate(i,NC)=3
       enddo
     else 
       do i = 1, long(NC)
-        read(9,*)segpoorsv(i,NC), acidtype(i,NC), basictype(i,NC), torsionstate(i,NC)
+        read(9,*)segpoorsv(i,NC,1), acidtype(i,NC), basictype(i,NC), torsionstate(i,NC)
       enddo
     endif
 
@@ -809,14 +808,18 @@ do NC = 1, Ncomp
 
   close(9)
 
+  
+
   if (blockiness(NC).ne.ndr) then
     if ((blockiness(NC).gt.1.).or.(blockiness(NC).lt.-1.)) then
       print*,"Blockiness must be [-1,1]."
       stop
     endif
     
-    write(filename3,'(A17,I3.3,A3)')'chainsfromlambda.',NC,'.in'
-    open(file=filename3, unit=9)
+    if (rank.eq.0) then
+      write(filename3,'(A17,I3.3,A3)')'chainsfromlambda.',NC,'.in'
+      open(file=filename3, unit=9)
+    endif
 
     seedblck = 1000
     
@@ -828,25 +831,30 @@ do NC = 1, Ncomp
 
     do j = 1, chainstrcount(NC)
       call genchains(seedblck, blockiness(NC), beadcount1(NC), beadcount2(NC), beadtype) 
-      print*,"Chain ",j," of ",chainstrcount(NC)
-      write(9,*)"Chain ",j," of ",chainstrcount(NC)
+      if (rank.eq.0) then
+          write(9,*)"Chain ",j," of ",chainstrcount(NC)
+          print*,"Chain ",j," of ",chainstrcount(NC)
+      endif
+
       do i = 1, long(NC)
          if (beadtype(i).eq.0) then
-           chainsegpoorsv(i,NC,j) = segpoorsv1(NC)
-           write(9,*)segpoorsv1(NC)
+           segpoorsv(i,NC,j) = segpoorsv1(NC)
+           if(rank.eq.0)write(9,*)segpoorsv1(NC)
          elseif (beadtype(i).eq.1) then
-           chainsegpoorsv(i,NC,j) = segpoorsv2(NC)
-           write(9,*)segpoorsv2(NC)
+           segpoorsv(i,NC,j) = segpoorsv2(NC)
+           if(rank.eq.0)write(9,*)segpoorsv2(NC)
          endif
       enddo
     enddo
-    close(9)
+    if (rank.eq.0)close(9)
     acidtype(:,NC) = 0
     basictype(:,NC) = 0
        
   endif
 
 enddo ! NC
+
+call MPI_BARRIER(MPI_COMM_WORLD, ierr)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                     Read st(i,j) from epsilon.in

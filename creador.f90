@@ -9,11 +9,12 @@ use MPI
 use transgauche
 use mkai
 use cadenaMD
+use modblockiness
 implicit none
 
 integer is
 
-integer kk, jj,i,j,k,ii ! dummy indice0s
+integer cc, cc_initial, kk, jj,i,j,k,ii ! dummy indice0s
 
 INTEGER temp_R
 real*8 tempr_R, tempr_Z
@@ -104,13 +105,15 @@ else
     endif
 endif
 
+cc_initial = rank * chainstrcount(NC) / size + 1
+cc = cc_initial
 
 do while (conf.lt.cuantas(NC))
 
 if(flagMD(NC).eq.1) then
    call cadenasMD(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
 else 
-   call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC)
+   call cadenas(chains,ncha,Uconf,Ntconf,Ugyr,Rgyr,NC,cc)
 endif
 
 !   open(unit=100000,file='chains.dat')
@@ -167,6 +170,7 @@ endif
 !                +(chains(3,4,j)-chains(3,7,j))**2)
 
          conf=conf+1
+         chaincountofconf(conf,NC) = cc
          Uchain(conf,NC)=Uconf
          Ntrans(:,conf,NC) = Ntconf(:)
          do k=1,long(NC)
@@ -206,7 +210,10 @@ endif
       endif
    enddo ! j
 
-enddo ! while
+   cc = cc_initial + conf/ (totalcuantas(NC)/chainstrcount(NC))
+   if(cc.gt.chainstrcount(NC))cc=chainstrcount(NC)
+   
+enddo ! while 
 
 if(flagMD(NC).eq.1) then
   close(7777)
@@ -255,7 +262,7 @@ enddo ! NC
 vchain=0.0
 do NC = 1,Ncomp
 do i=1,long(NC)
-  vchain(NC)=vchain(NC)+vpol(segpoorsv(i,NC))
+  vchain(NC)=vchain(NC)+vpol(segpoorsv(i,NC,1))
 enddo
 enddo
 

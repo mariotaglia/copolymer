@@ -79,7 +79,7 @@ do j = 1, natoms ! current position in MD atom list
        xend(1,jj) = MDx(i)/10.0
        xend(2,jj) = MDy(i)/10.0
        xend(3,jj) = MDz(i)/10.0
-       segpoorsv(jj,NC) = MDsegpoorsv(MDtype(i),NC)
+       segpoorsv(jj,NC,1) = MDsegpoorsv(MDtype(i),NC)
        acidtype(jj,NC) = MDacidtype(MDtype(i),NC)
        basictype(jj,NC) = MDbasictype(MDtype(i),NC)
      endif

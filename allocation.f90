@@ -1,4 +1,5 @@
 subroutine allocation
+
 use globals
 use mcharge
 use mkinsol
@@ -7,7 +8,9 @@ use partfunc
 use mkai
 use transgauche
 use volume
+use modblockiness
 
+allocate (chaincountofconf(cuantas_max, Ncomp))
 allocate (Xflag((npoorsv+2)*ntot))
 allocate (phi(0:dimR+1,dimZ))
 allocate (fAmin(Nacids,dimR,dimZ), fBHplus(Nbasics,dimR,dimZ), avpos(dimR,dimZ), avneg(dimR,dimZ))

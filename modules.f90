@@ -20,13 +20,13 @@ module modblockiness
 real*8, allocatable :: blockiness(:)
 integer, allocatable :: beadcount1(:), beadcount2(:), segpoorsv1(:), segpoorsv2(:), beadtype(:)
 integer, allocatable :: chainstrcount(:)
-integer, allocatable :: chainsegpoorsv(:,:,:)
+integer, allocatable :: chaincountofconf(:,:)
 integer Ntotal
 integer maxchains
 endmodule
 
 module mkai
-integer, allocatable :: segpoorsv(:,:)
+integer, allocatable :: segpoorsv(:,:,:)
 integer Npoorsv ! number of different types of poor solvent
 REAL*8, allocatable ::  xtotal(:,:,:)
 real*8, allocatable :: st(:,:)

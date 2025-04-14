@@ -10,6 +10,7 @@ use MPI
 use pis
 use mkai
 use transgauche
+use modblockiness
 implicit none
 integer NC
 real*8 all_tosend(4*ntot), all_toreceive(4*ntot)
@@ -247,7 +248,7 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
          if(PBCflag.eq.2)aZ = PBCREFI(iZ,dimZ)
 
          aR = innR(k,i,iiR,NC)
-         is = segpoorsv(k,NC)
+         is = segpoorsv(k,NC,chaincountofconf(i,NC))
          ia = acidtype(k,NC)
          ib = basictype(k,NC) 
                   
@@ -268,7 +269,7 @@ do iiZ=minntotZ(NC), maxntotZ(NC)
          if(PBCflag.eq.1)aZ = PBCSYMI(iZ,dimZ)
          if(PBCflag.eq.2)aZ = PBCREFI(iZ,dimZ)
          aR = innR(j,i,iiR,NC)
-         is = segpoorsv (j,NC)
+         is = segpoorsv (j,NC,chaincountofconf(i,NC))
          ia = acidtype (j,NC)
          ib = basictype (j,NC)
 
