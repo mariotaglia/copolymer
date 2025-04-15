@@ -723,7 +723,7 @@ do NC=1,Ncomp
 enddo          
 
 ! ta
-if(ta.eq.ndi) then
+if(ta.eq.ndr) then
   ta = 112.0
   if(rank.eq.0)write(stdout,*) 'torsion-angle undefined, use default value (112.0)'
 endif
@@ -787,7 +787,6 @@ do NC = 1, Ncomp
   open(file=filename2, unit = 9)
 
   if (flagMD(NC).eq.0) then ! RIS conformation
-    print*,"flag torsion state is ",flagtorsionstate
     if (flagtorsionstate.eq.0) then
       do i = 1, long(NC)
         read(9,*)segpoorsv(i,NC,1), acidtype(i,NC), basictype(i,NC) ! , torsionstate(i,NC)
