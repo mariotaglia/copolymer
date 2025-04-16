@@ -130,7 +130,7 @@ scsteptol = 1.0d-6 ! Function-norm stopping tolerance
 
 maxl = 2000 ! maximum Krylov subspace dimesion (?!?!?!) ! Esto se usa para el preconditioner
 maxlrst = 50 ! maximum number of restarts
-max_niter = 200
+max_niter = 2000
 globalstrat = 0
 
 call fnvinits(3, neq, ier) ! fnvinits inits NVECTOR module
@@ -152,7 +152,7 @@ if (ier .ne. 0) then
 call fkinsetiin('MAX_SETUPS', msbpre, ier)  ! Additional input information
 call fkinsetrin('FNORM_TOL', fnormtol, ier)
 call fkinsetrin('SSTEP_TOL', scsteptol, ier)
-!call fkinsetiin('MAX_NITER', max_niter, ier)
+call fkinsetiin('MAX_NITERS', max_niter, ier)
 
 do i = 1, ntot  !constraint vector
    constr(i) = 2.0 ! xh > 0
