@@ -37,13 +37,13 @@ real*8 sumtrans(dimR,dimZ,maxlong)
 real*8 gradphi2
 integer, external :: PBCSYMI
 integer, external :: PBCREFI
-! Jefe
-!flagsolver=1
 
-!if(rank.eq.0) then ! llama a subordinados y pasa vector x
-!   time1=MPI_WTIME()
-!   CALL MPI_BCAST(x, (Npoorsv+1)*ntot , MPI_DOUBLE_PRECISION,0, MPI_COMM_WORLD,err)
-!endif
+! Jefe
+if(rank.eq.0) then ! llama a subordinados y pasa vector x
+   flagsolver = 1
+   CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, err)
+   CALL MPI_BCAST(x, (Npoorsv + 2)*ntot , MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, err)
+endif
 
 n = ntot 
 
@@ -287,9 +287,7 @@ avpol_tosend(:, 1:dimR, 1:dimZ)=avpol_tmp(:, 1:dimR, 1:dimZ)
 avpola_tosend(:, 1:dimR, 1:dimZ)=avpola_tmp(:, 1:dimR, 1:dimZ)
 avpolb_tosend(:, 1:dimR, 1:dimZ)=avpolb_tmp(:, 1:dimR, 1:dimZ)
 
-!------------------ MPI -----------------`-----------------------------
-
-!call MPI_Barrier(MPI_COMM_WORLD, err)
+!------------------ MPI ----------------------------------------------
 
    call MPI_ALLREDUCE(avpola_tosend, avpola(:,:,:,NC), (Nacids+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
    call MPI_ALLREDUCE(avpolb_tosend, avpolb(:,:,:,NC), (Nbasics+1)*ntot, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, err)
@@ -362,7 +360,7 @@ deallocate(pro)
 enddo ! NC !
       !!!!!!
 
-
+if (rank.ne.0)goto 3333
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! contruction of f and the volume fractions
@@ -467,7 +465,7 @@ endif
 
 norma=algo
 
-!3333 continue
+3333 continue
 
 
 ier2 = 0
