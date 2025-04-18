@@ -71,6 +71,7 @@ Uchain = 0.
 Ntrans = 0
 
 do NC = 1, Ncomp
+if (rank.eq.0)seed = 434 + NC 
 
 sumRgyr=0.
 sumUgyr=0.
