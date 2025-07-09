@@ -35,7 +35,7 @@ with open("../DEFINITIONS.txt") as fp:
     lines = fp.readlines()
 with open("DEFINITIONS.txt","w") as fp:
     for line in lines:
-        if 'npol' in line:
+        if 'npol ' in line:
             line = "npol "+npol+" "+npol+" "+npol+" 0.01"
         if 'saveflag' in line:
             line = "saveflag 1"
