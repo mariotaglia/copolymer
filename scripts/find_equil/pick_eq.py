@@ -16,13 +16,14 @@ for filename in os.listdir("."):
             for line in lines:
                 if(line.startswith(" Free")):
                      listfe.append(float(line.split()[3]))
-                if(line.startswith(" npol")):
+                if(line.startswith(" npol ")):
                      listnpol.append(line.split()[2])
                      
 pos = listfe.index(min(listfe))
 index = listindex[pos]
 npol = listnpol[pos]
 
+print(pos,index,npol,min(listfe))
 
 os.system("mkdir equil")
 os.chdir("./equil")
