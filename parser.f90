@@ -364,7 +364,7 @@ select case (label)
      read(fh, *) npolratio(NC)
    enddo
 
-! flagonekais: read all kais from kai.001.001.dat   
+! flagonekais: read all kais from kai.001.001.in   
  case ('flagonekais')
    read(buffer, *, iostat=ios) flagonekais
    if(rank.eq.0)write(stdout,*) 'parser:','Set ',trim(label),' = ',trim(buffer)
