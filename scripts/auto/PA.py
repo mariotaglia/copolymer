@@ -260,10 +260,10 @@ for i in range(0,3):
         npol = f"1 1 20 0.1"
     if i == 2:
         npol = f"1 1 50 0.5"
-    definitions = f"""
-Ncomp 1
+    definitions = f"""Ncomp 1
 
-npolratio 1.
+npolratio 
+1.
 
 curvature {i}
 dimensions 140 1 1 1
