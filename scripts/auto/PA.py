@@ -1,6 +1,6 @@
 import pandas as pd
 import argparse
-import os 
+import os
 import numpy as np
 import shutil
 import re
@@ -21,12 +21,12 @@ pka_lista = [3.9, 8.37, 4.07, 10.5]
 pkb_lista  = [1.52, 7.96, 3.46]
 vpol = [0.048, 0.157, 0.076, 0.070, 0.069, 0.094, 0.103, None, 0.112, 0.126, 0.126, 0.128, 0.122, 0.149, 0.085, 0.047, 0.075, 0.186, 0.153, 0.099, 0.113]
 aa_beads = ["C1", "C3", "P5", "P3", "C5", "C3", "P4", None, "P5","C1", "C1", "C3", "C5", "C4", "C2", "P1", "P1", "C5", "C5", "C1", "C1"]
-nombres = ['Ala', 'Arg', 'Asn', 'Asp', 'Cys', 'Glu', 'Gln', 'Gly', 'His', 'Ile','Leu', 'Lys', 'Met', 'Phe', 'Pro', 'Ser', 'Thr', 'Trp', 'Tyr', 'Val', 'HC'] 
+nombres = ['Ala', 'Arg', 'Asn', 'Asp', 'Cys', 'Glu', 'Gln', 'Gly', 'His', 'Ile','Leu', 'Lys', 'Met', 'Phe', 'Pro', 'Ser', 'Thr', 'Trp', 'Tyr', 'Val', 'HC']
 aa_BB1 = ["A","R","N","D","E","Q","G","H","K","P","S"]
 aa_BB2 = ["C","I","L","M","F","T","W", "Y","V"]
 
 
-pepanf = [] 
+pepanf = []
 
 for i in PA_codigo:
     if i in aa:
@@ -91,7 +91,7 @@ for i in fullbeads:
 #matrices diagonales
 dimf = np.tril(np.ones((len(vpol_valores),len(vpol_valores)), dtype=int)) * 6
 lseg = np.tril(np.ones((len(vpol_valores),len(vpol_valores)), dtype=int)) * 0.47
-Utg = np.zeros((len(vpol_valores),2), dtype=int) 
+Utg = np.zeros((len(vpol_valores),2), dtype=int)
 
 #carboxi y amino terminal, el 1ro indica amino, el 2do carboxi
 terminal = re.findall(r'\d+', PA_codigo)
@@ -112,12 +112,12 @@ for i in terminal:
         if pepanf[-1] == "Z":
             if pepanf[0] != "Z":
                 raise SystemExit("Z en el extremo derecho impide carboxilo libre")
-            if pepanf[0] == "Z":    
+            if pepanf[0] == "Z":
                 raise SystemExit("Z en los extremos impide amino libre y carboxilo libre")
-        if pepanf[0] == "Z": 
+        if pepanf[0] == "Z":
             raise SystemExit("Z en el extremo izquierdo impide amino libre")
         pkbterminal = 4.5
-        pkaterminal = 4.5   
+        pkaterminal = 4.5
 
 
 ###STRUCTURE
@@ -146,14 +146,14 @@ for i in range(matriz_structure.shape[0]):
             matriz_structure[i,1] = k
             pka_vistos.append(j)
         else:
-            matriz_structure[i,1] = pka_vistos.index(j) + 1   
+            matriz_structure[i,1] = pka_vistos.index(j) + 1
     if j in aa_basicos:
         if j not in pkb_vistos:
             n = n + 1
             matriz_structure[i,2] = n
             pkb_vistos.append(j)
         else:
-            matriz_structure[i,2] = pkb_vistos.index(j) + 1   
+            matriz_structure[i,2] = pkb_vistos.index(j) + 1
 
 BB_indices = [i for i, bead in enumerate(fullbeads) if bead in ("BB1", "BB2")]
 primer_BB = BB_indices[0]
@@ -179,7 +179,7 @@ actual_path = os.path.dirname(os.path.abspath(__file__))
 ruta_martini_tabla = os.path.join(actual_path, "table_martini.dat")
 data=np.loadtxt(ruta_martini_tabla, skiprows=1, usecols=range(1,21))
 epslist = data[-2,:]
-sigmalist = data[-1,:] 
+sigmalist = data[-1,:]
 epsilon=np.zeros((n,n))
 epsilon_th=np.zeros((n,n))
 interaction_index=np.zeros((n,n),dtype=np.int8)
@@ -243,7 +243,7 @@ for k, (i, j) in enumerate(zip(epsilon_nombres, epsilon_beads), start=1):
     epsilon_texto.append(f"{k}:   {i}   {j}")
 
 
-#creo una carpeta con el nomnbre del codigo 
+#creo una carpeta con el nomnbre del codigo
 dir_general = f"{PA_codigo}"
 os.makedirs(dir_general, exist_ok=True)
 
@@ -260,7 +260,6 @@ for i in range(0,3):
         npol = f"1 1 20 0.1"
     if i == 2:
         npol = f"1 1 50 0.5"
-
     definitions = f"""
 Ncomp 1
 
@@ -277,18 +276,18 @@ layersize 0.2 1
 
 Npoorsv {len(vpol_valores)}
 vpol {len(vpol_valores)}
-{"\n".join(str(j) for j in vpol_valores if j is not None)}
+{chr(10).join(str(j) for j in vpol_valores if j is not None)}
 
 rsalt 0.3 0.3
 
 dimf {len(vpol_valores)}
-{"\n".join(" ".join(str(j) for j in fila if j != 0) for fila in dimf)}
+{chr(10).join(" ".join(str(j) for j in fila if j != 0) for fila in dimf)}
 
 Nacids {len(pka) + (1 if pkaterminal is not None else 0)}
-{"\n".join(str(j) for j in pka)}
+{chr(10).join(str(j) for j in pka)}
 {pkaterminal if pkaterminal is not None else ''}
 Nbasics {len(pkb) + (1 if pkbterminal is not None else 0)}
-{"\n".join(str(j) for j in pkb)}
+{chr(10).join(str(j) for j in pkb)}
 {pkbterminal if pkbterminal is not None else ''}
 
 PBCflag 1
@@ -300,13 +299,13 @@ npol {npol}
 
 Xulimit 5
 lseg {len(vpol_valores)}
-{"\n".join(" ".join(str(j) for j in fila if j != 0) for fila in lseg)}
+{chr(10).join(" ".join(str(j) for j in fila if j != 0) for fila in lseg)}
 
 lsegkai {len(vpol_valores)}
-{"\n".join(" ".join(str(j) for j in fila if j != 0) for fila in lseg)}
+{chr(10).join(" ".join(str(j) for j in fila if j != 0) for fila in lseg)}
 
 Utg {len(vpol_valores)}
-{"\n".join(" ".join(f"{j:.2f}" for j in fila) for fila in Utg)}
+{chr(10).join(" ".join(f"{j:.2f}" for j in fila) for fila in Utg)}
 
 csalt 0.1
 pHbulk 7
@@ -314,7 +313,7 @@ dielP 3.0
 
 nbranches
 {len(nbranches)}
-{"\n".join(str(j) for j in nbranches)}
+{chr(10).join(str(j) for j in nbranches)}
 
 saveflag 0
 """
@@ -323,7 +322,7 @@ saveflag 0
     with open(ruta_definitions, 'w', encoding='utf-8') as f:
         f.write(definitions)
 
-    structure = f"""{"\n".join("\t".join(f"{int(i)}" for i in fila) for fila in matriz_structure)} """
+    structure = f"""{chr(10).join(chr(9).join(f"{int(i)}" for i in fila) for fila in matriz_structure)} """
 
     ruta_structure = os.path.join(ruta_curvatura, "structure.001.in")
     with open(ruta_structure, 'w', encoding='utf-8') as f:
@@ -331,18 +330,19 @@ saveflag 0
 
 
     epsilon = f"""
-{"\n".join(" ".join(f"{j}" for j in fila) for fila in epsilon_th)}
+{chr(10).join(" ".join(f"{j}" for j in fila) for fila in epsilon_th)}
 
 0:   W    P4
-{"\n".join(epsilon_texto)}
+{chr(10).join(epsilon_texto)}
 """
 
     ruta_epsilon = os.path.join(ruta_curvatura, "epsilon.in")
     with open(ruta_epsilon, 'w', encoding='utf-8') as f:
         f.write(epsilon)
-    
+
 
     archivo_kais = os.path.join(script_dir, f"kais{i}", "kais.001.001.in")
     shutil.copy(archivo_kais, ruta_curvatura)
+
 
 
