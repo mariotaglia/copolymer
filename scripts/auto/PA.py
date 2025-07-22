@@ -261,11 +261,11 @@ for i in range(0,3):
     ruta_curvatura = os.path.join(dir_general, dir_curvatura)
     os.makedirs(ruta_curvatura, exist_ok=True)
     if i == 0:
-        npol = f"0.01 0.01 2.5 0.01"
+        npol = f"0.01 0.01 2.5 0.05"
     if i == 1:
-        npol = f"1 1 20 0.1"
+        npol = f"0.1 1 20 0.1"
     if i == 2:
-        npol = f"1 1 50 0.1"
+        npol = f"1 1 100 0.5"
     definitions = f"""Ncomp 1
 
 npolratio 
@@ -333,7 +333,7 @@ saveflag 0
     if i == 0:
         npol = f"0.01 0.01 0.2 0.01"
     if i == 1:
-        npol = f"1 1 1 0.1"
+        npol = f"0.1 1 1 0.1"
     if i == 2:
         npol = f"1 1 5 0.5"
     definitions = f"""Ncomp 1
