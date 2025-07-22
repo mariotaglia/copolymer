@@ -2,6 +2,7 @@ import subprocess
 import os
 import re
 import sys
+import time
 
 definitions = "DEFINITIONS.txt"
 
@@ -46,6 +47,7 @@ ultimo_archivo_out = f"out.001.{ultimo_out:03d}.dat"
 subprocess.run(f"mv {ultimo_archivo_out} in.in", shell=True, check=True)
 print(f"out movido a in.in")
 sys.stdout.flush()
+time.sleep(20)
 
 #cambiar infilie 0 a 2
 with open(definitions, "r") as f:
@@ -122,11 +124,13 @@ for i in range(0,max_ntot-1):
     os.system("mv out.001.001.dat in.in")
     print("out.001.001.dat movido a in.in")
     sys.stdout.flush()
+    time.sleep(20)
 
 # not go back one folder and scan densirty
 
 os.chdir("..")
 os.system("mv ./ramp/in.in .")
+time.sleep(20)
 
 # replace initial value
 
