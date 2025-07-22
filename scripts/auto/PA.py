@@ -4,14 +4,17 @@ import os
 import numpy as np
 import shutil
 import re
-
+import sys
 
 #ejecutar como python3 PA.py [código de PA]
 parser = argparse.ArgumentParser(description="Crear DEFINITIONS según código de péptidoanfifilo")
 parser.add_argument("codigo", type=str, help="Código alfanumérico péptidoanfifilo")
-args = parser.parse_args()
-PA_codigo = args.codigo
+parser.add_argument("pH", type=str, help="Bulk pH")
 
+args = parser.parse_args()
+
+PA_codigo = args.codigo
+pH = args.pH
 
 aa = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V", "Z"]
 beads = [2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1]
@@ -90,7 +93,7 @@ for i in fullbeads:
 
 #matrices diagonales
 dimf = np.tril(np.ones((len(vpol_valores),len(vpol_valores)), dtype=int)) * 6
-lseg = np.tril(np.ones((len(vpol_valores),len(vpol_valores)), dtype=int)) * 0.47
+lseg = np.tril(np.ones((len(vpol_valores),len(vpol_valores)), dtype=int)) * 0.5
 Utg = np.zeros((len(vpol_valores),2), dtype=int)
 
 #carboxi y amino terminal, el 1ro indica amino, el 2do carboxi
@@ -248,6 +251,9 @@ dir_general = f"{PA_codigo}"
 os.makedirs(dir_general, exist_ok=True)
 
 
+
+
+################################################################################
 #creo las carpetas curvatura
 script_dir = os.path.dirname(os.path.abspath(__file__))
 for i in range(0,3):
@@ -259,14 +265,84 @@ for i in range(0,3):
     if i == 1:
         npol = f"1 1 20 0.1"
     if i == 2:
-        npol = f"1 1 50 0.5"
+        npol = f"1 1 50 0.1"
     definitions = f"""Ncomp 1
 
 npolratio 
 1.
 
 curvature {i}
-dimensions 140 1 1 1
+dimensions 140 1 18 1
+cuantas
+10000
+long
+{long_valor}
+
+layersize 0.2 1
+
+Npoorsv {len(vpol_valores)}
+vpol {len(vpol_valores)}
+{chr(10).join(str(j) for j in vpol_valores if j is not None)}
+
+rsalt 0.3 0.3
+
+dimf {len(vpol_valores)}
+{chr(10).join(" ".join(str(j) for j in fila if j != 0) for fila in dimf)}
+
+Nacids {len(pka) + (1 if pkaterminal is not None else 0)}
+{chr(10).join(str(j) for j in pka)}
+{pkaterminal if pkaterminal is not None else ''}
+Nbasics {len(pkb) + (1 if pkbterminal is not None else 0)}
+{chr(10).join(str(j) for j in pkb)}
+{pkbterminal if pkbterminal is not None else ''}
+
+PBCflag 1
+infile 2
+flagkai 0
+flagonekais 1
+
+npol {npol}
+
+Xulimit 5
+lseg {len(vpol_valores)}
+{chr(10).join(" ".join(str(j) for j in fila if j != 0) for fila in lseg)}
+
+lsegkai {len(vpol_valores)}
+{chr(10).join(" ".join(str(j) for j in fila if j != 0) for fila in lseg)}
+
+Utg {len(vpol_valores)}
+{chr(10).join(" ".join(f"{j:.2f}" for j in fila) for fila in Utg)}
+
+csalt 0.1
+pHbulk {pH}
+dielP 3.0
+
+nbranches
+{len(nbranches)}
+{chr(10).join(str(j) for j in nbranches)}
+
+saveflag 0
+"""
+
+    ruta_definitions = os.path.join(ruta_curvatura, "DEFINITIONS.txt")
+    with open(ruta_definitions, 'w', encoding='utf-8') as f:
+        f.write(definitions)
+
+############################################################################################
+
+    if i == 0:
+        npol = f"0.01 0.01 0.2 0.01"
+    if i == 1:
+        npol = f"1 1 1 0.1"
+    if i == 2:
+        npol = f"1 1 5 0.5"
+    definitions = f"""Ncomp 1
+
+npolratio 
+1.
+
+curvature {i}
+dimensions 140 1 18 1
 cuantas
 10000
 long
@@ -308,7 +384,7 @@ Utg {len(vpol_valores)}
 {chr(10).join(" ".join(f"{j:.2f}" for j in fila) for fila in Utg)}
 
 csalt 0.1
-pHbulk 7
+pHbulk {pH}
 dielP 3.0
 
 nbranches
@@ -318,9 +394,12 @@ nbranches
 saveflag 0
 """
 
-    ruta_definitions = os.path.join(ruta_curvatura, "DEFINITIONS.txt")
+    ruta_definitions = os.path.join(ruta_curvatura, "DEFINITIONS_ramp.txt")
     with open(ruta_definitions, 'w', encoding='utf-8') as f:
         f.write(definitions)
+
+############################################################################################
+
 
     structure = f"""{chr(10).join(chr(9).join(f"{int(i)}" for i in fila) for fila in matriz_structure)} """
 
@@ -344,5 +423,19 @@ saveflag 0
     archivo_kais = os.path.join(script_dir, f"kais{i}", "kais.001.001.in")
     shutil.copy(archivo_kais, ruta_curvatura)
 
+# make ramp folder and copy
+    os.mkdir(os.path.join(ruta_curvatura,"ramp"))
+    os.system("cp "+ruta_curvatura+"/*.* " + ruta_curvatura+"/ramp/")
+    os.system("mv "+ruta_curvatura+"/ramp/DEFINITIONS_ramp.txt " + ruta_curvatura+"/ramp/DEFINITIONS.txt")
+
+    archivo_submit = os.path.join(script_dir, "tosubmit.sh")
+    shutil.copy(archivo_submit, ruta_curvatura)
+
+    with open(ruta_curvatura+"/tosubmit.sh","r") as f:
+        contenido = f.read()
+    contenido = contenido.replace("_NAME", f"{PA_codigo}_{pH}_{i}")        
+    with open(ruta_curvatura+"/tosubmit.sh","w") as f:
+        f.write(contenido)
+ 
 
 
