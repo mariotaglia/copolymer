@@ -497,6 +497,11 @@ norma=algo
 !3333 continue
 
 
+   if(isnan(norma)) then
+         print*, " I am ", rank, " I stopped the work, norm = NaN"
+   endif
+
+
 ier2 = 0
 
 return
