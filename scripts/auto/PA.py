@@ -16,16 +16,18 @@ args = parser.parse_args()
 PA_codigo = args.codigo
 pH = args.pH
 
-aa = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V", "Z"]
-beads = [2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1]
+
+aa = ["A", "R", "N", "D", "C", "E", "Q", "G", "H", "I", "L", "K", "M", "F", "P", "S", "T", "W", "Y", "V", "Z", "O", "B", "J"]
+beads = [2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2]
 aa_acidos = ["D", "C", "E", "Y"]
-aa_basicos = ["A", "H", "K"]
+aa_basicos = ["R", "H", "K", "O", "B", "J"]
 pka_lista = [3.9, 8.37, 4.07, 10.5]
-pkb_lista  = [1.52, 7.96, 3.46]
-vpol = [0.048, 0.157, 0.076, 0.070, 0.069, 0.094, 0.103, None, 0.112, 0.126, 0.126, 0.128, 0.122, 0.149, 0.085, 0.047, 0.075, 0.186, 0.153, 0.099, 0.113]
+pkb_lista  = [1.52, 7.96, 3.46, 3.5, 3.73, 4.57]
+long_valor = sum([beads[aa.index(s)] for s in PA_codigo])
+vpol = [0.048, 0.157, 0.076, 0.070, 0.069, 0.094, 0.103, None, 0.112, 0.126, 0.126, 0.128, 0.122, 0.149, 0.085, 0.047, 0.075, 0.186, 0.153, 0.099, 0.113, 0.086, 0.059, 0.032]
 aa_beads = ["C1", "C3", "P5", "P3", "C5", "C3", "P4", None, "P5","C1", "C1", "C3", "C5", "C4", "C2", "P1", "P1", "C5", "C5", "C1", "C1"]
-nombres = ['Ala', 'Arg', 'Asn', 'Asp', 'Cys', 'Glu', 'Gln', 'Gly', 'His', 'Ile','Leu', 'Lys', 'Met', 'Phe', 'Pro', 'Ser', 'Thr', 'Trp', 'Tyr', 'Val', 'HC']
-aa_BB1 = ["A","R","N","D","E","Q","G","H","K","P","S"]
+nombres = ['Ala', 'Arg', 'Asn', 'Asp', 'Cys', 'Glu', 'Gln', 'Gly', 'His', 'Ile','Leu', 'Lys', 'Met', 'Phe', 'Pro', 'Ser', 'Thr', 'Trp', 'Tyr', 'Val', 'HC', "Orn", "Dab", "Dap"] ###faltaria BB que no puedo ponerlo
+aa_BB1 = ["A","R","N","D","E","Q","G","H","K","P","S","O","B","J"]
 aa_BB2 = ["C","I","L","M","F","T","W", "Y","V"]
 
 
