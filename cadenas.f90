@@ -358,11 +358,11 @@ enddo
 
 do is=0,Npoorsv
   Rgyr(is)=sqrt(Rgyr(is)/2.0)
-  Rgyr(is)=Rgyr(is)/float(seglength(is))
+  Rgyr(is)=Rgyr(is)/dble(seglength(is))
 enddo 
 
 Rgyr(Npoorsv+1)=sqrt(Rgyr(Npoorsv+1)/2.0)
-Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)/float(long(NC))
+Rgyr(Npoorsv+1)=Rgyr(Npoorsv+1)/dble(long(NC))
 
 ncha=0
 
@@ -431,7 +431,7 @@ do k = 1,long
   enddo
 enddo
 
-cm = cm/float(long)
+cm = cm/dble(long)
 
 do k = 1,long
   do i = 1,3

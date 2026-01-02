@@ -9,9 +9,9 @@ select case (curvature)
 case (0)
 factorcurv = 1.0
 case (1)
-factorcurv = (float(bas+dimRini)-0.5)/(float(pos+dimRini)-0.5)
+factorcurv = (dble(bas+dimRini)-0.5)/(dble(pos+dimRini)-0.5)
 case (2)
-factorcurv = ((float(bas+dimRini)-0.5)/(float(pos+dimRini)-0.5))**2
+factorcurv = ((dble(bas+dimRini)-0.5)/(dble(pos+dimRini)-0.5))**2
 end select
 
 return

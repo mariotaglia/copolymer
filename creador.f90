@@ -175,22 +175,23 @@ endif
 !          write(9600+k,*)chains(1,k,j)
 !          write(9700+k,*)chains(2,k,j)
 !          write(9800+k,*)chains(3,k,j)
-
+        
 
             do ii = minntotR(NC),maxntotR(NC) ! position of first segment (or Center of mass?)
 
                select case (abs(curvature))
                  case (2)
-                  tempr_R=((chains(1,k,j)+(float(ii+dimRini)-0.5)*deltaR)**2 + chains(2,k,j)**2 + chains(3,k,j)**2 )**(0.5)
+                  tempr_R=((chains(1,k,j)+(dble(ii+dimRini)-0.5)*deltaR)**2 + chains(2,k,j)**2 + chains(3,k,j)**2 )**(0.5)
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                  case (1)
-                  tempr_R=((chains(1,k,j)+(float(ii+dimRini)-0.5)*deltaR)**2+chains(2,k,j)**2)**(0.5)
+                  tempr_R = ( ( chains(1,k,j) + (dble(ii+dimRini)-0.5)*deltaR )**2 + chains(2,k,j)**2 )**(0.5)
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                  case (0) 
-                  tempr_R=abs(chains(1,k,j)+(float(ii+dimRini)-0.5)*deltaR)
+                  !tempr_R = abs(chains(1,k,j) + (float(ii+dimRini)-0.5)*deltaR )
+                  tempr_R = ( (chains(1,k,j) + (dble(ii+dimRini)-0.5)*deltaR )**2 )**(0.5)
                   temp_R=int(tempr_R/deltaR)+1  ! put them into the correct layer
                endselect
-             
+                
                if(temp_R.gt.(dimR+dimRini)) then
                      print*, 'creador.f90: increase dimR', temp_R, chains(1,k,j), ii, j
                      do jj = 1, long(NC)
@@ -198,7 +199,7 @@ endif
                      enddo
                      stop
                endif
-              innR(k,conf,ii,NC)=temp_R-dimRini ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
+               innR(k,conf,ii,NC)=temp_R-dimRini ! in which layer is the segment "k" of a chain at position "ii" and conformation "conf"
             enddo ! ii
          tempr_Z=chains(3,k,j)
          innZ(k,conf,NC)=-int(anint(tempr_Z/deltaZ)) ! mirror conformation in Z
