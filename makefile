@@ -15,16 +15,15 @@ $(info USER is ${USER})
 SHELL = /bin/bash
 
 # FFLAGS= -Wall 
- FFLAGS= -O3 
-# FFLAGS=-g -fbacktrace -fbounds-check -ffpe-trap=zero,overflow,underflow 
 
+FFLAGS= -O3 -fallow-argument-mismatch
+# FFLAGS=-g -fbacktrace -fbounds-check -ffpe-trap=zero,overflow,underflow -fallow-argument-mismatch
 
 ifeq ($(HOST),midway3-login3.rcc.local)
 ifeq ($(USER),gzaldivar)
 LFLAGS = -L/home/gzaldivar/Software/kinsol-2.9.0/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/home/gzaldivar/Software/kinsol-2.9.0/lib
 endif
 endif
-
 
 ifeq ($(HOST),login.tusker.hcc.unl.edu)
 LFLAGS = -L/home/conda/gzaldivar/bin/kinsol/lib  -lsundials_fkinsol -lsundials_kinsol -lsundials_fnvecserial -lsundials_nvecserial ${LIBS} -Wl,-rpath,/home/conda/gzaldivar/bin/kinsol/lib

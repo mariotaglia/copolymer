@@ -31,10 +31,10 @@ integer i,iR,iZ ! dummy indices
 REAL*8 xfile((npoorsv+2)*ntot)                        
 
 integer countfile         ! enumerates the outputfiles 
-
+integer err
 
 ! MPI
-integer tag
+integer tag, source
 parameter(tag = 0)
 
 
@@ -131,13 +131,27 @@ do while (actionflag.lt.3)
       xg1(i)=x1(i)
    enddo
 
-! JEFE
+   ! JEFE
    if(rank.eq.0) then ! solo el jefe llama al solver
       print*, 'solve: Enter solver ', (npoorsv+2)*ntot, ' eqs'
-   endif   
+      iter=0
+      call call_kinsol(x1, xg1, ier)
+      flagsolver = 0
+      CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,err)
+   endif
 
-   iter=0
-   call call_kinsol(x1, xg1, ier)
+   ! Subordinados
+   if(rank.ne.0) then
+     do
+       flagsolver = 0
+       source = 0
+       CALL MPI_BCAST(flagsolver, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,err)
+       if(flagsolver.eq.1) then
+          call call_fkfun(x1) ! todavia no hay solucion => fkfun 
+       endif ! flagsolver
+       if(flagsolver.eq.0) exit ! Detiene el programa para este nodo
+     enddo
+   endif
 
    do iR=1,dimR
    do iZ=1,dimZ
